@@ -69,7 +69,10 @@ def main() -> int:
                 print(f"SKIP {key:11s} optional package or server missing")
             continue
         print(f"{'ok  ' if ok else 'FAIL'} {key:14s} {time.time() - t0:5.1f}s")
-        if ok:
+        if ok and "not installed, skipped" in p.stdout and key in previous and "not installed, skipped" not in previous[key]:
+            out[key] = previous[key]              # a partial run must not replace a full recording
+            print(f"     {key:14s} ran with an SDK missing; kept the earlier full recorded output")
+        elif ok:
             out[key] = p.stdout.rstrip()
         else:
             failed.append(key)
