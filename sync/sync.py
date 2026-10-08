@@ -340,6 +340,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--push", action="store_true")
     ap.add_argument("--digest", action="store_true")
+    ap.add_argument("--machine", action="store_true",
+                    help="also run labs/machine/check.py --write (read-only checks of this machine)")
     a = ap.parse_args()
 
     root, repo = Path(a.root), Path(a.repo)
@@ -351,6 +353,11 @@ def main() -> int:
     if not cfg or not topics:
         log("config.json or content/topics.json is missing or invalid")
         return 2
+
+    if a.machine and not a.dry_run:
+        mc = subprocess.run([sys.executable, str(repo / "labs" / "machine" / "check.py"), "--write"],
+                            capture_output=True, text=True, timeout=600)
+        log("machine check:", (mc.stdout.strip().splitlines() or ["no output"])[-1], mc.stderr.strip()[-300:])
 
     manifest, dropped = build(root, cfg, topics, a.digest)
     s = manifest["stats"]
@@ -366,14 +373,14 @@ def main() -> int:
 
     old = load_json(out, {})
     if old and fingerprint(old) == fingerprint(manifest):
-        log("no change since last snapshot")
-        return 0
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(manifest, indent=1) + "\n")
-    log("wrote", out)
+        log("no change in the manifest since last snapshot")
+    else:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(manifest, indent=1) + "\n")
+        log("wrote", out)
 
     if a.push:
-        git(repo, "add", "content/live/manifest.json")
+        git(repo, "add", "content/live/manifest.json", "content/machine-output.json")
         c = git(repo, "commit", "-m", "Live snapshot " + manifest["generatedAt"][:16].replace("T", " ") + " UTC")
         if c.returncode != 0:
             log(c.stdout.strip() or c.stderr.strip())

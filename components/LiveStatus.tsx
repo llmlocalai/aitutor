@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import T from "@/components/T";
+import { ui } from "@/lib/ui";
 
 type S = { state: "checking" | "up" | "down" | "unset"; detail?: string };
 
@@ -13,8 +15,7 @@ export default function LiveStatus() {
       .then((d) => {
         if (dead) return;
         if (!d.configured) setS({ state: "unset" });
-        else if (d.reachable)
-          setS({ state: "up", detail: `${d.latency_ms} ms${d.tools != null ? `, ${d.tools} MCP tools registered` : ""}` });
+        else if (d.reachable) setS({ state: "up", detail: `${d.latency_ms} ms` });
         else setS({ state: "down" });
       })
       .catch(() => !dead && setS({ state: "down" }));
@@ -22,18 +23,11 @@ export default function LiveStatus() {
       dead = true;
     };
   }, []);
-
-  const label = {
-    checking: "Checking the local build",
-    up: `Local build reachable (${s.detail})`,
-    down: "Local build not reachable right now. Showing the last pushed snapshot.",
-    unset: "Live link not configured yet. Showing the pushed snapshot.",
-  }[s.state];
-
+  const label = { checking: ui.stChecking, up: ui.stUp, down: ui.stDown, unset: ui.stUnset }[s.state];
   return (
     <span className={`status ${s.state === "up" ? "up" : s.state === "checking" ? "" : "down"}`}>
       <i />
-      {label}
+      <span><T v={label} />{s.detail ? ` (${s.detail})` : ""}</span>
     </span>
   );
 }

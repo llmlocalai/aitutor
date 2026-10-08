@@ -1,333 +1,315 @@
-import type { Module } from "@/lib/types";
+import { t, type Module } from "@/lib/types";
 
 export const ragGraph: Module = {
   id: "rag-graph",
-  title: "RAG and knowledge graph",
-  short: "Find the right passage, prove it, and add graph edges where vectors miss.",
+  n: 5,
   layer: 2,
-  depth: "deep",
-  what:
-    "Retrieval-augmented generation puts retrieved text in front of the model at answer time. This module builds hybrid retrieval (vector plus keyword) over Postgres, an authority-aware ranking step, two kinds of graph expansion, and a cheap claims store for definitions.",
-  why:
-    "The knowledge in a RAG system is in the store, and the model weights stay unchanged. An answer is grounded only if a tool call returned the passage in that conversation. Retrieval quality therefore sets the ceiling on answer quality, and it has to be measured separately from the chat model.",
+  title: t("RAG and knowledge graph", "RAG 与知识图谱"),
+  short: t(
+    "Find the right passage, prove it, and add graph edges where similarity misses.",
+    "找到正确的段落并证明它，在相似度检索漏掉的地方用图的边补上。",
+  ),
+  what: t(
+    "Retrieval-augmented generation puts retrieved text in front of the model at answer time. This module builds hybrid retrieval (vector plus keyword), rank fusion, an authority nudge, duplicate collapsing, and two kinds of graph expansion.",
+    "检索增强生成（RAG）在回答时把检索到的文本放到模型面前。本模块搭建混合检索（向量加关键词）、排名融合、权威度微调、重复合并，以及两种图扩展。",
+  ),
+  why: t(
+    "The knowledge in a RAG system is in the store, and the model weights stay unchanged. An answer is grounded only if a tool returned the passage in that conversation. Retrieval quality sets the ceiling on answer quality and has to be measured apart from the chat model.",
+    "RAG 系统的知识存在数据库里，模型权重并没有变。只有当工具在本次对话中返回了相应段落，回答才算有依据。检索质量决定了回答质量的上限，必须与聊天模型分开测量。",
+  ),
   how: [
-    "Documents are split into chunks. Each chunk gets an embedding vector and a full-text index entry.",
-    "A query runs twice: nearest vectors (dense) and keyword match (lexical). Reciprocal rank fusion merges the two ranked lists without needing comparable scores.",
-    "A small authority weight nudges primary sources above summaries of them. Duplicate passages that appear in several files collapse to one.",
-    "Graph edges add passages that similarity search cannot reach. Citation edges follow references from a hit to the passage it cites. Definition edges fetch the passage that defines a term the question uses.",
-    "A separate claims table stores short verified statements with full-text search. It answers definition questions without loading the embedding model.",
+    t("Documents are split into chunks. Each chunk gets a vector and a full-text entry.", "文档被切成文本块。每个块生成一个向量和一条全文索引。"),
+    t("A query runs twice: nearest vectors (dense) and keyword match (lexical). Reciprocal rank fusion merges the two ranked lists by position.", "一次查询跑两路：最近邻向量（dense）和关键词匹配（lexical）。倒数排名融合（RRF）按名次合并两个列表。"),
+    t("A tier bonus sized to one rank step lets a primary source win a near tie. Identical passages collapse to one, and the most authoritative copy is shown.", "一个相当于一个名次差的等级加分，让权威来源在接近平手时胜出。相同段落合并为一条，并展示最权威的那份。"),
+    t("Graph edges add passages similarity cannot reach: the passage that defines a term, and the section a hit refers to.", "图的边补上相似度够不到的段落：定义某个术语的段落，以及命中段落所引用的章节。"),
   ],
   prereqs: [
     {
       id: "inference",
-      why: "Search needs an embedding model at query time and at index time. The vector column width is fixed by that model, so the model choice comes first.",
-      stub: "A function that hashes text into a fixed-length vector. Plumbing works, results are meaningless.",
+      why: t("Search needs an embedding call at index time and at query time. The vector width is fixed by that model, so the model choice comes first.", "索引和查询时都需要调用 embedding。向量维度由该模型决定，所以要先选定模型。"),
+      stub: t("The hashing embedder in labs/common/llm.py. Plumbing works and results reflect shared words only.", "labs/common/llm.py 里的哈希 embedding。管道能跑通，但结果只反映词汇重合。"),
     },
     {
       id: "knowledge",
-      why: "Retrieval can only return what was ingested, and it ranks by signals created at ingestion: chunk boundaries, source paths, authority tiers. Curation mistakes become retrieval mistakes that no ranking fix removes.",
-      stub: "Three or four hand-written text files in one folder.",
+      why: t("Retrieval returns what was ingested and ranks by signals made at ingestion: chunk boundaries, paths, tiers. Curation mistakes become retrieval mistakes that no ranking fix removes.", "检索只能返回入库的内容，并依靠入库时产生的信号排序：切块边界、路径、等级。整理阶段的错误会变成检索错误，任何排序手段都修不回来。"),
+      stub: t("Three or four hand-written text files in one folder, all at the same tier.", "一个目录里放三四个手写的文本文件，等级都相同。"),
     },
     {
       id: "state",
-      why: "Chunks, vectors, the file ledger, and graph edges need a store that survives concurrent readers and a nightly writer. The reference build lost weeks to single-writer stores before moving to Postgres.",
-      stub: "An in-memory list with brute-force cosine similarity. Fine up to a few thousand chunks.",
+      why: t("Chunks, vectors, and edges need tables that survive a nightly writer and concurrent readers.", "文本块、向量和边需要存在表里，并且要经得住夜间写入和并发读取。"),
+      stub: t("An in-memory list with brute-force cosine similarity.", "一个内存列表，加暴力计算的余弦相似度。"),
     },
   ],
   inBuild: [
-    { path: "apps/agent-server/pgschema.sql", role: "Schemas: learned knowledge, the file ledger, and one chunk index per collection." },
-    { path: "apps/agent-server/kb_ingest.py", role: "Extract, chunk, embed, and record files by content hash." },
-    { path: "apps/agent-server/tools/knowledge_base.py", role: "The search tool: hybrid SQL, fusion, authority weight, dedup, graph expansion, trace log." },
-    { path: "apps/agent-server/tools/recall_claims.py", role: "Full-text recall over verified claims, returned with the source passage." },
-    { path: "apps/agent-server/nightly/defines.py", role: "Builds definition edges from set definitional forms." },
-    { path: "apps/agent-server/nightly/citations.py", role: "Builds citation edges between passages." },
-    { path: "knowledge-bank/source_authority.json", role: "Path rules that assign each source an authority tier." },
+    { path: "apps/agent-server/kb_extract.py", role: t("Turn a source file into clean, structure-aware chunks.", "把源文件变成干净、保留结构的文本块。") },
+    { path: "apps/agent-server/tools/knowledge_base.py", role: t("The search tool: hybrid SQL, fusion, authority weight, dedup, graph expansion, trace.", "检索工具：混合 SQL、融合、权威加权、去重、图扩展、追踪日志。") },
+    { path: "apps/agent-server/nightly/defines.py", role: t("Builds definition edges from set definitional forms.", "从固定的定义句式中建立“定义”边。") },
+    { path: "apps/agent-server/nightly/citations.py", role: t("Builds citation edges between passages.", "建立段落之间的“引用”边。") },
+    { path: "apps/agent-server/tools/passage_dedup.py", role: t("One result for a paragraph that exists in several files.", "同一段落存在于多个文件时只返回一条。") },
   ],
   flow: {
-    caption: "One search, from question to returned passages",
+    caption: t("One search, from question to returned passages", "一次检索：从问题到返回的段落"),
     stages: [
-      { label: "Question", detail: "Plus the collection to search. Collections are separate indexes on purpose.", kind: "input" },
-      { label: "Embed the query", detail: "Same model that embedded the chunks. Different models are not comparable.", kind: "model" },
-      { label: "Dense top N", detail: "Nearest vectors through the HNSW index. Finds paraphrases.", kind: "store" },
-      { label: "Lexical top N", detail: "Full-text match ranked by cover density. Finds exact terms, codes, and section numbers.", kind: "store" },
-      { label: "Fuse with RRF", detail: "Score is the sum of 1/(60 + rank) across the two lists.", kind: "check" },
-      { label: "Authority and dedup", detail: "Small tier bonus. One copy of a paragraph that exists in several files.", kind: "check" },
-      { label: "Graph expansion", detail: "Add cited passages and defining passages when the question type calls for it.", kind: "tool" },
-      { label: "Return with sources", detail: "Text, source file, chunk position, and a diagnostic when nothing matched.", kind: "output" },
+      { label: t("Question and collection", "问题与集合"), detail: t("Collections are separate indexes on purpose.", "各集合的索引是有意分开的。"), kind: "input" },
+      { label: t("Embed the query", "把问题向量化"), detail: t("With the same model that embedded the chunks.", "使用与文本块相同的 embedding 模型。"), kind: "model" },
+      { label: t("Dense top N", "向量检索 Top N"), detail: t("Nearest vectors. Finds paraphrases.", "最近邻向量。能找到换了说法的内容。"), kind: "store" },
+      { label: t("Lexical top N", "关键词检索 Top N"), detail: t("Full-text match by BM25. Finds exact terms, codes, and section numbers.", "按 BM25 的全文匹配。能找到精确术语、编号和章节号。"), kind: "store" },
+      { label: t("Fuse by rank", "按名次融合"), detail: t("Score is the sum of 1/(60 + rank) across the two lists.", "得分是两个列表中 1/(60 + 名次) 之和。"), kind: "check" },
+      { label: t("Authority and dedup", "权威度与去重"), detail: t("A bonus worth about one rank. One copy of a repeated paragraph.", "相当于约一个名次的加分。重复段落只留一份。"), kind: "check" },
+      { label: t("Graph expansion", "图扩展"), detail: t("Add defining and cited passages when the question calls for them.", "当问题需要时，补上定义段落和被引用的段落。"), kind: "tool" },
+      { label: t("Return with sources", "连同来源一起返回"), detail: t("Text, source, section, and a diagnostic when nothing matched.", "文本、来源、章节；没有匹配时返回诊断信息。"), kind: "output" },
     ],
   },
   steps: [
     {
-      title: "Validate documents before indexing anything",
-      why: "Indexing is expensive and garbage is silent. A bad file produces confident chunks that rank well for the wrong reasons.",
-      body: [
-        "Check file type by content, not by extension or size. On the reference build, 15 files with a .pdf extension were HTML error pages that passed a size check.",
-        "Fix the folder taxonomy and file names first. Source path is a ranking signal later.",
+      id: "chunk",
+      title: t("Chunk with a context line", "切块时带上上下文行"),
+      why: t("Chunking decides what a hit can contain, and the embedding is of the chunk text. It is first because changing it later means re-embedding everything.", "切块决定一次命中能包含什么，而向量是对块文本计算的。它排第一，因为以后再改就得全部重新向量化。"),
+      do: [
+        t("Split on headings first, then by size with overlap.", "先按标题切分，再按长度切分并保留重叠。"),
+        t("Store a context string per chunk: document title and section heading.", "为每个块保存一个上下文字符串：文档标题和章节标题。"),
+        t("Index the context with the text so a chunk can match on its section name.", "把上下文和正文一起建索引，这样块可以通过章节名被匹配到。"),
       ],
-      code: {
-        lang: "python",
-        text: `def is_real_pdf(path: str) -> bool:
-    with open(path, "rb") as f:
-        return f.read(5) == b"%PDF-"`,
-      },
-      verify: "Every file in the bank passes a magic-byte check for its type.",
+      lab: { file: "labs/m05_rag/index.py", region: "chunk" },
+      verify: t("A chunk from Section 3 carries the context `<title> > Section 3. Lodging`.", "来自第 3 节的块带有上下文 `<标题> > Section 3. Lodging`。"),
+      needs: [{ step: "knowledge.intake", what: t("validated files in a known layout", "已校验、目录结构明确的文件") }],
+      produces: t("`chunk_markdown()`: a list of (context, text).", "`chunk_markdown()`：返回 (上下文, 正文) 列表。"),
     },
     {
-      title: "Create the store with one index per collection",
-      why: "The schema fixes the vector width and the isolation boundaries. Changing either after loading millions of rows means a rebuild.",
-      body: [
-        "Use Postgres with the pgvector extension. It gives crash-safe tables, concurrent readers and writers, and full-text search in the same database as the vectors.",
-        "Give each collection its own chunk table and its own indexes. An ingest for one collection then cannot damage another.",
-        "Keep a file ledger keyed by content hash so re-ingestion skips unchanged files.",
+      id: "load",
+      title: t("Embed and load, driven by the ledger", "由台账驱动，向量化并入库"),
+      why: t("Loading joins three earlier modules: the ledger says which files, the embedder turns text into vectors, the schema says where rows go.", "入库把前面三个模块连在一起：台账决定处理哪些文件，embedding 把文本变成向量，表结构决定数据写到哪里。"),
+      do: [
+        t("Index only ledger rows with status filed. Skip retired and rejected.", "只索引台账中状态为 filed 的记录。跳过 retired 和 rejected。"),
+        t("Write each chunk to the chunk table and to the full-text table.", "把每个块同时写入文本块表和全文索引表。"),
+        t("Copy the tier from the ledger onto every chunk.", "把台账里的等级复制到每个块上。"),
+        t("Mark the ledger row indexed.", "把台账记录标记为 indexed。"),
       ],
-      code: {
-        lang: "sql",
-        file: "pgschema.sql (reduced)",
-        text: `CREATE EXTENSION IF NOT EXISTS vector;
-
-CREATE TABLE kb.files (
-  collection text NOT NULL,
-  source     text NOT NULL,
-  sha256     text NOT NULL,
-  status     text NOT NULL DEFAULT 'indexed',
-  PRIMARY KEY (collection, source)
-);
-
-CREATE TABLE kb_finance.chunks (
-  chunk_id    text PRIMARY KEY,          -- "<source>::<n>"
-  source      text NOT NULL,
-  chunk_index int  NOT NULL,
-  text        text NOT NULL,
-  context     text,                      -- short lead-in describing the document
-  embedding   halfvec(768),              -- width set by the embedding model
-  retired     boolean NOT NULL DEFAULT false
-);
-
-CREATE INDEX chunks_fts_idx ON kb_finance.chunks
-  USING gin (to_tsvector('english', coalesce(context,'') || ' ' || text));`,
-      },
-      verify: "`\\d kb_finance.chunks` shows the vector column and the GIN index.",
+      lab: { file: "labs/m05_rag/index.py", region: "load" },
+      run: "python3 -m labs.m05_rag.demo",
+      output: "m05.demo",
+      pick: ["indexed"],
+      verify: t("The chunk count matches the output and no chunk comes from the retired file.", "文本块数量与输出一致，且没有任何块来自已退役的文件。"),
+      needs: [
+        { step: "rag-graph.chunk", what: t("chunks to embed", "待向量化的文本块") },
+        { step: "knowledge.ledger", what: t("which files to index and their tier", "要索引哪些文件及其等级") },
+        { step: "state.schema", what: t("kb_chunks and kb_fts tables", "kb_chunks 和 kb_fts 表") },
+        { step: "inference.client", what: t("embed()", "embed()") },
+      ],
+      produces: t("An indexed collection: rows with text, context, vector, tier.", "一个已索引的集合：每行包含正文、上下文、向量、等级。"),
     },
     {
-      title: "Chunk with a context line, then embed",
-      why: "Chunking decides what a hit can contain. It comes before embedding because the embedding is of the chunk text, and you cannot re-chunk without re-embedding.",
-      body: [
-        "The reference build uses 800-character chunks with 100 characters of overlap. Start there and change it only with a retrieval eval in hand.",
-        "Store a short context string per chunk naming the document and section. It is included in the full-text index so a chunk can match on its document's title.",
-        "Embed in batches and record each file's hash in the ledger when its chunks are committed.",
+      id: "dense",
+      title: t("Dense search", "向量检索"),
+      why: t("Each side of hybrid search is built and inspected alone before fusion, so you can see what each one finds and misses.", "混合检索的两路要先各自搭好、单独检查，再做融合，这样才能看清每一路能找到什么、会漏掉什么。"),
+      do: [
+        t("Embed the query. Score every chunk by cosine similarity. Return the top N ids.", "把问题向量化，对每个块计算余弦相似度，返回前 N 个 id。"),
+        t("The lab scans every row. In production an approximate index replaces the scan.", "lab 是全表扫描。生产环境用近似索引代替。"),
       ],
-      code: {
-        lang: "python",
-        text: `def chunk(text: str, size: int = 800, overlap: int = 100):
-    step = size - overlap
-    for i in range(0, max(len(text) - overlap, 1), step):
-        yield text[i:i + size]
-
-async def embed(text: str) -> list[float]:
-    r = await http.post(f"{OLLAMA_URL}/api/embeddings",
-                        json={"model": "nomic-embed-text", "prompt": text})
-    return r.json()["embedding"]`,
-      },
-      verify: "Row count in the chunk table matches your expectation for the corpus, and no embedding is null.",
+      lab: { file: "labs/m05_rag/search.py", region: "dense" },
+      verify: t("A paraphrased question returns the right chunk near the top.", "换了说法的问题，正确的块排在靠前位置。"),
+      needs: [{ step: "rag-graph.load", what: t("stored vectors", "已存储的向量") }],
+      produces: t("A ranked list of chunk ids from meaning.", "一个基于语义的块 id 排序列表。"),
     },
     {
-      title: "Bulk load first, build the vector index after",
-      why: "Building an HNSW graph row by row during a large load is hours slower than building it once at the end.",
-      body: [
-        "Load all rows, then create the index. Raise the search breadth parameter at query time if recall matters more than a few milliseconds.",
+      id: "lexical",
+      title: t("Lexical search", "关键词检索"),
+      why: t("Built next to dense search for comparison. It finds exact tokens that vectors blur: policy numbers, section numbers, rare terms.", "紧挨着向量检索搭建，便于对比。它能找到向量会模糊掉的精确词：规定编号、章节号、罕见术语。"),
+      do: [
+        t("Turn the query into terms joined by OR.", "把问题拆成用 OR 连接的词项。"),
+        t("Rank by BM25 and return the top N ids.", "按 BM25 排序，返回前 N 个 id。"),
       ],
-      code: {
-        lang: "sql",
-        text: `CREATE INDEX chunks_hnsw_idx ON kb_finance.chunks
-  USING hnsw (embedding halfvec_cosine_ops);
-
-SET hnsw.ef_search = 1000;   -- per session, recall over speed`,
-      },
-      verify: "EXPLAIN on a nearest-neighbor query shows an index scan on the HNSW index.",
+      lab: { file: "labs/m05_rag/search.py", region: "lexical" },
+      output: "m05.demo",
+      pick: ["2 "],
+      verify: t("A query that is only a policy number returns the document with that number at lexical rank 1.", "只输入规定编号的查询，带该编号的文档在关键词检索中排第 1。"),
+      needs: [{ step: "rag-graph.load", what: t("the full-text table", "全文索引表") }],
+      produces: t("A ranked list of chunk ids from exact words.", "一个基于精确词的块 id 排序列表。"),
     },
     {
-      title: "Write the hybrid query with rank fusion",
-      why: "Dense and lexical search fail on different questions. You need both lists before you can fuse them, and fusion by rank avoids calibrating two unrelated score scales.",
-      body: [
-        "Take the top N from each side. Give every chunk a score of 1/(k + rank) per list and sum. The constant k is 60 by convention and results are not sensitive to it.",
-        "Pass the query vector as a parameter in the ORDER BY. On the reference build the vector first went through a CTE, which hid it from the planner. Every search scanned 2.4 million rows and took 5.4 seconds. As a direct parameter it uses the index and runs in under 2 seconds.",
+      id: "fuse",
+      title: t("Fuse the two lists by rank", "按名次融合两个列表"),
+      why: t("Fusion needs both lists. It uses positions and never scores, because cosine similarity and BM25 are on unrelated scales.", "融合需要两个列表都就绪。它只用名次、不用分数，因为余弦相似度和 BM25 的量纲毫不相干。"),
+      do: [
+        t("Give every chunk 1/(k + rank) per list and sum. k is 60 by convention.", "每个块在每个列表中得到 1/(k + 名次)，然后求和。k 按惯例取 60。"),
+        t("Work out one number: near the top, one rank step is worth 1/61 minus 1/62, about 0.00026. You need it in the next step.", "算出一个数：在榜首附近，一个名次差值为 1/61 减 1/62，约 0.00026。下一步要用到。"),
       ],
-      code: {
-        lang: "sql",
-        file: "knowledge_base.py (hybrid SQL, reduced)",
-        text: `WITH q AS (SELECT websearch_to_tsquery('english', %(text)s) AS t),
-dense AS (
-  SELECT chunk_id, row_number() OVER (ORDER BY d) AS r
-  FROM (SELECT chunk_id, embedding <=> %(vec)s::halfvec(768) AS d
-        FROM kb_finance.chunks
-        WHERE NOT retired AND embedding IS NOT NULL
-        ORDER BY embedding <=> %(vec)s::halfvec(768)
-        LIMIT %(n)s) c
-),
-lexical AS (
-  SELECT chunk_id, row_number() OVER (ORDER BY rank DESC) AS r
-  FROM (SELECT chunk_id,
-               ts_rank_cd(to_tsvector('english', coalesce(context,'') || ' ' || text), q.t) AS rank
-        FROM kb_finance.chunks, q
-        WHERE NOT retired
-          AND to_tsvector('english', coalesce(context,'') || ' ' || text) @@ q.t
-        ORDER BY rank DESC LIMIT %(n)s) l
-),
-fused AS (
-  SELECT chunk_id, sum(1.0 / (60 + r)) AS rrf
-  FROM (SELECT chunk_id, r FROM dense UNION ALL SELECT chunk_id, r FROM lexical) u
-  GROUP BY chunk_id
-)
-SELECT c.chunk_id, f.rrf, c.source, c.chunk_index, c.text
-FROM fused f JOIN kb_finance.chunks c USING (chunk_id)
-ORDER BY f.rrf DESC
-LIMIT %(n)s;`,
-      },
-      verify: "A question that uses an exact section number and a paraphrased question both return the right passage in the top five.",
+      lab: { file: "labs/m05_rag/search.py", region: "rrf" },
+      output: "m05.demo",
+      pick: ["1 "],
+      verify: t("In the output each result shows its dense rank and lexical rank. A chunk strong in both ranks first.", "输出中每条结果都显示它在向量检索和关键词检索中的名次。两边都靠前的块排在最前。"),
+      needs: [
+        { step: "rag-graph.dense", what: t("the dense list", "向量检索列表") },
+        { step: "rag-graph.lexical", what: t("the lexical list", "关键词检索列表") },
+      ],
+      produces: t("One fused score per chunk.", "每个块一个融合得分。"),
     },
     {
-      title: "Add authority weighting and passage dedup",
-      why: "These operate on a fused candidate list, so they follow fusion. They fix two failures you only see once search works: a summary outranking the rule it summarizes, and ten results that are one paragraph copied across files.",
-      body: [
-        "Assign each source a tier from path rules. Add a small bonus per tier. On the reference build the weight is 0.08, enough to break near-ties and too small to override relevance.",
-        "Collapse identical passages to one result. Track how many distinct passages are in the top ten as an eval metric.",
-        "A cross-encoder reranker over the top 30 is optional. Add it behind a flag and keep it only if the eval moves.",
+      id: "authority",
+      title: t("Add the authority nudge and collapse duplicates", "加入权威度微调并合并重复"),
+      why: t("Both act on the fused list. They fix two failures you only see once search works: a summary outranking the rule, and one paragraph filling the results.", "两者都作用于融合后的列表。它们解决的是检索跑通之后才会暴露的两个问题：摘要排在规定原文前面，以及同一段话占满结果。"),
+      do: [
+        t("Add a bonus per tier step. Size it to about one rank step. The lab first used a value 15 times larger, and tier 2 chunks could no longer reach the top however relevant they were.", "每高一个等级加一点分，大小约等于一个名次差。lab 最初用了大 15 倍的值，结果 2 级的块无论多相关都排不到前面。"),
+        t("Group results with identical text. Keep the best position and show the copy with the lowest tier.", "把正文相同的结果归为一组。保留最好的名次，并展示等级最高（数字最小）的那份。"),
+        t("Put every feature behind an environment flag so an eval can turn it off.", "给每项功能都加一个环境变量开关，让评估时可以关掉它。"),
       ],
-      verify: "For a known rule, the primary source ranks above documents that quote it.",
+      lab: { file: "labs/m05_rag/search.py", region: "search" },
+      output: "m05.demo",
+      pick: ["3 ", "  dedup on"],
+      verify: t("With dedup off the same paragraph appears twice. With it on, one copy remains and it is the tier 1 file.", "关闭去重时同一段落出现两次。开启后只剩一份，而且来自 1 级文件。"),
+      needs: [
+        { step: "rag-graph.fuse", what: t("fused scores, and the size of one rank step", "融合得分，以及一个名次差的大小") },
+        { step: "knowledge.tiers", what: t("the tier on every chunk", "每个块上的等级") },
+      ],
+      produces: t("`search()`: ranked, deduplicated, tier-aware results.", "`search()`：已排序、已去重、考虑等级的结果。"),
     },
     {
-      title: "Add graph edges for the question types vectors miss",
-      why: "Graph expansion needs a working baseline to expand from, and it needs evidence of which questions fail. Building a graph first is how projects spend a month on infrastructure for a problem they have not measured.",
-      body: [
-        "Citation edges: when a passage says \"see section X\", store an edge to that passage. At query time, follow edges from top hits and add a bounded number of cited passages.",
-        "Definition edges: detect set definitional forms (\"X means\", \"the term X refers to\") at index time and store an edge from the term to the defining passage. For definitional questions, add those passages.",
-        "Both are plain tables with a from and a to column. The reference build deferred a full entity-graph system until simpler tiers were shown to fail.",
+      id: "edges",
+      title: t("Build graph edges at index time", "在索引阶段建立图的边"),
+      why: t("Edges are built after loading because they are derived from chunk text. They come after baseline search because you need failing questions to know which edges are worth building.", "边要在入库之后建，因为它们是从块的正文中提取的。又排在基础检索之后，因为你需要先有答不好的问题，才知道哪些边值得建。"),
+      do: [
+        t("Definition edges: find sentences of the form \"The term X means\" and store X pointing at that chunk.", "定义边：找出“The term X means”这类句式，把 X 指向该块。"),
+        t("Section edges: store which chunks belong to each numbered section.", "章节边：记录每个编号章节下有哪些块。"),
+        t("Citation edges: when a chunk says \"see Section N\", store a pointer to that section, in the document it names.", "引用边：当某个块写着“see Section N”时，保存一个指向该章节的指针，并定位到它所提到的文档。"),
       ],
-      code: {
-        lang: "sql",
-        text: `CREATE TABLE brain.atom_links (
-  from_id  text NOT NULL,
-  to_id    text NOT NULL,
-  relation text NOT NULL,          -- 'cites' | 'defines'
-  PRIMARY KEY (from_id, to_id, relation)
-);`,
-      },
-      verify: "A definitional gold set scores higher with definition edges on than off. If it does not, turn them off.",
+      lab: { file: "labs/m05_rag/index.py", region: "edges" },
+      verify: t("The edge table holds a defines row for `per diem` and a cites row from Section 3 to Section 5.", "边表里有一条 `per diem` 的定义边，以及一条从第 3 节指向第 5 节的引用边。"),
+      needs: [
+        { step: "rag-graph.load", what: t("chunk text and context", "块的正文和上下文") },
+        { step: "state.schema", what: t("the kb_edges table", "kb_edges 表") },
+      ],
+      produces: t("Typed edges: defines, section, cites.", "带类型的边：defines、section、cites。"),
     },
     {
-      title: "Add a claims store for cheap recall",
-      why: "It depends on having passages to cite. It exists because loading the embedder can evict the chat model, and many questions only need a definition.",
-      body: [
-        "Store short statements extracted from sources, each with a status and a pointer to its source passage. Index the statement text for full-text search.",
-        "Return the source passage beside each claim and tell the model that the passage is the authority. A claim is a pointer to evidence.",
+      id: "expand",
+      title: t("Expand results along the edges", "沿着边扩展检索结果"),
+      why: t("Expansion starts from a hit list, so it follows search. It is bounded, because every added passage costs context.", "扩展从命中列表出发，所以排在检索之后。它必须有上限，因为每多一个段落都要占用上下文。"),
+      do: [
+        t("If the question asks what a term means, add the chunk that defines any term found in the question.", "如果问题是在问某个术语的含义，就补上定义该术语的块。"),
+        t("For the top hits, follow citation edges and add the cited section.", "对排名靠前的命中，沿引用边补上被引用的章节。"),
+        t("Mark each added passage with how it got there.", "给每个补进来的段落标明它是怎么来的。"),
       ],
-      verify: "A definition question is answered through the claims tool with no embedding model load in the engine log.",
+      lab: { file: "labs/m05_rag/search.py", region: "expand" },
+      output: "m05.demo",
+      pick: ["4 ", "5 "],
+      verify: t("Result 4 adds the definition of `approving official`. Result 5 adds Section 5 because Section 3 cites it.", "结果 4 补上了 `approving official` 的定义。结果 5 补上了第 5 节，因为第 3 节引用了它。"),
+      needs: [
+        { step: "rag-graph.authority", what: t("the hit list to expand from", "用于扩展的命中列表") },
+        { step: "rag-graph.edges", what: t("the edges to follow", "要沿着走的边") },
+      ],
+      produces: t("Results that include passages reached by structure.", "包含按结构关系找到的段落的结果。"),
     },
     {
-      title: "Expose search as a tool that explains empty results",
-      why: "The tool wrapper is last because it wraps everything above. It is the interface the harness sees.",
-      body: [
-        "Return passages with source and position. When nothing matches, return a diagnostic naming the filter that emptied the result.",
-        "Write one trace line per search: query, candidate counts per side, final ranks. Offline diagnosis depends on it.",
+      id: "diagnose",
+      title: t("Explain empty results and write a trace", "解释空结果，并记录追踪信息"),
+      why: t("This finishes the search function. The agent will call it as a tool next, and an empty result with no explanation is where fabrication starts.", "这一步让检索函数完整。接下来智能体会把它当工具调用，而没有解释的空结果正是编造的起点。"),
+      do: [
+        t("When nothing is returned, add a diagnostic that names the cause.", "没有结果时，附上说明原因的诊断信息。"),
+        t("Return counts for each stage: dense, lexical, fused, expanded.", "返回每个阶段的数量：dense、lexical、fused、expanded。"),
       ],
-      code: {
-        lang: "python",
-        text: `SCHEMA = {
-  "type": "function",
-  "function": {
-    "name": "search_knowledge_base",
-    "description": "Search a document collection. Returns passages with source and position.",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "collection": {"type": "string", "enum": ["FINANCE", "K12"]},
-        "query": {"type": "string"},
-        "top_k": {"type": "integer", "default": 6}
-      },
-      "required": ["collection", "query"]
-    }
-  }
-}`,
-      },
-      verify: "A query with no match returns an empty list and a diagnostic string, and a trace line is written.",
+      output: "m05.demo",
+      pick: ["6 "],
+      verify: t("Searching a collection that does not exist returns a diagnostic listing the collections that do.", "检索一个不存在的集合时，返回的诊断信息会列出实际存在的集合。"),
+      needs: [{ step: "rag-graph.expand", what: t("the complete search path", "完整的检索路径") }],
+      produces: t("A search result shape with results, trace, and diagnostic. The tools module wraps it.", "包含 results、trace 和 diagnostic 的检索结果结构。工具模块会对它做封装。"),
+    },
+    {
+      id: "production",
+      title: t("Production form: Postgres with pgvector", "生产形态：Postgres 加 pgvector"),
+      why: t("Same stages, different engine. It is last because the lab version is enough to build and evaluate everything after it.", "阶段相同，引擎不同。它排在最后，因为 lab 版本足够搭建和评估后面的所有内容。"),
+      do: [
+        t("Bulk load rows first, then build the HNSW index once. Building it row by row during a large load is hours slower.", "先批量导入数据，再一次性建立 HNSW 索引。在大批量导入过程中逐行建索引要慢好几个小时。"),
+        t("Write the hybrid query with the query vector as a parameter in each ORDER BY.", "写混合检索查询时，在每个 ORDER BY 里直接把查询向量作为参数。"),
+        t("Do not read the vector from a CTE that two branches use. Postgres inlines a CTE that is read once and materializes one that is read twice, and a materialized value cannot drive the index. The lab shows all three forms.", "不要让两个分支从同一个 CTE 里读取向量。只被读取一次的 CTE 会被 Postgres 内联，被读取两次的会被物化，而物化后的值无法驱动索引。lab 演示了这三种写法。"),
+        t("Run EXPLAIN with sequential scans turned off and confirm the plan names the HNSW index.", "关闭顺序扫描后运行 EXPLAIN，确认执行计划里出现了 HNSW 索引。"),
+        t("Score the gold set through both engines before you switch traffic.", "切换流量之前，用两个引擎分别跑一遍金标准集。"),
+      ],
+      lab: { file: "labs/m05_rag/pg.py", region: "hybrid" },
+      codeNote: t("The lab uses vector(256) because its fake embedder has 256 dimensions. With pgvector 0.7 or later, halfvec halves storage. The reference build uses halfvec(768).", "lab 用的是 vector(256)，因为它的假嵌入器是 256 维。pgvector 0.7 及以上版本可以用 halfvec，存储减半。参考系统用的是 halfvec(768)。"),
+      run: "PG_RUN_AS=<ordinary user, only when running as root> python3 -m labs.m05_rag.pg",
+      output: "m05.pg",
+      pick: ["3 ", "4 ", "5 "],
+      verify: t("EXPLAIN names the HNSW index for the parameter form, and the gold set scores the same through Postgres as through the lab engine.", "参数写法的 EXPLAIN 结果里出现 HNSW 索引，并且金标准集在 Postgres 上的得分与 lab 引擎相同。"),
+      needs: [
+        { step: "state.postgres", what: t("a Postgres database with the vector extension", "带向量扩展的 Postgres 数据库") },
+        { step: "rag-graph.fuse", what: t("the fusion logic, now in SQL", "融合逻辑，现在用 SQL 实现") },
+      ],
+      produces: t("The same search contract over millions of rows.", "同样的检索接口，支撑百万级数据。"),
     },
   ],
   together: [
-    { with: "harness", how: "The planner decides when to search and may search again after reading results. Retrieval is a tool, so its output size is capped by the harness." },
-    { with: "guardrails", how: "The guard compares the answer with what retrieval returned in this request. Retrieval output is the evidence." },
-    { with: "evaluation", how: "A sealed gold set scores retrieval alone, so a chunking or ranking change shows up as a number." },
-    { with: "self-evolving", how: "The nightly learner reads chunks and writes claims. Held-out chunks are excluded so the learner cannot study the test." },
+    { with: "tools-mcp", how: t("Search is wrapped as a tool. Its diagnostic is what the tool returns when empty.", "检索被封装成工具。结果为空时，工具返回的就是它的诊断信息。") },
+    { with: "guardrails", how: t("The guard compares the answer with what retrieval returned in this request.", "护栏会把回答与本次请求中检索返回的内容进行比对。") },
+    { with: "evaluation", how: t("A sealed gold set scores retrieval alone. Every flag in this module is an eval variant.", "封存的标准集单独给检索打分。本模块的每个开关都是一个评估变体。") },
+    { with: "self-evolving", how: t("The learner reads chunks and writes claims that point back to them. Held-out chunks are excluded.", "学习任务读取文本块，写下指回这些块的论断。留出的块不在其阅读范围内。") },
   ],
   failures: [
     {
       when: "2026-08",
-      title: "A corrupt vector segment stopped sync for four weeks",
-      what: "The single-process vector store had one unreadable segment. Search on the main collection failed and ingestion could not proceed.",
-      fix: "Move vectors into Postgres tables with write-ahead logging and a rebuildable index.",
-      lesson: "Treat the vector index as derived data that can be rebuilt from rows you trust.",
+      title: t("A corrupt vector segment stopped sync for four weeks", "一个损坏的向量分段让同步停了四周"),
+      what: t("The single-process vector store had one unreadable segment. Search on the main collection failed and ingestion could not proceed.", "单进程向量库有一个分段无法读取。主集合的检索失败，入库也无法继续。"),
+      fix: t("Move vectors into database tables with write-ahead logging and a rebuildable index.", "把向量存进带预写日志的数据库表，索引可以随时重建。"),
+      lesson: t("Treat the vector index as derived data that can be rebuilt from rows you trust.", "把向量索引当作派生数据，随时能从可信的数据行重建。"),
     },
     {
       when: "2026-09",
-      title: "Every search scanned the whole table",
-      what: "The query vector was passed through a CTE. The planner could not use the HNSW index and each search took 5.4 seconds.",
-      fix: "Pass the vector as a query parameter in the ORDER BY clause.",
-      lesson: "Run EXPLAIN on the retrieval query. An index that exists is not an index that is used.",
+      title: t("Every search scanned the whole table", "每次检索都在全表扫描"),
+      what: t("The query vector sat in a CTE that both the dense and the keyword branch read. Postgres materializes a CTE that is read twice, so the vector stopped being a constant the HNSW index could use. Every search scanned 2.4 million rows and took 5.4 seconds.", "查询向量放在一个 CTE 里，稠密检索和关键词检索两个分支都读取它。被读取两次的 CTE 会被 Postgres 物化，向量于是不再是 HNSW 索引能用的常量。每次检索扫描 240 万行，耗时 5.4 秒。"),
+      fix: t("Pass the vector as a query parameter in the ORDER BY clause.", "把向量作为查询参数直接写进 ORDER BY 子句。"),
+      lesson: t("Run EXPLAIN on the retrieval query. An index that exists may still go unused.", "对检索查询运行 EXPLAIN。索引存在不代表它被用上了。"),
     },
     {
       when: "2026-07",
-      title: "One collection leaked into another",
-      what: "Finance passages appeared in education-scoped chats because the knowledge attachment was set per model.",
-      fix: "Separate indexes per collection and a deterministic scope filter.",
-      lesson: "Isolation belongs in the data layout. A prompt instruction is not a boundary.",
+      title: t("One collection leaked into another", "一个集合的内容漏进了另一个集合"),
+      what: t("Finance passages appeared in education-scoped chats because the knowledge attachment was set per model.", "财务类段落出现在教育范围的对话里，因为知识库是按模型挂载的。"),
+      fix: t("Separate indexes per collection and a deterministic scope filter.", "每个集合单独建索引，并加上确定性的范围过滤。"),
+      lesson: t("Isolation belongs in the data layout. A prompt instruction is not a boundary.", "隔离要靠数据结构实现。提示词里的指令不是边界。"),
     },
     {
-      when: "2026-10",
-      title: "The top ten was one paragraph ten times",
-      what: "The same paragraph existed in several files and filled the result list.",
-      fix: "Collapse duplicate passages and track distinct passages in the top ten as a metric.",
-      lesson: "Measure diversity of results as well as rank of the right one.",
+      when: "lab",
+      title: t("An authority bonus that overrode relevance", "盖过了相关性的权威加分"),
+      what: t("The first lab version added 0.004 per tier. One rank step is worth 0.00026, so the bonus equaled about 15 ranks and tier decided everything.", "lab 的第一版每个等级加 0.004。而一个名次差只值 0.00026，所以这个加分相当于约 15 个名次，结果完全由等级决定。"),
+      fix: t("Size the bonus to one rank step.", "把加分调到一个名次差的大小。"),
+      lesson: t("Express every ranking weight in the units of the score it is added to.", "任何排序权重，都要用它所加到的那个分数的量纲来衡量。"),
     },
   ],
   portability: {
-    databricks:
-      "Vector Search with a Delta Sync index replaces the chunk table and HNSW index, and it offers hybrid search. Chunks live in a Delta table governed by Unity Catalog. Graph edges are Delta tables you join. Lakebase gives you Postgres if you want to keep this SQL as written.",
-    watsonx:
-      "watsonx.data provides the lakehouse and a vector engine (Milvus). Orchestrate agents attach knowledge bases backed by it. You keep the same pipeline stages: validate, chunk, embed, hybrid query, rerank.",
-    codex:
-      "Codex does not provide a retrieval store. Run this stack as a service and expose search as an MCP tool. Codex then calls it like any other tool.",
-    cursor:
-      "Cursor indexes your code for its own use. Domain retrieval is yours to host. Register your search service as an MCP server in the project config.",
-    claude:
-      "Expose the search tool through an MCP server. The reference build does this so a coding agent and the chat agent share one retrieval implementation.",
-    other:
-      "Postgres with pgvector runs anywhere, including Docker. The SQL in this module is unchanged. Only the embedding endpoint URL differs.",
+    databricks: t(
+      "AI Search (formerly Vector Search) with a Delta Sync index replaces the chunk table and ANN index, and it supports full-text and hybrid queries. Chunks live in a Delta table governed by Unity Catalog. Graph edges are Delta tables you join. Lakebase gives you Postgres if you want to keep the SQL as written.",
+      "带 Delta Sync 索引的 AI Search（原 Vector Search）取代文本块表和近似索引，并支持全文和混合查询。文本块存在受 Unity Catalog 管理的 Delta 表里。图的边是你自己关联的 Delta 表。想原样保留 SQL 的话可以用 Lakebase（Postgres）。",
+    ),
+    watsonx: t("watsonx.data provides the lakehouse and a vector engine (Milvus). Orchestrate agents attach knowledge bases backed by it. You keep the same stages: validate, chunk, embed, hybrid query, rerank.", "watsonx.data 提供湖仓和向量引擎（Milvus）。Orchestrate 智能体可挂载基于它的知识库。各阶段保持不变：校验、切块、向量化、混合查询、重排。"),
+    codex: t("Codex does not provide a retrieval store. Run this stack as a service and expose search as an MCP tool.", "Codex 不提供检索存储。把这套系统作为服务运行，并把检索以 MCP 工具的形式暴露出去。"),
+    cursor: t("Cursor indexes your code for its own use. Domain retrieval is yours to host. Register your search service as an MCP server in the project config.", "Cursor 会为自身用途索引你的代码。业务领域的检索需要你自己托管。在项目配置里把检索服务注册为 MCP 服务。"),
+    claude: t("Expose the search tool through an MCP server. The reference build does this so a coding agent and the chat agent share one retrieval implementation.", "通过 MCP 服务暴露检索工具。参考系统就是这么做的，让编程智能体和聊天智能体共用同一套检索实现。"),
+    other: t("The lab runs anywhere Python runs. Postgres with pgvector runs anywhere Docker runs. Only the embedding endpoint URL changes.", "lab 在任何有 Python 的地方都能跑。Postgres 加 pgvector 在任何有 Docker 的地方都能跑。只需要改 embedding 端点的 URL。"),
   },
   checks: [
     {
-      q: "Why hybrid search and not vectors alone?",
-      a: "Vectors match meaning and miss exact tokens such as section numbers, codes, and rare terms. Keyword search does the reverse. The two fail on different questions, so fusing both ranked lists covers more than either.",
+      q: t("Why hybrid search and not vectors alone?", "为什么用混合检索，而不是只用向量？"),
+      a: t("Vectors match meaning and miss exact tokens such as section numbers and codes. Keyword search does the reverse. They fail on different questions, so fusing both covers more than either.", "向量匹配语义，但会漏掉章节号、编号这类精确词。关键词检索正好相反。两者在不同的问题上失效，融合后的覆盖面比任何一方都大。"),
     },
     {
-      q: "Why does rank fusion use ranks and not scores?",
-      a: "Cosine distance and text rank are on unrelated scales. Ranks are comparable across any two lists, so fusion needs no calibration.",
+      q: t("Why does fusion use ranks and not scores?", "为什么融合用名次而不用分数？"),
+      a: t("Cosine similarity and BM25 are on unrelated scales. Ranks are comparable across any two lists, so fusion needs no calibration.", "余弦相似度和 BM25 的量纲毫不相干。名次在任意两个列表之间都可比，所以融合不需要校准。"),
     },
     {
-      q: "Why must knowledge management come before retrieval?",
-      a: "Ranking uses signals made at ingestion: chunk boundaries, source paths, authority tiers, and which files exist. Bad inputs produce confident wrong hits, and no query-time step can recover text that was never ingested correctly.",
+      q: t("How large should the authority bonus be, and how do you know?", "权威加分应该多大？你怎么确定？"),
+      a: t("About one rank step of the fused score, which near the top is 1/61 minus 1/62. Larger and tier overrides relevance. You confirm by running the retrieval eval with the flag on and off.", "大约是融合得分的一个名次差，在榜首附近是 1/61 减 1/62。再大，等级就会盖过相关性。通过开关该功能分别运行检索评估来确认。"),
     },
     {
-      q: "Why are graph edges added after hybrid search works?",
-      a: "Edges expand from an initial hit list, so they need one. You also need failing questions to know which edges to build. The reference build added citation and definition edges because specific gold questions failed without them.",
+      q: t("Why are graph edges added after hybrid search works?", "为什么图的边要在混合检索跑通之后再加？"),
+      a: t("Edges expand from a hit list, so they need one. You also need failing questions to know which edges to build. In the lab's own eval the graph flag changed no score on a 15-question set, which is a result worth knowing before investing more.", "边是从命中列表扩展出去的，所以先得有命中列表。你还需要答不好的问题，才知道该建哪些边。在 lab 自带的评估中，图扩展的开关在 15 道题上没有改变任何分数，这是在继续投入之前值得知道的结果。"),
     },
     {
-      q: "Explain the claims store in one sentence to someone who knows RAG.",
-      a: "It is a full-text index over short verified statements that each point at a source passage, used to answer definition questions without loading the embedding model.",
+      q: t("Trace the data from a file in the inbox to a passage in an answer. Name each step.", "追踪数据从收件箱里的文件到回答中的段落。说出每一步。"),
+      a: t("Validate, file, ledger row with tier, chunk with context, embed, load into chunk and full-text tables, build edges, then at query time dense plus lexical, fuse, tier bonus, dedup, expand, return with source.", "校验、归档、写入带等级的台账、带上下文切块、向量化、写入文本块表和全文表、建边；查询时：向量加关键词检索、融合、等级加分、去重、扩展、连同来源返回。"),
     },
   ],
   terms: [
-    { term: "RRF", def: "Reciprocal rank fusion. Score is the sum over lists of 1/(k + rank)." },
-    { term: "HNSW", def: "A graph index for approximate nearest-neighbor search over vectors." },
-    { term: "hit@k", def: "Share of questions whose gold passage is in the top k results." },
-    { term: "Authority tier", def: "A trust level assigned to a source by path rule, used as a small ranking bonus." },
+    { term: t("RRF", "RRF（倒数排名融合）"), def: t("Reciprocal rank fusion. Score is the sum over lists of 1/(k + rank).", "得分是各列表中 1/(k + 名次) 之和。") },
+    { term: t("BM25", "BM25"), def: t("A keyword ranking function based on term frequency and rarity.", "基于词频和稀有度的关键词排序函数。") },
+    { term: t("HNSW", "HNSW"), def: t("A graph index for approximate nearest-neighbor search over vectors.", "用于向量近似最近邻检索的图索引。") },
+    { term: t("Edge", "边"), def: t("A stored link from a term or passage to another passage, with a type.", "从术语或段落指向另一个段落的、带类型的链接。") },
   ],
 };

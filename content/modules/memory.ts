@@ -1,0 +1,251 @@
+import { t, type Module } from "@/lib/types";
+
+export const memory: Module = {
+  id: "memory",
+  n: 9,
+  layer: 5,
+  title: t("Memory", "记忆"),
+  short: t(
+    "What the agent keeps about a user, and how it gets back into the prompt.",
+    "智能体为用户保留了什么，以及这些内容如何回到提示词里。",
+  ),
+  what: t(
+    "Memory is durable information written after conversations and read back in later ones. This module builds per-user facts that go into every prompt, a searchable history of past turns, and the background pipeline that writes both.",
+    "记忆是在对话之后写入、在以后的对话中读回的持久信息。本模块搭建三样东西：进入每次提示词的用户事实、可检索的历史对话，以及负责写入这两者的后台流程。",
+  ),
+  why: t(
+    "Without memory every conversation starts cold. With careless memory the agent leaks one user's context into another's, or delays every answer while it takes notes.",
+    "没有记忆，每次对话都从零开始。记忆做得不仔细，智能体会把一个用户的上下文泄露给另一个用户，或者为了记笔记而拖慢每一次回答。",
+  ),
+  how: [
+    t("Every read and write takes a partition, usually the user id. The partition is the boundary.", "每次读写都带一个分区，通常是用户 ID。分区就是边界。"),
+    t("Facts are small key and value notes. A short briefing of them is added to the system prompt.", "事实是简短的键值记录。它们的简短摘要会加进系统提示词。"),
+    t("Turns are the full history. They are searched on demand and are not placed in every prompt.", "对话轮次是完整的历史。按需检索，不会放进每次提示词。"),
+    t("Writing happens after the answer, in the background. A failure there never reaches the user.", "写入发生在回答之后，在后台进行。即使失败，用户也不会受影响。"),
+  ],
+  prereqs: [
+    {
+      id: "harness",
+      why: t("Memory is read at prompt composition and written after the response. Both are harness stages.", "记忆在组装提示词时读取，在响应之后写入。这两处都是 Harness 的阶段。"),
+      stub: t("A JSON file per user, read at start and appended at end.", "每个用户一个 JSON 文件，开始时读取，结束时追加。"),
+    },
+    {
+      id: "state",
+      why: t("Memory is durable state with concurrent writers: live chats and background jobs. It needs the tables and the connection settings from the state module.", "记忆是有并发写入方的持久状态：实时对话和后台任务都会写。它需要状态模块里的表和连接设置。"),
+      stub: t("A single-writer file store, for one user only.", "一个单写入方的文件存储，只服务一个用户。"),
+    },
+  ],
+  inBuild: [
+    { path: "apps/agent-server/memory_store.py", role: t("Per-partition reads and writes.", "按分区读写。") },
+    { path: "apps/agent-server/memory_pipeline.py", role: t("Post-response extraction, run in the background.", "响应之后在后台运行的信息提取。") },
+    { path: "apps/agent-server/conversation_index.py", role: t("Searchable index of past conversations.", "历史对话的可检索索引。") },
+    { path: "apps/agent-server/tools/conversation_recall.py", role: t("Recall as a tool the agent can call.", "作为工具供智能体调用的回忆功能。") },
+  ],
+  flow: {
+    caption: t("Memory around one request", "一次请求前后的记忆流程"),
+    stages: [
+      { label: t("Request with a partition", "带分区的请求"), detail: t("The partition comes from the authenticated key or session, never from the model.", "分区来自已认证的密钥或会话，绝不来自模型。"), kind: "input" },
+      { label: t("Briefing", "摘要"), detail: t("A few fact lines for this partition are added to the system prompt.", "该分区的几行事实被加进系统提示词。"), kind: "store" },
+      { label: t("Agent runs", "智能体运行"), detail: t("It may call the recall tool to search earlier threads.", "它可以调用回忆工具检索之前的会话。"), kind: "model" },
+      { label: t("Answer returned", "返回回答"), detail: t("The user has the answer before anything is written.", "在任何写入发生之前，用户已经拿到回答。"), kind: "output" },
+      { label: t("Record", "记录"), detail: t("A background task stores both turns and extracts durable facts.", "后台任务保存这两轮对话，并提取可长期保留的事实。"), kind: "store" },
+    ],
+  },
+  steps: [
+    {
+      id: "partition",
+      title: t("Fix the partition rule", "确定分区规则"),
+      why: t("Decide where the partition comes from before writing any memory code. Every function takes it as its first argument, and retrofitting it is how leaks happen.", "在写任何记忆代码之前，先确定分区从哪里来。每个函数都把它作为第一个参数，事后再补正是泄露的来源。"),
+      do: [
+        t("Derive the partition from the authenticated caller: the key's app, or a signed user id.", "从已认证的调用方得出分区：密钥对应的应用，或一个签名的用户 ID。"),
+        t("Never accept a partition from the model or from tool arguments.", "绝不接受模型或工具参数提供的分区。"),
+        t("Write it as the first parameter of every memory function.", "把它写成每个记忆函数的第一个参数。"),
+      ],
+      verify: t("No memory function can be called without a partition.", "没有任何记忆函数可以在不带分区的情况下被调用。"),
+      needs: [{ step: "api-gateway.keys", what: t("an authenticated identity to derive the partition from", "用于推导分区的已认证身份") }],
+      produces: t("A rule: partition comes from authentication.", "一条规则：分区来自身份认证。"),
+    },
+    {
+      id: "facts",
+      title: t("Store facts and build the briefing", "保存事实并生成摘要"),
+      why: t("Facts are the simplest memory and the only kind that goes into every prompt, so they are built first and kept small.", "事实是最简单的记忆，也是唯一会进入每次提示词的那种，所以先做它，并保持精简。"),
+      do: [
+        t("`remember()` upserts one key for one partition.", "`remember()` 为某个分区更新或插入一个键。"),
+        t("`briefing()` returns a few lines, newest first, with a hard limit.", "`briefing()` 返回几行内容，新的在前，并有硬性上限。"),
+      ],
+      lab: { file: "labs/m09_memory/memory.py", region: "facts" },
+      verify: t("A second `remember()` for the same key replaces the value.", "对同一个键再次调用 `remember()` 会替换原值。"),
+      needs: [
+        { step: "memory.partition", what: t("the partition argument", "分区参数") },
+        { step: "state.schema", what: t("the mem_facts table", "mem_facts 表") },
+      ],
+      produces: t("`remember()` and `briefing()`.", "`remember()` 和 `briefing()`。"),
+    },
+    {
+      id: "pipeline",
+      title: t("Write the record pipeline, after the answer", "编写记录流程，放在回答之后"),
+      why: t("It needs the fact store. It runs after the answer because the user is waiting for the answer and no one is waiting for the notes.", "它依赖事实存储。它在回答之后运行，因为用户等的是回答，没有人在等笔记。"),
+      do: [
+        t("`record()` stores the user turn and the assistant turn, then extracts facts from what the user said.", "`record()` 保存用户和助手各一轮对话，然后从用户说的话里提取事实。"),
+        t("`record_async()` runs it in a background thread and catches every exception.", "`record_async()` 在后台线程里执行它，并捕获所有异常。"),
+        t("The lab extracts with patterns to stay deterministic. A real system asks a small model what is worth keeping.", "为保持确定性，lab 用正则模式提取。真实系统会让一个小模型判断什么值得保留。"),
+      ],
+      lab: { file: "labs/m09_memory/memory.py", region: "pipeline" },
+      verify: t("`record_async()` returns immediately.", "`record_async()` 立即返回。"),
+      needs: [
+        { step: "memory.facts", what: t("remember()", "remember()") },
+        { step: "state.writers", what: t("proof that a background writer is safe", "后台写入安全的证据") },
+      ],
+      produces: t("`record_async()`: what the harness calls after responding.", "`record_async()`：Harness 在响应之后调用它。"),
+    },
+    {
+      id: "recall",
+      title: t("Add recall over past turns", "加入对历史对话的回忆"),
+      why: t("Recall needs stored turns, so it follows the pipeline. History is searched on demand because putting it all in the prompt costs every turn.", "回忆需要已保存的对话，所以排在记录流程之后。历史按需检索，因为全放进提示词的话每一轮都要付费。"),
+      do: [
+        t("Search this partition's turns by similarity to the query.", "按与查询的相似度检索该分区的对话。"),
+        t("Skip the current thread. It is already in context.", "跳过当前会话。它已经在上下文里了。"),
+        t("Return nothing below a similarity floor. A weak match presented as memory is worse than none.", "相似度低于门槛就什么都不返回。把弱匹配当成记忆，比没有记忆更糟。"),
+      ],
+      lab: { file: "labs/m09_memory/memory.py", region: "recall" },
+      verify: t("An unrelated query returns an empty list.", "不相关的查询返回空列表。"),
+      needs: [
+        { step: "memory.pipeline", what: t("stored turns", "已保存的对话") },
+        { step: "inference.client", what: t("embed()", "embed()") },
+      ],
+      produces: t("`recall()`: this user's earlier turns that match.", "`recall()`：该用户之前与查询匹配的对话。"),
+    },
+    {
+      id: "plug",
+      title: t("Plug memory into the harness and test isolation", "把记忆接入 Harness 并测试隔离性"),
+      why: t("This joins memory to the loop. Isolation is tested here, with two users, before any real user exists.", "这一步把记忆接到循环上。隔离性就在这里用两个用户测试，赶在任何真实用户出现之前。"),
+      do: [
+        t("Pass the memory object as the `memory` argument of the agent.", "把记忆对象作为智能体的 `memory` 参数传入。"),
+        t("Run two users through the agent. Each states a cost center.", "让两个用户分别通过智能体。各自说出一个成本中心。"),
+        t("Check each briefing, then check that one user's fact is absent from the other's prompt.", "检查各自的摘要，再确认一个用户的事实没有出现在另一个用户的提示词里。"),
+      ],
+      run: "python3 -m labs.m09_memory.demo",
+      output: "m09.demo",
+      pick: ["1 ", "2 ", "3 "],
+      verify: t("Line 3 reads True for the owner's prompt and False for the other user's.", "第 3 行显示：所有者的提示词为 True，另一个用户的为 False。"),
+      needs: [
+        { step: "memory.pipeline", what: t("record_async()", "record_async()") },
+        { step: "harness.compose", what: t("the memory plug point", "记忆接入点") },
+        { step: "harness.run", what: t("the place run() hands off the exchange", "run() 交出对话的位置") },
+      ],
+      produces: t("An agent that briefs itself per user and records after answering.", "一个按用户生成摘要、在回答之后做记录的智能体。"),
+    },
+    {
+      id: "boundaries",
+      title: t("Test the three boundaries of recall", "测试回忆的三条边界"),
+      why: t("Each boundary is a line of output. Test them now so a later change that breaks one is caught by the same demo.", "每条边界对应一行输出。现在就测好，以后哪次改动破坏了其中一条，同一个 demo 就能发现。"),
+      do: [
+        t("Owner recalls an earlier thread: a hit.", "所有者回忆之前的会话：有命中。"),
+        t("Another user runs the same query: nothing.", "另一个用户执行同样的查询：没有结果。"),
+        t("Owner queries from the same thread: nothing, it is already in context.", "所有者在同一个会话里查询：没有结果，因为已在上下文里。"),
+        t("Owner queries something unrelated: nothing.", "所有者查询不相关的内容：没有结果。"),
+      ],
+      output: "m09.demo",
+      pick: ["4 ", "5 ", "6 ", "7 "],
+      verify: t("Lines 5, 6, and 7 are empty lists.", "第 5、6、7 行都是空列表。"),
+      needs: [{ step: "memory.recall", what: t("recall()", "recall()") }],
+      produces: t("Four checks that double as a regression test.", "四项检查，同时可作为回归测试。"),
+    },
+    {
+      id: "failure",
+      title: t("Prove a memory failure cannot break an answer", "证明记忆故障不会破坏回答"),
+      why: t("The pipeline claims to be fire and forget. Test the claim by making it fail.", "记录流程声称自己“发出即不管”。通过让它故意失败来验证这个说法。"),
+      do: [
+        t("Replace `record` with a function that raises.", "把 `record` 换成一个会抛异常的函数。"),
+        t("Run a request and read the answer.", "发一个请求，查看回答。"),
+      ],
+      output: "m09.demo",
+      pick: ["memory write failed", "8 "],
+      verify: t("The failure is printed, and the answer is returned unchanged.", "失败信息被打印出来，回答原样返回。"),
+      needs: [{ step: "memory.plug", what: t("memory attached to the agent", "已接到智能体上的记忆") }],
+      produces: t("Evidence that memory is best effort and never load-bearing.", "证明记忆是尽力而为的附加能力，系统不依赖它才能正常工作。"),
+    },
+    {
+      id: "tool",
+      title: t("Offer recall as a tool bound to one user", "把回忆做成绑定到单个用户的工具"),
+      why: t("Last, because it combines recall with the tool registry. The partition is bound when the tool is created, so the model has no argument through which to ask for another user's history.", "放在最后，因为它把回忆和工具注册表结合起来。分区在创建工具时就绑定了，所以模型没有任何参数可以用来索取别人的历史。"),
+      do: [
+        t("Create the tool function per request with the partition and thread already fixed.", "每个请求创建一次工具函数，分区和会话在创建时就固定。"),
+        t("Expose one argument: the query.", "只暴露一个参数：查询内容。"),
+        t("Return a diagnostic when nothing matches.", "没有匹配时返回诊断信息。"),
+      ],
+      lab: { file: "labs/m09_memory/tool_check.py", region: "bind" },
+      run: "python3 -m labs.m09_memory.tool_check",
+      output: "m09.tool",
+      verify: t("The schema has one property, `query`. A call that adds a `partition` argument is refused, and the same query through another user's tool returns nothing.", "schema 只有一个属性 `query`。多传一个 `partition` 参数的调用会被拒绝；同样的查询通过另一个用户的工具返回空。"),
+      needs: [
+        { step: "memory.recall", what: t("recall()", "recall()") },
+        { step: "tools-mcp.registry", what: t("the registry decorator", "注册表的装饰器") },
+      ],
+      produces: t("A recall tool with no way to cross users.", "一个无法跨用户的回忆工具。"),
+    },
+  ],
+  together: [
+    { with: "harness", how: t("The briefing enters prompt composition. The record call follows the response.", "摘要在组装提示词时进入。记录调用紧随响应之后。") },
+    { with: "state", how: t("Facts and turns live in mem and conv tables. Background writes rely on WAL.", "事实和对话存放在 mem 和 conv 表里。后台写入依赖 WAL。") },
+    { with: "evaluation", how: t("A memory eval seeds two synthetic users and checks hits, silence, and separation.", "记忆评估会创建两个模拟用户，检查命中、应保持沉默的情况和隔离性。") },
+    { with: "self-evolving", how: t("Learned rules are a kind of memory that belongs to the agent, stored with the same status discipline.", "学到的规则是属于智能体自身的一种记忆，按同样的状态管理方式存储。") },
+  ],
+  failures: [
+    {
+      when: "2026-10",
+      title: t("Recall returned the conversation it was in", "回忆返回了当前所在的对话"),
+      what: t("A recall search matched turns from the current thread, which were already in context.", "回忆检索匹配到了当前会话里的内容，而这些本来就在上下文中。"),
+      fix: t("Skip the current thread.", "跳过当前会话。"),
+      lesson: t("Memory should add what the context lacks.", "记忆应该补充上下文里没有的东西。"),
+    },
+    {
+      when: "2026-10",
+      title: t("A weak match presented as a memory", "把弱匹配当成了记忆"),
+      what: t("With no floor, recall always returned its closest turn, however unrelated.", "没有设门槛时，回忆总会返回最接近的那一轮，哪怕毫不相关。"),
+      fix: t("A similarity floor chosen from an eval: the lowest true hit scored 0.55 and the highest unrelated match 0.24, so the floor was set between them.", "根据评估设定相似度门槛：最低的真实命中得分 0.55，最高的无关匹配 0.24，门槛设在两者之间。"),
+      lesson: t("Pick thresholds from measured gaps.", "根据测得的分数差距来选阈值。"),
+    },
+    {
+      when: "2026-10",
+      title: t("A memory briefing that could fail a request", "记忆摘要可能导致请求失败"),
+      what: t("An error while building the briefing propagated and the request failed.", "生成摘要时出错，错误向上传播，导致请求失败。"),
+      fix: t("Catch errors in the briefing and continue without it.", "捕获生成摘要时的错误，没有摘要也继续执行。"),
+      lesson: t("Anything optional must be unable to break what is required.", "任何可选的东西，都不能有能力破坏必需的东西。"),
+    },
+  ],
+  portability: {
+    databricks: t(
+      "Agent Bricks lists memory as a platform component. For your own schema use Lakebase or Delta tables keyed by user, read in your agent code.",
+      "Agent Bricks 把记忆列为平台组件之一。如果要用自己的表结构，可以使用以用户为键的 Lakebase 或 Delta 表，在智能体代码中读取。",
+    ),
+    watsonx: t("Orchestrate keeps conversation context. Long-term memory is a store you connect and read through a tool.", "Orchestrate 保留对话上下文。长期记忆是你接入的存储，通过工具读取。"),
+    codex: t("Persistent instructions live in AGENTS.md. Memories are files the agent is told to read and update.", "持久指令放在 AGENTS.md 里。记忆是让智能体去读取和更新的文件。"),
+    cursor: t("Rules and memory features hold persistent preferences. Project facts belong in repo files.", "规则和记忆功能保存持久偏好。项目相关的事实应放在仓库文件里。"),
+    claude: t("A project instruction file plus memory files and tools. The pattern is the same: write after, read at start, scope by project.", "项目指令文件加上记忆文件和工具。模式相同：事后写入、开始时读取、按项目限定范围。"),
+    other: t("A table with a partition column and a background writer. Portable.", "一张带分区列的表加一个后台写入任务。可移植。"),
+  },
+  checks: [
+    {
+      q: t("Why is the memory write fire and forget?", "为什么记忆写入要“发出即不管”？"),
+      a: t("The user is waiting on the answer. A slow or failed write should cost nothing in latency or correctness, so it runs after the response and swallows its own errors.", "用户在等的是回答。写入慢或失败都不应影响延迟和正确性，所以它在响应之后运行，并自行吞掉错误。"),
+    },
+    {
+      q: t("What stops one user's memory from reaching another?", "是什么阻止一个用户的记忆到达另一个用户？"),
+      a: t("A partition taken from authentication and applied in the store on every read and write. The recall tool has no partition argument at all.", "分区取自身份认证，并在存储层的每次读写中强制使用。回忆工具根本没有分区参数。"),
+    },
+    {
+      q: t("Why are facts in every prompt and turns only on demand?", "为什么事实进入每次提示词，而对话历史只按需读取？"),
+      a: t("Facts are few and short. History grows without bound, and prompt tokens are charged on every turn. Searching it when needed costs one tool call.", "事实数量少、内容短。历史会无限增长，而提示词 token 每一轮都要计费。需要时再检索只花一次工具调用。"),
+    },
+    {
+      q: t("In what order did you build memory, and what does each step need from the one before?", "你按什么顺序搭建记忆？每一步需要上一步的什么？"),
+      a: t("Partition rule, facts, record pipeline, recall, harness plug, boundary tests, failure test, recall tool. Facts need the partition, the pipeline needs facts, recall needs stored turns, and the tests need all of it attached to the agent.", "分区规则、事实、记录流程、回忆、接入 Harness、边界测试、故障测试、回忆工具。事实需要分区，记录流程需要事实，回忆需要已保存的对话，而测试需要这一切都已接到智能体上。"),
+    },
+  ],
+  terms: [
+    { term: t("Briefing", "摘要（Briefing）"), def: t("The few memory lines added to the system prompt for this user.", "为该用户加进系统提示词的几行记忆。") },
+    { term: t("Recall", "回忆（Recall）"), def: t("Searching earlier conversation turns for this user.", "检索该用户之前的对话内容。") },
+    { term: t("Fire and forget", "发出即不管"), def: t("Started in the background, with no one waiting for the result.", "在后台启动，没有任何环节等待它的结果。") },
+  ],
+};

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import T from "@/components/T";
+import { ui } from "@/lib/ui";
 
 const KEY = "aitutor.explained";
 
@@ -29,7 +31,7 @@ export default function Progress({ id }: { id: string }) {
   return (
     <label className="progress">
       <input type="checkbox" checked={on} onChange={toggle} />
-      I can explain this module and its ordering without notes
+      <span><T v={ui.canExplain} /></span>
     </label>
   );
 }

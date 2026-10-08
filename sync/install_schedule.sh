@@ -19,7 +19,7 @@ cat > "$PLIST" <<PL
 <plist version="1.0"><dict>
   <key>Label</key><string>$LABEL</string>
   <key>ProgramArguments</key>
-  <array><string>$PY</string><string>$REPO/sync/sync.py</string><string>--push</string></array>
+  <array><string>$PY</string><string>$REPO/sync/sync.py</string><string>--push</string><string>--machine</string></array>
   <key>EnvironmentVariables</key>
   <dict>
     <key>AI_DATA_ROOT</key><string>$ROOT</string>

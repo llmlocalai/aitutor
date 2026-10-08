@@ -1,0 +1,17 @@
+{
+  "_note": "Requests with the skill each should load. Scored only. Never copy these into routing.json.",
+  "items": [
+    {"q": "What is the maximum I can claim for a hotel night?", "skill": "policy-citation"},
+    {"q": "Do I need sign-off before I book flights?", "skill": "policy-citation"},
+    {"q": "Explain what an incidental expense is.", "skill": "policy-citation"},
+    {"q": "Can I expense a glass of wine with dinner?", "skill": "policy-citation"},
+    {"q": "How long do I have to submit receipts?", "skill": "policy-citation"},
+    {"q": "How much did B. Chen spend on hotels in Boston?", "skill": "expense-investigation"},
+    {"q": "Show meal spending for cost center CC-200.", "skill": "expense-investigation"},
+    {"q": "Total lodging spend in 2026-06?", "skill": "expense-investigation"},
+    {"q": "Which trips went over the hotel cap?", "skill": "expense-investigation"},
+    {"q": "good morning", "skill": "none"},
+    {"q": "thank you!", "skill": "none"},
+    {"q": "tell me a joke about trains", "skill": "none"}
+  ]
+}

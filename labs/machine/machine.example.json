@@ -1,0 +1,21 @@
+{
+  "_note": "Copy to machine.json (not committed) and edit for your machine. Every check is read-only. Leave a value empty to skip its check.",
+  "ai_data_root": "/Volumes/DATA",
+  "engine_url": "http://127.0.0.1:11434",
+  "models_dir": "/Volumes/DATA/models/ollama",
+  "engine_env_file": "/Volumes/DATA/ollama-env.sh",
+  "probe_model": "",
+  "second_runtime_url": "http://127.0.0.1:8082/v1",
+  "engine_port": 11434,
+  "request_log": "/Volumes/DATA/logs/agents/requests.jsonl",
+  "mcp_config": "/Volumes/DATA/.mcp.json",
+  "mcp_list_flag": "--list",
+  "coding_agent_skills_dir": "/Volumes/DATA/.claude/skills",
+  "launchd_prefix": "com.example.",
+  "required_services": ["ollama", "agent-server", "postgres", "scheduler", "watchdog"],
+  "collector_services": ["collect-daily", "collect-weekly"],
+  "wiki_dir": "/Volumes/DATA/knowledge-bank/Wiki",
+  "backup_glob": "/Volumes/DATA/backups/postgres/*",
+  "backup_max_age_hours": 48,
+  "repo_dir": "/Volumes/DATA"
+}

@@ -1,0 +1,12 @@
+{
+  "_note": "Human-written end-to-end questions. The headline metric. Written before any learning ran.",
+  "items": [
+    {"q": "What is the nightly lodging cap?", "must_contain": ["220"], "needs_tool": "search_policy"},
+    {"q": "Did B. Chen's Boston lodging exceed the lodging cap?", "must_contain": ["219", "under"], "needs_tool": "query_expenses"},
+    {"q": "Did B. Chen's Chicago lodging exceed the lodging cap?", "must_contain": ["236", "over"], "needs_tool": "query_expenses"},
+    {"q": "How much was spent on meals in 2026-07?", "must_contain": ["358.60"], "needs_tool": "query_expenses",
+     "why": "July has no rows. A passing answer retries without the month and reports the total that does exist."},
+    {"q": "How much was spent on air travel in total?", "must_contain": ["1297.50"], "needs_tool": "query_expenses"},
+    {"q": "How much was spent on lodging in Denver?", "must_contain": ["198"], "needs_tool": "query_expenses"}
+  ]
+}

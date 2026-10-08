@@ -1,64 +1,51 @@
 import Link from "next/link";
-import { modules, platforms } from "@/lib/curriculum";
+import T from "@/components/T";
+import { modules, platformIds, platformNames } from "@/lib/curriculum";
+import { guides } from "@/lib/platforms";
+import { ui } from "@/lib/ui";
 
-export const metadata = { title: "Platforms" };
+export const metadata = { title: "Platforms · 各平台" };
 
 export default function Platforms() {
   return (
     <div className="wrap">
       <header className="lesson-head">
-        <div className="eyebrow">Carry it elsewhere</div>
-        <h1>Every module on every platform</h1>
-        <p className="lede">
-          The parts stay the same across platforms. What changes is who runs each part: you, or the
-          platform. Read a row to see one idea in six places. Read a column to plan a build on one
-          platform.
-        </p>
+        <div className="eyebrow"><T v={ui.plEyebrow} /></div>
+        <h1><T v={ui.plTitle} /></h1>
+        <p className="lede"><T v={ui.plLede} /></p>
       </header>
-      <div className="two" style={{ marginBottom: 18 }}>
-        <div className="card">
-          <h3>What you always own</h3>
-          <p>
-            Tool definitions, instructions and skills, answer checks, evaluation sets, and the
-            curation of your knowledge. Keep these outside any one vendor's format where you can.
-          </p>
-        </div>
-        <div className="card">
-          <h3>What a platform usually takes over</h3>
-          <p>
-            Model serving, the agent loop, state storage, tracing, scheduling, and access control.
-            You configure them and you still have to measure them.
-          </p>
-        </div>
+      <div className="note" style={{ marginBottom: 18 }}><T v={ui.plWarn} /></div>
+
+      <h2 style={{ marginTop: 0 }}><T v={ui.guide} /></h2>
+      <div className="mods">
+        {guides.map((g) => (
+          <Link key={g.id} href={`/platforms/${g.id}`} className="card mod">
+            <div className="eyebrow"><T v={g.kind} /> · {g.steps.length} <T v={ui.steps} /></div>
+            <h3>{g.name}</h3>
+            <p className="muted small"><T v={g.summary} /></p>
+          </Link>
+        ))}
       </div>
+
+      <h2><T v={ui.matrix} /></h2>
       <div className="table-scroll">
         <table className="matrix">
           <thead>
             <tr>
-              <th className="rowh">Module</th>
-              {platforms.map((p) => (
-                <th key={p.id}>{p.name}</th>
-              ))}
+              <th className="rowh"><T v={ui.module} /></th>
+              {platformIds.map((p) => (<th key={p}>{platformNames[p]}</th>))}
             </tr>
           </thead>
           <tbody>
             {modules.map((m) => (
               <tr key={m.id}>
-                <td className="rowh">
-                  <Link href={`/modules/${m.id}#platforms`}>{m.title}</Link>
-                </td>
-                {platforms.map((p) => (
-                  <td key={p.id}>{m.portability[p.id]}</td>
-                ))}
+                <td className="rowh"><Link href={`/modules/${m.id}#platforms`}>{m.n}. <T v={m.title} /></Link></td>
+                {platformIds.map((p) => (<td key={p}><T v={m.portability[p]} /></td>))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="small muted" style={{ marginTop: 12 }}>
-        Platform feature names were checked in October 2026 and change often. Confirm against
-        current vendor documentation before you commit to a design.
-      </p>
     </div>
   );
 }

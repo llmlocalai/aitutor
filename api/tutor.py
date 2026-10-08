@@ -41,6 +41,8 @@ How to teach:
   before it and why, and what breaks without it.
 - When asked to quiz, ask one question at a time and wait for the answer. Then say what
   was right, what was missing, and give a model answer.
+- The curriculum has runnable labs under labs/. Point the learner to the lab file and the
+  command for a step when one exists in the context.
 - When asked how to build something on another platform, map each part to who runs it
   there, and name what the learner still owns.
 - If you are not sure a vendor feature exists or what it is called today, say so and
@@ -50,7 +52,7 @@ How to teach:
 
 MAX_MESSAGES = 12
 MAX_CHARS = 2000
-MAX_CONTEXT = 9000
+MAX_CONTEXT = 12000
 
 _mem: dict[str, tuple[int, float]] = {}
 
@@ -103,7 +105,7 @@ def _limited(ip: str) -> str | None:
     return None
 
 
-def _clean(body: dict) -> tuple[list[dict], str]:
+def _clean(body: dict) -> tuple[list[dict], str, str]:
     msgs = []
     for m in (body.get("messages") or [])[-MAX_MESSAGES:]:
         role = m.get("role")
@@ -111,7 +113,8 @@ def _clean(body: dict) -> tuple[list[dict], str]:
         if role in ("user", "assistant") and isinstance(content, str) and content.strip():
             msgs.append({"role": role, "content": content[:MAX_CHARS]})
     context = body.get("context") if isinstance(body.get("context"), str) else ""
-    return msgs, context[:MAX_CONTEXT]
+    lang = "zh" if body.get("lang") == "zh" else "en"
+    return msgs, context[:MAX_CONTEXT], lang
 
 
 def _chat(base: str, key: str, model: str, messages: list[dict], timeout: float) -> str:
@@ -127,9 +130,11 @@ def _chat(base: str, key: str, model: str, messages: list[dict], timeout: float)
     return text.strip()
 
 
-def answer(messages: list[dict], context: str) -> tuple[str, str]:
+def answer(messages: list[dict], context: str, lang: str = "en") -> tuple[str, str]:
     """Returns (reply, via). Raises RuntimeError when no backend is usable."""
     system = SYSTEM + ("\n\nCONTEXT\n" + context if context else "")
+    if lang == "zh":
+        system += "\n\nReply in Simplified Chinese. Keep code, commands, file names and API names in their original form."
     full = [{"role": "system", "content": system}] + messages
     tried = []
 
@@ -187,11 +192,11 @@ class handler(BaseHTTPRequestHandler):
         if blocked:
             return _send(self, 429, {"error": blocked})
 
-        messages, context = _clean(body if isinstance(body, dict) else {})
+        messages, context, lang = _clean(body if isinstance(body, dict) else {})
         if not messages or messages[-1]["role"] != "user":
             return _send(self, 400, {"error": "Send at least one question."})
         try:
-            reply, via = answer(messages, context)
+            reply, via = answer(messages, context, lang)
         except RuntimeError as e:
             return _send(self, 503, {"error": str(e)})
         return _send(self, 200, {"reply": reply, "via": via})

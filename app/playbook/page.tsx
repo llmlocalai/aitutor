@@ -1,46 +1,42 @@
-import Link from "next/link";
-import { buildOrder, byId } from "@/lib/curriculum";
+import CodeBlock from "@/components/CodeBlock";
+import PlaybookList, { type Row } from "@/components/PlaybookList";
+import T from "@/components/T";
+import { masterOrder, modules } from "@/lib/curriculum";
+import { ui } from "@/lib/ui";
 
-export const metadata = { title: "Build order" };
+export const metadata = { title: "Playbook · 操作手册" };
 
 export default function Playbook() {
-  const order = buildOrder();
+  const rows: Row[] = masterOrder().map((r) => ({
+    key: r.key,
+    moduleId: r.module.id,
+    moduleN: r.module.n,
+    moduleTitle: r.module.title,
+    index: r.index,
+    stepId: r.step.id,
+    title: r.step.title,
+    why: r.step.why,
+    produces: r.step.produces,
+    verify: r.step.verify,
+    run: r.step.run,
+    lab: !!r.step.lab,
+    notExecuted: !!r.step.notExecuted,
+    needs: (r.step.needs ?? []).map((n) => ({ key: n.step, what: n.what })),
+  }));
   return (
     <div className="wrap">
       <header className="lesson-head">
-        <div className="eyebrow">Playbook</div>
-        <h1>One valid build order, with the reason for every position</h1>
-        <p className="lede">
-          This is a sequence in which every module's prerequisites already exist. Other valid
-          sequences exist. Modules with no dependency between them can swap places, and any module
-          can be built early if you stub what it needs.
-        </p>
+        <div className="eyebrow"><T v={ui.pbEyebrow} /></div>
+        <h1><T v={ui.pbTitle} /></h1>
+        <p className="lede"><T v={ui.pbLede} /></p>
       </header>
-      <ol className="order">
-        {order.map((m) => (
-          <li key={m.id}>
-            <div>
-              <h3>
-                <Link href={`/modules/${m.id}`}>{m.title}</Link>
-                <span className={`tag ${m.depth}`}>{m.depth === "deep" ? "full lesson" : "outline"}</span>
-              </h3>
-              <p className="muted" style={{ margin: "4px 0 8px" }}>{m.short}</p>
-              {m.prereqs.length === 0 ? (
-                <p className="small muted">Starting point. Needs nothing else.</p>
-              ) : (
-                <ul className="why-list">
-                  {m.prereqs.map((p) => (
-                    <li key={p.id}>
-                      <b>After {byId[p.id].title}</b>
-                      <span>{p.why}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div className="card" style={{ marginBottom: 18 }}>
+        <h3><T v={ui.pbSetup} /></h3>
+        <p className="muted"><T v={ui.pbSetupBody} /></p>
+        <CodeBlock label="bash" text={`git clone <your repository url> aitutor && cd aitutor
+python3 -m labs.run_all --check`} />
+      </div>
+      <PlaybookList rows={rows} modules={modules.map((m) => ({ id: m.id, n: m.n, title: m.title }))} />
     </div>
   );
 }

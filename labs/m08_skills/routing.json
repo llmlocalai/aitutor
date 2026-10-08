@@ -1,0 +1,23 @@
+{
+  "_note": "Requests each skill should handle. Kept apart from evals so the eval stays honest. Add a line when a real request is routed wrong.",
+  "policy-citation": [
+    "What is the nightly lodging cap?",
+    "How many days do I have to file an expense report?",
+    "What does per diem mean?",
+    "Is alcohol reimbursable?",
+    "When do I need approval before booking a trip?"
+  ],
+  "expense-investigation": [
+    "How much did we spend on meals in Chicago?",
+    "What did B. Chen spend on lodging in June?",
+    "Total air travel for cost center CC-100",
+    "Did anyone exceed the cap in Boston?",
+    "List lodging expenses for 2026-04"
+  ],
+  "_none": [
+    "hello",
+    "what can you do?",
+    "thanks, that helps",
+    "write a haiku about airports"
+  ]
+}

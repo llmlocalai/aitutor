@@ -1,0 +1,20 @@
+{
+  "_note": "Hand-written retrieval gold set for the sample bank. Each question is a paraphrase of one chunk and names the chunk that answers it. Sealed by seal.py. Never copy these into routing exemplars or skills.",
+  "items": [
+    {"q": "What do we call the fixed daily allowance for food and small costs on a trip?", "gold": "policy/travel-policy.md::1", "type": "define"},
+    {"q": "Which manager signs off on a trip charged to a cost center?", "gold": "policy/travel-policy.md::2", "type": "define"},
+    {"q": "What is the name for trip cash handed out early that still lacks receipts?", "gold": "policy/travel-policy.md::3", "type": "define"},
+    {"q": "How much can be claimed for food per day in an expensive city?", "gold": "policy/travel-policy.md::4", "type": "rule"},
+    {"q": "What is the most a hotel room can cost per night before written sign-off is needed?", "gold": "policy/travel-policy.md::5", "type": "rule"},
+    {"q": "On a flight of seven hours, which cabin may I book?", "gold": "policy/travel-policy.md::6", "type": "rule"},
+    {"q": "What share of the trip estimate can be paid to me ahead of time?", "gold": "policy/travel-policy.md::7", "type": "rule"},
+    {"q": "How long after returning can I still submit my claim without a waiver?", "gold": "policy/travel-policy.md::8", "type": "rule"},
+    {"q": "What is the monthly payment for people who work from home called?", "gold": "policy/remote-work-policy.md::1", "type": "define"},
+    {"q": "How much is paid each month toward home internet and gear?", "gold": "policy/remote-work-policy.md::2", "type": "rule"},
+    {"q": "May a hotel bill be divided over two nights to get below the limit?", "gold": "memos/2026-lodging-memo.md::1", "type": "rule"},
+    {"q": "Are taxes counted inside the nightly room limit?", "gold": "memos/2026-lodging-memo.md::2", "type": "rule"},
+    {"q": "Which document carries the number NW-HR-031?", "gold": "policy/remote-work-policy.md::0", "type": "cite"},
+    {"q": "Which policy number is the authoritative travel rule?", "gold": "policy/travel-policy.md::0", "type": "cite"},
+    {"q": "What does the term approving official mean?", "gold": "policy/travel-policy.md::2", "type": "define"}
+  ]
+}

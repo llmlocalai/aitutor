@@ -2,161 +2,137 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ancestors, byId, dependents, modules } from "@/lib/curriculum";
+import T from "@/components/T";
+import { useLang } from "@/components/lang";
+import { makeGraph, type Slim } from "@/lib/graph";
+import { t } from "@/lib/types";
+import { ui } from "@/lib/ui";
 
-const W = 1120;
+const W = 1180;
 const H = 470;
-const NW = 158;
+const NW = 148;
 const NH = 50;
-const COLS = ["FOUNDATION", "CONTRACTS", "CAPABILITIES", "THE LOOP", "BEHAVIOR", "SYSTEMS"];
+const COLS = [
+  t("FOUNDATION", "基础"), t("CONTRACTS", "契约"), t("RETRIEVAL", "检索"), t("ACTIONS", "动作"),
+  t("THE LOOP", "循环"), t("BEHAVIOR", "行为"), t("SYSTEMS", "系统"),
+];
+const GAP = (W - 30 - NW) / (COLS.length - 1);
 
-function layout() {
+function layout(modules: Slim[]) {
   const cols: Record<number, string[]> = {};
   for (const m of modules) (cols[m.layer] ??= []).push(m.id);
   const pos: Record<string, { x: number; y: number }> = {};
-  const n = COLS.length;
-  const gap = (W - 40 - NW) / (n - 1);
   for (const [layer, ids] of Object.entries(cols)) {
-    const x = 20 + Number(layer) * gap;
-    const usable = H - 60;
+    const x = 15 + Number(layer) * GAP;
     ids.forEach((id, i) => {
-      const y = 44 + (usable / ids.length) * (i + 0.5) - NH / 2;
-      pos[id] = { x, y };
+      pos[id] = { x, y: 44 + ((H - 60) / ids.length) * (i + 0.5) - NH / 2 };
     });
   }
   return pos;
 }
 
-export default function CurriculumMap() {
-  const pos = useMemo(layout, []);
-  const [sel, setSel] = useState<string>("harness");
-  const needs = useMemo(() => ancestors(sel), [sel]);
-  const unlocks = useMemo(() => new Set(dependents(sel).map((m) => m.id)), [sel]);
-  const m = byId[sel];
+function clip(s: string, lang: string) {
+  const max = lang === "zh" ? 10 : 20;
+  return s.length > max ? s.slice(0, max - 1) + "…" : s;
+}
 
-  const cls = (id: string) => {
-    if (id === sel) return "sel";
-    if (needs.has(id)) return "needs";
-    if (unlocks.has(id)) return "unlocks";
-    return "dim";
-  };
+export default function CurriculumMap({ mods: modules }: { mods: Slim[] }) {
+  const lang = useLang();
+  const { byId, dependents, ancestors } = useMemo(() => makeGraph(modules), [modules]);
+  const pos = useMemo(() => layout(modules), [modules]);
+  const [sel, setSel] = useState("harness");
+  const needs = useMemo(() => ancestors(sel), [sel, ancestors]);
+  const unlocks = useMemo(() => new Set(dependents(sel).map((m) => m.id)), [sel, dependents]);
+  const m = byId[sel];
+  const cls = (id: string) => (id === sel ? "sel" : needs.has(id) ? "needs" : unlocks.has(id) ? "unlocks" : "dim");
 
   return (
-    <div className="map-wrap">
-      <div>
-        <div className="map-scroll">
-          <svg className="map-svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Curriculum dependency map">
-            {COLS.map((c, i) => (
-              <text key={c} className="map-col" x={20 + i * ((W - 40 - NW) / (COLS.length - 1)) + NW / 2} y={22} textAnchor="middle">
-                {c}
+    <div>
+      <div className="map-scroll">
+        <svg className="map-svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Curriculum dependency map">
+          {COLS.map((c, i) => (
+            <text key={c.en} className="map-col" x={15 + i * GAP + NW / 2} y={22} textAnchor="middle">{c[lang]}</text>
+          ))}
+          {modules.flatMap((mod) =>
+            mod.prereqs.map((p) => {
+              const a = pos[p.id];
+              const b = pos[mod.id];
+              const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
+              let k = "dim";
+              if (mod.id === sel || (needs.has(mod.id) && needs.has(p.id))) k = "needs";
+              if (p.id === sel) k = "unlocks";
+              return <path key={`${p.id}-${mod.id}`} className={`map-edge ${k}`} d={`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`} />;
+            }),
+          )}
+          {modules.map((mod) => (
+            <g
+              key={mod.id}
+              className={`map-node ${cls(mod.id)}`}
+              transform={`translate(${pos[mod.id].x},${pos[mod.id].y})`}
+              onClick={() => setSel(mod.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSel(mod.id);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-pressed={mod.id === sel}
+              aria-label={mod.title[lang]}
+            >
+              <rect width={NW} height={NH} rx={8} />
+              <text x={11} y={22}>{clip(mod.title[lang], lang)}</text>
+              <text className="sub" x={11} y={38}>
+                {String(mod.n).padStart(2, "0")} · {mod.steps} {ui.steps[lang]}
               </text>
-            ))}
-            {modules.flatMap((mod) =>
-              mod.prereqs.map((p) => {
-                const a = pos[p.id];
-                const b = pos[mod.id];
-                if (!a || !b) return null;
-                const x1 = a.x + NW;
-                const y1 = a.y + NH / 2;
-                const x2 = b.x;
-                const y2 = b.y + NH / 2;
-                const mx = (x1 + x2) / 2;
-                let k = "dim";
-                if (mod.id === sel || (needs.has(mod.id) && needs.has(p.id))) k = "needs";
-                if (p.id === sel) k = "unlocks";
-                return (
-                  <path
-                    key={`${p.id}-${mod.id}`}
-                    className={`map-edge ${k}`}
-                    d={`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`}
-                  />
-                );
-              }),
-            )}
-            {modules.map((mod) => {
-              const p = pos[mod.id];
-              return (
-                <g
-                  key={mod.id}
-                  className={`map-node ${mod.depth} ${cls(mod.id)}`}
-                  transform={`translate(${p.x},${p.y})`}
-                  onClick={() => setSel(mod.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSel(mod.id);
-                    }
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  aria-pressed={mod.id === sel}
-                  aria-label={`${mod.title}. ${mod.depth === "deep" ? "Full lesson." : "Outline."}`}
-                >
-                  <rect width={NW} height={NH} rx={8} />
-                  <text x={12} y={22}>{mod.title.length > 22 ? mod.title.slice(0, 21) + "…" : mod.title}</text>
-                  <text className="sub" x={12} y={38}>
-                    {mod.depth === "deep" ? "FULL LESSON" : "OUTLINE"}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-        <div className="legend">
-          <span><i className="lg-deep" />Full lesson</span>
-          <span><i className="lg-needs" />Must exist first</span>
-          <span><i className="lg-unlocks" />Unlocked next</span>
-          <span className="muted">Select a module. Scroll sideways on a small screen.</span>
-        </div>
+            </g>
+          ))}
+        </svg>
+      </div>
+      <div className="legend">
+        <span><i className="lg-needs" /><T v={ui.legendNeeds} /></span>
+        <span><i className="lg-unlocks" /><T v={ui.legendUnlocks} /></span>
+        <span className="muted"><T v={ui.legendHint} /></span>
       </div>
 
       <aside className="panel" aria-live="polite" style={{ marginTop: 16 }}>
-        <div className="eyebrow">Selected</div>
-        <h3 style={{ fontSize: "1.3rem", marginTop: 4 }}>{m.title}</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>{m.short}</p>
-        <Link className="btn" href={`/modules/${m.id}`}>
-          Open {m.depth === "deep" ? "lesson" : "outline"}
-        </Link>
-
+        <div className="eyebrow"><T v={ui.selected} /> · <T v={ui.module} /> {m.n}</div>
+        <h3 style={{ fontSize: "1.3rem", marginTop: 4 }}><T v={m.title} /></h3>
+        <p className="muted small" style={{ marginTop: 6 }}><T v={m.short} /></p>
+        <Link className="btn" href={`/modules/${m.id}`}><T v={ui.openLesson} /></Link>
         <div className="two" style={{ marginTop: 18 }}>
-        <div>
-        <h3>Why these come first</h3>
-        {m.prereqs.length === 0 ? (
-          <p className="muted small" style={{ marginTop: 6 }}>
-            Nothing. This is a starting point.
-          </p>
-        ) : (
-          <ul className="why-list">
-            {m.prereqs.map((p) => (
-              <li key={p.id}>
-                <b>{byId[p.id].title}</b>
-                <span>{p.why}</span>
-                {p.stub && (
-                  <span className="stub">
-                    <b>Build out of order</b> Stub it with: {p.stub}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        </div>
-        <div>
-        {unlocks.size > 0 && (
-          <>
-            <h3>What this unlocks</h3>
-            <ul className="why-list">
-              {dependents(sel).map((d) => (
-                <li key={d.id} className="un">
-                  <b>{d.title}</b>
-                  <span>{d.prereqs.find((p) => p.id === sel)?.why}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        </div>
+          <div>
+            <h3><T v={ui.whyFirst} /></h3>
+            {m.prereqs.length === 0 ? (
+              <p className="muted small" style={{ marginTop: 6 }}><T v={ui.nothingFirst} /></p>
+            ) : (
+              <ul className="why-list">
+                {m.prereqs.map((p) => (
+                  <li key={p.id}>
+                    <b><T v={byId[p.id].title} /></b>
+                    <span><T v={p.why} /></span>
+                    <span className="stub"><b><T v={ui.outOfOrder} /></b> <T v={ui.stubWith} /> <T v={p.stub} /></span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div>
+            {unlocks.size > 0 && (
+              <>
+                <h3><T v={ui.unlocks} /></h3>
+                <ul className="why-list">
+                  {dependents(sel).map((d) => (
+                    <li key={d.id} className="un">
+                      <b><T v={d.title} /></b>
+                      <span><T v={d.prereqs.find((p) => p.id === sel)!.why} /></span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
         </div>
       </aside>
     </div>

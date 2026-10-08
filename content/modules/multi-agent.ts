@@ -1,0 +1,220 @@
+import { t, type Module } from "@/lib/types";
+
+export const multiAgent: Module = {
+  id: "multi-agent",
+  n: 12,
+  layer: 6,
+  title: t("Multi-agent patterns", "多智能体模式"),
+  short: t(
+    "Several model roles with separate context, tools, and budgets, coordinated by code.",
+    "多个模型角色，各有独立的上下文、工具和预算，由代码协调。",
+  ),
+  what: t(
+    "A multi-agent system splits work across model calls that each have their own instructions, tools, and context. This module builds two patterns: an orchestrator that fans out to narrow workers, and two independent judges that vote.",
+    "多智能体系统把工作分给多次模型调用，每次调用都有自己的指令、工具和上下文。本模块搭建两种模式：向专职子智能体扇出的编排器，以及两个独立投票的裁判。",
+  ),
+  why: t(
+    "One context window cannot hold everything, and one role cannot check itself. Separate roles give isolation of context and independence of judgment. They also multiply cost and failure modes, so each split needs a measured reason.",
+    "一个上下文窗口装不下所有东西，一个角色也无法检查自己。分开的角色带来上下文隔离和判断独立。但它们也会成倍增加成本和故障方式，所以每一次拆分都需要有实测的理由。",
+  ),
+  how: [
+    t("A worker is the same Agent class with a smaller tool registry and its own message list.", "子智能体就是同一个 Agent 类，只是工具注册表更小、消息列表是自己的。"),
+    t("The orchestrator splits a question, runs workers as nodes in one wave, and merges their findings in a final node.", "编排器拆分问题，把各个子智能体作为同一波里的节点运行，再在最后一个节点合并它们的结论。"),
+    t("Two judges with different methods vote on whether a claim is supported. A claim is removed only when both fail it.", "两个方法不同的裁判对一条论断是否有依据进行投票。只有两者都否决时，论断才被移除。"),
+  ],
+  prereqs: [
+    {
+      id: "harness",
+      why: t("A sub-agent is a harness loop run as a node. You need one working loop and the wave executor before you can run several.", "子智能体就是作为节点运行的一个 Harness 循环。要运行多个，先得有一个能用的循环和波次执行器。"),
+      stub: t("Two sequential model calls with different system prompts.", "两次顺序的模型调用，使用不同的系统提示词。"),
+    },
+    {
+      id: "skills",
+      why: t("Roles are defined by scoped instructions. A worker's base prompt is a skill that is always on.", "角色由限定范围的指令来定义。子智能体的基础提示词相当于一个始终生效的技能。"),
+      stub: t("Hard-coded role prompts.", "写死的角色提示词。"),
+    },
+    {
+      id: "evaluation",
+      why: t("Every added agent adds cost and latency. Only an eval can show that a split improved results.", "每增加一个智能体就增加成本和延迟。只有评估能证明拆分确实改善了结果。"),
+      stub: t("Manual comparison on five questions. Enough to learn the pattern, too little to justify it.", "在五个问题上人工比较。足以学会这个模式，但不足以证明它值得。"),
+    },
+  ],
+  inBuild: [
+    { path: "apps/agent-server/graph.py", role: t("The executor that runs concurrent nodes.", "运行并发节点的执行器。") },
+    { path: "apps/agent-server/nightly/claim_verify.py", role: t("Two-vote check of served claims against their source.", "对已启用的论断与其来源进行双票核查。") },
+    { path: "ROLE-DIMENSION-ARCHITECTURE-v2.md", role: t("Design for specialist roles by question dimension.", "按问题维度划分专职角色的设计。") },
+  ],
+  flow: {
+    caption: t("Orchestrator and workers", "编排器与子智能体"),
+    stages: [
+      { label: t("Compound question", "复合问题"), detail: t("Two or more parts that need different data.", "包含两个或更多部分，分别需要不同的数据。"), kind: "input" },
+      { label: t("Split", "拆分"), detail: t("Each part gets a worker type.", "每个部分分配一种子智能体。"), kind: "check" },
+      { label: t("Worker wave", "子智能体波次"), detail: t("Workers run at once. Each sees only its part and its tools.", "各子智能体同时运行。每个只看到自己的那部分问题和自己的工具。"), kind: "model" },
+      { label: t("Fan-in", "扇入"), detail: t("Every worker names the same successor, so it runs once.", "每个子智能体都指向同一个后继节点，所以后继只运行一次。"), kind: "check" },
+      { label: t("Synthesize", "汇总"), detail: t("Findings are merged in the original order.", "按原始顺序合并各自的结论。"), kind: "output" },
+    ],
+  },
+  steps: [
+    {
+      id: "justify",
+      title: t("Write down what the split is for", "写下拆分的目的"),
+      why: t("Decide before building. A second agent is justified by one of two needs, and each has a test.", "动手之前先决定。增加第二个智能体只有两种正当理由，每种都有对应的检验方法。"),
+      do: [
+        t("Isolation: would the sub-task's context crowd out the main one? Test: measure context size per approach.", "隔离：子任务的上下文会不会挤占主任务的上下文？检验：测量每种做法的上下文大小。"),
+        t("Independence: does the result need a check by something that did not produce it? Test: does a second vote change outcomes on labeled cases.", "独立性：结果是否需要由没有参与生成它的一方来检查？检验：在已标注的案例上，第二票是否改变了结果。"),
+        t("If neither applies, stay with one agent.", "两者都不适用，就继续用一个智能体。"),
+      ],
+      verify: t("You can name the need and the measurement that will confirm it.", "你能说出具体需求，以及用来确认它的测量方式。"),
+      needs: [{ step: "evaluation.noise", what: t("a way to tell a real gain from noise", "区分真实提升与噪声的方法") }],
+      produces: t("A stated reason and a test for it.", "一个明确的理由和对应的检验方法。"),
+    },
+    {
+      id: "workers",
+      title: t("Create narrow workers", "创建专职子智能体"),
+      why: t("Workers come before the orchestrator. A worker is defined by what it cannot reach.", "先有子智能体，再有编排器。子智能体由“它接触不到什么”来定义。"),
+      do: [
+        t("Build a registry that exposes a subset of tools.", "创建一个只暴露部分工具的注册表。"),
+        t("Create one Agent per role with that registry and a one-line base prompt.", "为每个角色创建一个 Agent，使用该注册表和一行基础提示词。"),
+        t("Classify each sub-question to a role. The lab uses rules. A planner model does this in production.", "把每个子问题分配给一个角色。lab 用规则实现，生产环境由规划模型完成。"),
+      ],
+      lab: { file: "labs/m12_multi/orchestrator.py", region: "split" },
+      run: "python3 -m labs.m12_multi.demo",
+      output: "m12.demo",
+      pick: ["1 "],
+      verify: t("The deadline question goes to the policy worker and the spending question to the data worker.", "关于期限的问题分给了政策子智能体，关于支出的问题分给了数据子智能体。"),
+      needs: [
+        { step: "multi-agent.justify", what: t("the reason for the split", "拆分的理由") },
+        { step: "harness.run", what: t("the Agent class", "Agent 类") },
+        { step: "tools-mcp.registry", what: t("a registry to take a subset of", "用来取子集的注册表") },
+      ],
+      produces: t("`split()` and a registry subset per role.", "`split()` 以及每个角色的注册表子集。"),
+    },
+    {
+      id: "orchestrate",
+      title: t("Fan out, fan in, synthesize", "扇出、扇入、汇总"),
+      why: t("Now the wave executor does for agents what it did for tools. This step reuses it unchanged.", "现在波次执行器对智能体做的事，和它之前对工具做的一样。这一步原样复用它。"),
+      do: [
+        t("A dispatch node returns one worker node per sub-question.", "分发节点为每个子问题返回一个子智能体节点。"),
+        t("Each worker node runs its agent and appends a finding.", "每个子智能体节点运行自己的智能体，并追加一条结论。"),
+        t("Every worker node names the same synthesize node.", "所有子智能体节点都指向同一个汇总节点。"),
+        t("Synthesize orders the findings and joins them.", "汇总节点把结论排好顺序并合并。"),
+      ],
+      lab: { file: "labs/m12_multi/orchestrator.py", region: "orchestrate" },
+      output: "m12.demo",
+      pick: ["2 ", "3 ", "4 "],
+      verify: t("The waves read dispatch, two workers, synthesize. Each finding shows its own context size.", "波次依次是：分发、两个子智能体、汇总。每条结论都显示了各自的上下文大小。"),
+      needs: [
+        { step: "multi-agent.workers", what: t("workers and the split", "子智能体和拆分函数") },
+        { step: "harness.graph", what: t("run_graph()", "run_graph()") },
+        { step: "state.merge", what: t("an append key for findings", "用于结论的追加键") },
+      ],
+      produces: t("`orchestrate()`: one answer from several isolated agents.", "`orchestrate()`：由多个相互隔离的智能体得出的一个回答。"),
+    },
+    {
+      id: "cost",
+      title: t("Measure what the split cost", "测量拆分的代价"),
+      why: t("Right after it works, measure it. This is the test you wrote down in the first step.", "一跑通就测量。这正是第一步里写下的检验。"),
+      do: [
+        t("Run the same question through one agent with all tools.", "把同一个问题交给一个拥有全部工具的智能体。"),
+        t("Compare model calls and the largest context each approach needed.", "比较两种做法的模型调用次数和所需的最大上下文。"),
+        t("Then run both through the agent eval to compare answers.", "然后让两者都通过智能体评估，比较回答质量。"),
+      ],
+      output: "m12.demo",
+      pick: ["5 "],
+      verify: t("You can state the trade: here the split doubles model calls and reduces the largest context.", "你能说清这笔交换：在这里，拆分让模型调用次数翻倍，同时减小了最大上下文。"),
+      needs: [{ step: "multi-agent.orchestrate", what: t("both paths to compare", "可供比较的两条路径") }],
+      produces: t("A measured cost and benefit for this split.", "这次拆分的实测成本和收益。"),
+    },
+    {
+      id: "judges",
+      title: t("Build two independent judges", "搭建两个相互独立的裁判"),
+      why: t("The second pattern is independence. It is built here because the learning loop and the evaluation module both call it.", "第二种模式是独立性。它放在这里搭建，因为学习循环和评估模块都会调用它。"),
+      do: [
+        t("Judge one is literal: every number in the claim must be in the passage, and most content words too.", "裁判一是字面型：论断里的每个数字都必须出现在段落中，大部分实词也是。"),
+        t("Judge two is semantic: the claim must be about the same thing, and its numbers must be present. In production this judge is a model prompt.", "裁判二是语义型：论断必须和段落讲的是同一件事，且其中的数字必须在段落里。在生产环境中这个裁判是一段模型提示词。"),
+        t("Keep when both pass. Flag when one dissents. Remove only when both fail.", "两者都通过则保留。一方有异议则标记。只有两者都否决才移除。"),
+      ],
+      lab: { file: "labs/m12_multi/judges.py", region: "judges" },
+      output: "m12.demo",
+      pick: ["6 "],
+      verify: t("The exact claim is kept, the paraphrase is kept with one dissent, the wrong number is removed, the unrelated claim is removed.", "原样的论断被保留；换了说法的论断被保留但有一票异议；数字错误的被移除；无关的论断被移除。"),
+      needs: [{ step: "inference.client", what: t("embed(), and chat() when a judge is a model", "embed()；裁判是模型时还需要 chat()") }],
+      produces: t("`verify()`: a verdict with both votes and reasons.", "`verify()`：包含两票及其理由的裁定。"),
+    },
+    {
+      id: "calibrate",
+      title: t("Calibrate the judges before they remove anything", "在裁判移除任何内容之前先校准"),
+      why: t("A judge that acts is a guard on stored knowledge. Like the answer guard, it runs in report mode first.", "会执行动作的裁判，就是针对已存储知识的护栏。和回答护栏一样，它要先以只报告的模式运行。"),
+      do: [
+        t("Label a sample of claims yourself.", "自己标注一批论断样本。"),
+        t("Run both judges in a dry run and compare with your labels.", "让两个裁判空跑一遍，与你的标注对比。"),
+        t("Read every disagreement. Fix the judge, then recheck what it rejected.", "逐条查看不一致之处。修正裁判，然后重新检查它否决过的内容。"),
+      ],
+      lab: { file: "labs/m12_multi/calibrate.py", region: "calibrate" },
+      run: "python3 -m labs.m12_multi.calibrate",
+      output: "m12.calibrate",
+      verify: t("You know each judge's agreement rate and the kind of claim each gets wrong. In the lab both word-based judges miss paraphrases and pass claims that contradict the passage while sharing its words.", "你知道每个裁判的一致率，以及各自容易判错哪类论断。在 lab 里，两个基于词语的裁判都识别不了改写，并且会放过那些与原文用词相同、意思却相反的论断。"),
+      needs: [
+        { step: "multi-agent.judges", what: t("verify()", "verify()") },
+        { step: "guardrails.observe", what: t("the observe-first practice", "先观察再执行的做法") },
+      ],
+      produces: t("Judges trusted enough to act in the learning loop.", "可信度足以在学习循环中执行动作的裁判。"),
+    },
+  ],
+  together: [
+    { with: "harness", how: t("Workers are Agent instances. The orchestrator is three nodes on the same executor.", "子智能体是 Agent 的实例。编排器是同一个执行器上的三个节点。") },
+    { with: "evaluation", how: t("The agent eval decides whether a split helped. Judges are calibrated like any eval instrument.", "由智能体评估来判断拆分是否有帮助。裁判要像任何评估工具一样校准。") },
+    { with: "self-evolving", how: t("The nightly loop uses the two-vote check to take unsupported claims out of service.", "夜间循环用双票核查把没有依据的论断停用。") },
+    { with: "ops", how: t("Background agents pause while a live request holds the busy marker.", "实时请求持有忙碌标记期间，后台智能体暂停。") },
+  ],
+  failures: [
+    {
+      when: "2026-10",
+      title: t("One judge removed true claims", "单个裁判移除了正确的论断"),
+      what: t("A single strict judge voted against claims that were correct simplifications of their source.", "一个严格的裁判对那些正确简化了来源内容的论断投了反对票。"),
+      fix: t("Two votes. A simplification or an omission alone keeps the claim.", "改为双票制。仅仅是简化或省略，论断仍然保留。"),
+      lesson: t("Requiring agreement to remove trades a few missed bad claims for far fewer wrongly removed good ones.", "要求两票一致才移除：会多放过少量坏论断，但误删的好论断少得多。"),
+    },
+    {
+      when: "lab",
+      title: t("A splitter that misread a word", "拆分器误读了一个词"),
+      what: t("The first split rule sent any text containing the word expense to the data worker, including a question about expense report deadlines.", "最初的拆分规则把任何含有 expense 一词的文本都分给数据子智能体，包括一个关于报销单提交期限的问题。"),
+      fix: t("Match on verbs of spending, and test the split on its own.", "改为匹配表示“花费”的动词，并单独测试拆分函数。"),
+      lesson: t("Routing between agents is a classifier. Give it examples and score it like the skill router.", "智能体之间的路由就是一个分类器。给它示例，并像技能路由器那样给它打分。"),
+    },
+  ],
+  portability: {
+    databricks: t(
+      "Sub-agents can be separate deployed agents or functions inside one agent. Frameworks such as LangGraph and the OpenAI Agents SDK run inside a deployed agent and supply handoffs.",
+      "子智能体可以是分别部署的智能体，也可以是同一个智能体里的函数。LangGraph、OpenAI Agents SDK 等框架可以在已部署的智能体内部运行，并提供交接机制。",
+    ),
+    watsonx: t("Orchestrate agents list collaborators and route work among them. This is the platform's core pattern.", "Orchestrate 的智能体列出协作者，并在它们之间分派工作。这是该平台的核心模式。"),
+    codex: t("Subagents run tasks in separate contexts. The Agents SDK supports handoffs between agents.", "子智能体在独立的上下文中执行任务。Agents SDK 支持智能体之间的交接。"),
+    cursor: t("Subagents and background agents run tasks in parallel with their own context.", "子智能体和后台智能体各自带着独立上下文并行执行任务。"),
+    claude: t("Subagents have their own context window and tool set, defined in files. The SDK can spawn them from code.", "子智能体有自己的上下文窗口和工具集，用文件定义。SDK 可以在代码中启动它们。"),
+    other: t("The wave executor is plain Python. Sub-agents are objects.", "波次执行器是纯 Python。子智能体就是对象。"),
+  },
+  checks: [
+    {
+      q: t("Give one good reason and one bad reason to add a second agent.", "分别举一个增加第二个智能体的好理由和坏理由。"),
+      a: t("Good: you need an independent check, or a sub-task's context would crowd out the main one. Bad: the architecture diagram looks more capable. Without an eval showing a gain, it is only more cost.", "好理由：你需要独立的检查，或者子任务的上下文会挤占主任务的上下文。坏理由：架构图看起来更厉害。没有评估证明有提升，那就只是多花成本。"),
+    },
+    {
+      q: t("Why two votes for claim verification?", "为什么论断核查要用两票？"),
+      a: t("A single judge's error would remove true claims. Requiring both to fail trades some missed bad claims for far fewer wrongly removed good ones.", "单个裁判出错会移除正确的论断。要求两者都否决才移除：会漏掉一些坏论断，但误删的好论断少得多。"),
+    },
+    {
+      q: t("What makes a worker a worker?", "是什么让一个子智能体成为“子智能体”？"),
+      a: t("A smaller tool set, its own instructions, and its own message list. It is the same Agent class. Nothing it reads enters another worker's context.", "更小的工具集、自己的指令、自己的消息列表。它用的是同一个 Agent 类。它读到的任何内容都不会进入其他子智能体的上下文。"),
+    },
+    {
+      q: t("How does the orchestrator reuse the harness?", "编排器如何复用 Harness？"),
+      a: t("It runs on the same wave executor. Workers fan out as nodes in one wave, each names the synthesize node, and the dict keyed by name runs it once.", "它运行在同一个波次执行器上。子智能体作为同一波里的节点扇出，各自指向汇总节点，而以名称为键的字典保证汇总节点只运行一次。"),
+    },
+  ],
+  terms: [
+    { term: t("Orchestrator", "编排器"), def: t("Code that splits work, runs workers, and merges results.", "负责拆分工作、运行子智能体并合并结果的代码。") },
+    { term: t("Worker", "子智能体"), def: t("An agent with a narrow tool set and its own context.", "工具集专一、拥有独立上下文的智能体。") },
+    { term: t("Dissent", "异议"), def: t("One judge of two voting against. It flags a claim and does not remove it.", "两个裁判中有一个投反对票。它会标记论断，但不会移除。") },
+  ],
+};

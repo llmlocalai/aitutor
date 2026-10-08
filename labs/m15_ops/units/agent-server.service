@@ -1,0 +1,15 @@
+# Linux. Copy to /etc/systemd/system/, replace AGENT_HOME and USER, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now agent-server
+[Unit]
+Description=Agent server
+After=network-online.target
+
+[Service]
+User=USER
+WorkingDirectory=AGENT_HOME
+ExecStart=AGENT_HOME/venv/bin/python3 -m uvicorn main:app --host 127.0.0.1 --port 8788
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

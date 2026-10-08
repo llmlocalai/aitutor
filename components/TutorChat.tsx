@@ -1,21 +1,21 @@
 "use client";
 
 import { useRef, useState } from "react";
+import T from "@/components/T";
+import { useLang } from "@/components/lang";
+import type { LS } from "@/lib/types";
+import { ui } from "@/lib/ui";
 
 type Msg = { role: "user" | "assistant"; content: string; via?: string };
 
-const STARTERS = [
-  "Quiz me on why this module sits where it does.",
-  "What would I stub to build this first?",
-  "How would I build this on Databricks?",
-];
-
-export default function TutorChat({ context, topic }: { context?: string; topic?: string }) {
+export default function TutorChat({ context, topic }: { context?: LS; topic?: LS }) {
+  const lang = useLang();
   const [log, setLog] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
+  const starters = [ui.tuS1, ui.tuS2, ui.tuS3];
 
   const send = async (q: string) => {
     const question = q.trim();
@@ -31,15 +31,15 @@ export default function TutorChat({ context, topic }: { context?: string; topic?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: next.slice(-12).map(({ role, content }) => ({ role, content })),
-          context: context ?? "",
-          topic: topic ?? "",
+          context: context ? context[lang] : "",
+          lang,
         }),
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error ?? `The tutor returned ${r.status}.`);
+      if (!r.ok) throw new Error(data.error ?? `${r.status}`);
       setLog([...next, { role: "assistant", content: data.reply, via: data.via }]);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "The tutor could not be reached.");
+      setErr(e instanceof Error && e.message.length > 3 ? e.message : ui.tuError[lang]);
     } finally {
       setBusy(false);
       setTimeout(() => end.current?.scrollIntoView({ block: "nearest" }), 50);
@@ -50,9 +50,9 @@ export default function TutorChat({ context, topic }: { context?: string; topic?
     <div className="chat">
       {log.length === 0 && (
         <div className="chips">
-          {STARTERS.map((s) => (
-            <button key={s} type="button" className="btn ghost" onClick={() => send(s)} disabled={busy}>
-              {s}
+          {starters.map((s) => (
+            <button key={s.en} type="button" className="btn ghost" onClick={() => send(s[lang])} disabled={busy}>
+              <T v={s} />
             </button>
           ))}
         </div>
@@ -61,10 +61,12 @@ export default function TutorChat({ context, topic }: { context?: string; topic?
         {log.map((m, i) => (
           <div key={i} className={`msg ${m.role}`}>
             {m.content}
-            {m.via && <span className="via">answered by {m.via} model</span>}
+            {m.via && (
+              <span className="via"><T v={ui.tuVia} /> <T v={m.via === "local" ? ui.tuLocal : ui.tuCloud} /></span>
+            )}
           </div>
         ))}
-        {busy && <div className="msg assistant muted">Thinking. A cold local model can take up to a minute.</div>}
+        {busy && <div className="msg assistant muted"><T v={ui.tuThinking} /></div>}
         <div ref={end} />
       </div>
       {err && <div className="note">{err}</div>}
@@ -78,18 +80,16 @@ export default function TutorChat({ context, topic }: { context?: string; topic?
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault();
               send(text);
             }
           }}
-          placeholder={topic ? `Ask about ${topic}` : "Ask about any part of the build"}
-          aria-label="Your question"
+          placeholder={topic ? `${ui.tuPlaceholderTopic[lang]} ${topic[lang]}` : ui.tuPlaceholder[lang]}
+          aria-label={ui.tuAsk[lang]}
           maxLength={2000}
         />
-        <button className="btn" type="submit" disabled={busy || !text.trim()}>
-          Ask
-        </button>
+        <button className="btn" type="submit" disabled={busy || !text.trim()}><T v={ui.tuAsk} /></button>
       </form>
     </div>
   );

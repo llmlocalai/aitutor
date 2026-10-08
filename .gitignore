@@ -12,3 +12,6 @@ sync/.state.json
 sync/sync.log
 tsconfig.tsbuildinfo
 next-env.d.ts
+labs/_work/
+
+labs/machine/machine.json

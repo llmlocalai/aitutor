@@ -1,324 +1,297 @@
-import type { Module } from "@/lib/types";
+import { t, type Module } from "@/lib/types";
 
 export const harness: Module = {
   id: "harness",
-  title: "Harness engineering",
-  short: "The loop around the model: prompt assembly, tool execution, budgets, checks, logs.",
-  layer: 3,
-  depth: "deep",
-  what:
-    "The harness is the program that runs the model. It assembles the prompt, offers tools, executes the tool calls the model asks for, feeds results back, decides when to stop, checks the answer, and records what happened.",
-  why:
-    "A model call is stateless and cannot act. Everything that makes an agent behave reliably lives in the harness: which tools exist, how many rounds are allowed, what gets truncated, what is checked before the user sees it. Two systems with the same model and different harnesses behave like different products.",
+  n: 7,
+  layer: 4,
+  title: t("Harness engineering", "Harness 工程"),
+  short: t(
+    "The loop around the model: prompt assembly, tool execution, budgets, checks, logs.",
+    "包裹模型的那层循环：组装提示词、执行工具、控制预算、检查结果、记录日志。",
+  ),
+  what: t(
+    "The harness is the program that runs the model. It assembles the prompt, offers tools, executes the calls the model asks for, feeds results back, decides when to stop, checks the answer, and records what happened.",
+    "Harness 是运行模型的那个程序。它组装提示词、提供工具、执行模型请求的调用、把结果送回去、决定何时停止、检查回答，并记录发生了什么。",
+  ),
+  why: t(
+    "A model call is stateless and cannot act. Which tools exist, how many rounds are allowed, what gets truncated, what is checked before the user sees it: all of that is the harness. Two systems with the same model and different harnesses behave like different products.",
+    "模型调用是无状态的，也无法执行任何操作。有哪些工具、允许多少轮、什么内容会被截断、用户看到之前检查什么，这些全都由 Harness 决定。同一个模型配上不同的 Harness，表现得就像两个不同的产品。",
+  ),
   how: [
-    "The harness exposes the same chat-completions contract it consumes. Callers cannot tell whether they are talking to a bare model or to the agent.",
-    "A planner node calls the model. If the model answers, the run ends. If it requests tool calls, each call becomes a node and all of them run concurrently.",
-    "Tool nodes append their results to the conversation and route back to the planner. Several tool nodes naming the same successor collapse into one planner run.",
-    "A wave budget bounds the cycle. When the budget runs out, one final turn without tools answers from the evidence already gathered.",
-    "Before the answer leaves, a deterministic guard compares it with the evidence from this request. A failed draft gets one corrective retry.",
+    t("A planner node calls the model. If the model answers, the run ends. If it requests tool calls, each call becomes a node and all of them run at once.", "规划节点调用模型。模型给出回答，运行就结束。模型请求工具调用，每个调用就成为一个节点，全部并发执行。"),
+    t("Tool nodes append results and route back to the planner. Several nodes naming the same successor collapse into one run of it.", "工具节点追加结果，然后路由回规划节点。多个节点指向同一个后继时，后继只运行一次。"),
+    t("A round budget bounds the cycle. When it runs out, one final turn without tools answers from the evidence gathered.", "轮次预算限制循环次数。预算用完时，再进行一轮不带工具的调用，根据已收集的证据作答。"),
+    t("Skills, memory, the guard, and hooks plug into fixed points. Each is its own module.", "技能、记忆、护栏和钩子接入固定的位置。它们各自是一个独立模块。"),
   ],
   prereqs: [
     {
       id: "api-gateway",
-      why: "The harness sits behind the gateway contract. Keys carry scopes, and the harness reads the scope to decide whether a caller gets tools at all.",
-      stub: "A hard-coded flag: tools allowed, one anonymous caller.",
+      why: t("The harness sits behind the gateway contract. Keys carry scopes, and the harness reads the scope to decide whether a caller gets tools.", "Harness 位于网关契约之后。密钥带有权限范围，Harness 根据它决定调用方能否使用工具。"),
+      stub: t("One anonymous caller with tools always on.", "一个匿名调用方，工具始终开启。"),
     },
     {
       id: "inference",
-      why: "The planner is a model call. Round budgets, output caps, and prompt size limits are set from measured inference numbers.",
-      stub: "A fake model function that returns a scripted tool call on the first turn and text on the second.",
+      why: t("The planner is a model call. Round budgets and output caps are set from measured rates.", "规划节点就是一次模型调用。轮次预算和输出上限根据测得的速率设定。"),
+      stub: t("The fake model with a scripted policy. Every harness lab uses it.", "带脚本策略的假模型。Harness 的所有 lab 都用它。"),
     },
     {
       id: "state",
-      why: "The loop is a state machine. Concurrent tool results have to merge into one conversation without overwriting each other, so the merge rules are defined before the loop that relies on them.",
-      stub: "A plain dict and sequential tool execution.",
+      why: t("Concurrent tool results have to merge into one conversation without overwriting each other. The merge rules exist before the loop that relies on them.", "并发的工具结果必须合并进同一个对话而不互相覆盖。合并规则要先于依赖它的循环而存在。"),
+      stub: t("A plain dict and sequential tool execution: the flat loop.", "一个普通字典加顺序执行工具，也就是扁平循环。"),
     },
     {
       id: "tools-mcp",
-      why: "A loop with no tools is a chat proxy. You need at least one registered tool with a schema to exercise the tool path.",
-      stub: "One local function such as a clock or calculator.",
+      why: t("A loop with no tools is a chat proxy. You need a registry with at least one tool to exercise the tool path.", "没有工具的循环只是个聊天代理。至少要有一个带工具的注册表，才能走通工具路径。"),
+      stub: t("One local function such as a clock.", "一个本地函数，比如返回当前时间。"),
     },
   ],
   inBuild: [
-    { path: "apps/agent-server/main.py", role: "HTTP surface: chat completions, models, feedback, health." },
-    { path: "apps/agent-server/graph.py", role: "A 110-line wave executor: fan-out, fan-in, merge rules, wave budget, trace." },
-    { path: "apps/agent-server/agent_loop.py", role: "The planner and tool graph, prompt composition, streaming, logging." },
-    { path: "apps/agent-server/AGENT.md", role: "The base system prompt." },
-    { path: "apps/agent-server/tools/registry.py", role: "One registry for hand-written and MCP tools." },
-    { path: "apps/agent-server/hooks/", role: "Pre-tool and post-tool hooks." },
-    { path: "apps/agent-server/answer_guard.py", role: "Checks figures, counts, and names in the answer against tool results." },
+    { path: "apps/agent-server/main.py", role: t("HTTP surface: chat completions, models, feedback, health.", "HTTP 接口：chat completions、models、feedback、health。") },
+    { path: "apps/agent-server/graph.py", role: t("A 110-line wave executor: fan-out, fan-in, merge rules, wave budget, trace.", "110 行的波次执行器：扇出、扇入、合并规则、波次预算、追踪。") },
+    { path: "apps/agent-server/agent_loop.py", role: t("The planner and tool graph, prompt composition, streaming, logging.", "规划与工具图、提示词组装、流式输出、日志。") },
+    { path: "apps/agent-server/AGENT.md", role: t("The base system prompt.", "基础系统提示词。") },
   ],
   flow: {
-    caption: "One request through the harness",
+    caption: t("One request through the harness", "一个请求如何通过 Harness"),
     stages: [
-      { label: "Authenticate", detail: "Key, scope, rate limit, quota. Scope decides whether tools are offered.", kind: "check" },
-      { label: "Triage", detail: "Cheap gates first: regex, then embedding similarity. Some questions skip tools.", kind: "check" },
-      { label: "Compose prompt", detail: "Base instructions, at most one matched skill, the caller's memory section.", kind: "input" },
-      { label: "Planner", detail: "Model call with tool schemas. Returns an answer or a set of tool calls.", kind: "model" },
-      { label: "Tool wave", detail: "All requested calls run at once. Hooks run before and after each. Results are capped.", kind: "tool" },
-      { label: "Guard", detail: "The draft is checked against this request's evidence. One corrective retry on failure.", kind: "check" },
-      { label: "Respond", detail: "Streamed or complete, in the same format the caller sent.", kind: "output" },
-      { label: "Record", detail: "Logs and memory writes happen after the response and never block it.", kind: "store" },
+      { label: t("Compose prompt", "组装提示词"), detail: t("Base instructions, at most one skill, the caller's memory.", "基础指令、至多一个技能、调用方的记忆。"), kind: "input" },
+      { label: t("Planner", "规划节点"), detail: t("Model call with tool schemas. Returns an answer or tool calls.", "带工具 schema 的模型调用。返回回答或工具调用。"), kind: "model" },
+      { label: t("Tool wave", "工具波次"), detail: t("All requested calls run at once. Hooks run first. Results are capped and logged.", "所有被请求的调用并发执行。先跑钩子。结果被截断并记录日志。"), kind: "tool" },
+      { label: t("Budget check", "预算检查"), detail: t("Out of rounds: withdraw tools and ask for an answer from the evidence.", "轮次用完：撤掉工具，要求根据已有证据作答。"), kind: "check" },
+      { label: t("Guard", "护栏"), detail: t("Check the draft against this request's evidence. One corrective retry.", "把草稿与本次请求的证据比对。允许一次纠正重试。"), kind: "check" },
+      { label: t("Respond", "响应"), detail: t("Return the answer in the format the caller sent.", "以调用方使用的格式返回回答。"), kind: "output" },
+      { label: t("Record", "记录"), detail: t("Request log, tool log, memory. After the answer, never before.", "请求日志、工具日志、记忆。都在回答之后进行，绝不提前。"), kind: "store" },
     ],
-    loop: { from: 4, to: 3, label: "back to planner, up to 6 rounds" },
+    loop: { from: 2, to: 1, label: t("back to the planner, up to the round budget", "回到规划节点，直到轮次预算用完") },
   },
   steps: [
     {
-      title: "Fix the public contract first",
-      why: "The contract is what callers depend on. If it stays constant, you can rebuild everything behind it without breaking a client.",
-      body: [
-        "Accept and return the OpenAI chat-completions format. Existing SDKs, editors, and UIs then work unchanged.",
-        "Keep one internal entry point. The reference build kept the same function signature when the loop was rewritten as a graph, so the HTTP layer needed no change.",
+      id: "flat",
+      title: t("Build the flat loop and bound it", "搭建扁平循环并设上限"),
+      why: t("The flat loop is the smallest thing that is an agent. It joins the model client and the tool registry. Get it correct and bounded before adding concurrency, because every later feature is a refinement of it.", "扁平循环是能称为智能体的最小形态。它把模型客户端和工具注册表连在一起。先把它做对、设好上限，再加并发，因为后面的每项功能都是在它之上的改进。"),
+      do: [
+        t("Call the model with the tool schemas.", "带着工具 schema 调用模型。"),
+        t("If the reply has tool calls: run each through the registry and append a role=tool message with the matching tool_call_id.", "如果回复里有工具调用：逐个通过注册表执行，并追加带对应 tool_call_id 的 role=tool 消息。"),
+        t("If the reply has none: return its content.", "如果没有工具调用：返回其内容。"),
+        t("Stop after a fixed number of rounds.", "达到固定轮数后停止。"),
       ],
-      code: {
-        lang: "python",
-        text: `# The whole public surface of the loop.
-async def run(payload: dict, engine_url: str, allow_tools: bool, key_id: str):
-    """-> (openai_response_dict, prompt_tokens, completion_tokens, model_calls)"""`,
-      },
-      verify: "An unmodified OpenAI client pointed at your server gets a valid completion.",
+      lab: { file: "labs/m07_harness/loop.py", region: "flat" },
+      run: "python3 -m labs.m07_harness.demo",
+      output: "m07.demo",
+      pick: ["1 "],
+      verify: t("The answer states the cap and the amount, and both came from tool results.", "回答说出了上限和金额，而且两者都来自工具结果。"),
+      needs: [
+        { step: "inference.client", what: t("chat()", "chat()") },
+        { step: "tools-mcp.registry", what: t("schemas() and call_as_text()", "schemas() 和 call_as_text()") },
+      ],
+      produces: t("`flat_loop()`: the correctness reference for everything after.", "`flat_loop()`：后续所有实现的正确性参照。"),
     },
     {
-      title: "Build the flat loop and bound it",
-      why: "The flat loop is the smallest thing that is an agent. Get it correct and bounded before adding concurrency, because every later feature is a refinement of it.",
-      body: [
-        "Call the model with tool schemas. If it returns tool calls, run them, append the results as tool messages, and call again.",
-        "Stop when the model answers in plain text or when a round limit is reached. Six rounds is the reference default.",
+      id: "graph",
+      title: t("Write the wave executor", "编写波次执行器"),
+      why: t("It follows the flat loop because it is the same behavior with two additions: tool calls in one turn run concurrently, and their results merge safely. It needs the merge rules from the state module.", "它排在扁平循环之后，因为行为相同，只多了两点：同一轮的工具调用并发执行，结果安全合并。它需要状态模块里的合并规则。"),
+      do: [
+        t("A node is an async function from state to a pair: an update, and the next nodes by name.", "节点是一个异步函数，输入状态，输出一对值：更新内容，以及按名称给出的后继节点。"),
+        t("Run every node in the wave with gather.", "用 gather 并发运行这一波的所有节点。"),
+        t("Merge every update first. Then build the next wave as a dict keyed by node name.", "先合并所有更新，再以节点名为键构建下一波的字典。"),
+        t("Record the node names of each wave in a trace. Stop at a wave limit.", "把每一波的节点名记入 trace。达到波次上限时停止。"),
       ],
-      code: {
-        lang: "python",
-        text: `async def flat_loop(messages, tools, max_rounds=6):
-    for _ in range(max_rounds):
-        reply = await chat(messages, tools=tools)
-        msg = reply["choices"][0]["message"]
-        messages.append(msg)
-        calls = msg.get("tool_calls") or []
-        if not calls:
-            return msg["content"]
-        for call in calls:
-            result = await call_tool(call["function"]["name"],
-                                     json.loads(call["function"]["arguments"]))
-            messages.append({"role": "tool",
-                             "tool_call_id": call["id"],
-                             "content": json.dumps(result)[:8000]})
-    return None  # budget exhausted, handled in a later step`,
-      },
-      verify: "A question that needs one tool call produces two model calls and one tool message.",
+      lab: { file: "labs/m07_harness/graph.py", region: "run_graph" },
+      verify: t("You can explain why three tool nodes that each return `{\"planner\": fn}` cause one planner run.", "你能解释为什么三个都返回 `{\"planner\": fn}` 的工具节点，只会触发一次规划节点。"),
+      needs: [{ step: "state.merge", what: t("merge_state()", "merge_state()") }],
+      produces: t("`run_graph()`: also used by the multi-agent module.", "`run_graph()`：多智能体模块也会用到。"),
     },
     {
-      title: "Generalize to a wave graph",
-      why: "This follows the flat loop because it is the same behavior with two additions: tool calls in one turn run concurrently, and their results merge safely. You need the sequential version as the reference for correctness.",
-      body: [
-        "A node is an async function from state to a pair: state updates and the next nodes. A wave is every node scheduled at the same time.",
-        "Run a wave with gather. Merge every update. Then build the next wave as a dict keyed by node name. Two tool nodes that both name the planner produce one planner entry, which is fan-in by construction.",
-        "Accumulator keys extend or sum. All other keys overwrite. That rule is what lets concurrent nodes contribute without clobbering each other.",
+      id: "nodes",
+      title: t("Express the loop as planner and tool nodes", "把循环表达为规划节点和工具节点"),
+      why: t("Now the two pieces meet: the flat loop's logic, run by the wave executor.", "现在两部分汇合：扁平循环的逻辑，交给波次执行器来运行。"),
+      do: [
+        t("Planner: call the model. No tool calls means terminal. Tool calls mean one tool node per call.", "规划节点：调用模型。没有工具调用即终止。有工具调用，就为每个调用创建一个工具节点。"),
+        t("Tool node: run hooks, call the registry, append the tool message, log, route to the planner.", "工具节点：运行钩子、调用注册表、追加工具消息、记日志、路由回规划节点。"),
+        t("Run blocking calls in a thread so the wave is truly concurrent.", "把阻塞调用放进线程执行，让同一波真正并发。"),
       ],
-      code: {
-        lang: "python",
-        file: "graph.py (core)",
-        text: `_EXTEND_KEYS = {"messages_append", "trace_notes"}
-_SUM_KEYS = {"usage_prompt_tokens", "usage_completion_tokens", "model_calls"}
-
-def merge_state(state: dict, update: dict) -> None:
-    for key, value in update.items():
-        if key in _EXTEND_KEYS:
-            target = key.removesuffix("_append")
-            state.setdefault(target, []).extend(value)
-        elif key in _SUM_KEYS:
-            state[key] = state.get(key, 0) + value
-        else:
-            state[key] = value
-
-async def run_graph(entry_name, entry_fn, initial_state, max_waves=6):
-    state = dict(initial_state)
-    wave = {entry_name: entry_fn}
-    trace = []
-    for wave_idx in range(1, max_waves + 1):
-        if not wave:
-            break
-        trace.append({"wave": wave_idx, "nodes": list(wave)})
-        results = await asyncio.gather(*[fn(state) for fn in wave.values()])
-        for update, _ in results:           # merge everything first
-            if update:
-                merge_state(state, update)
-        next_wave = {}
-        for _, edges in results:            # then route
-            next_wave.update(edges)         # same key twice = fan-in
-        wave = next_wave
-    else:
-        state["_budget_exhausted"] = True
-    state["_trace"] = trace
-    return state`,
-      },
-      verify: "Three tool calls requested in one turn show as one wave with three nodes in the trace, followed by one planner node.",
+      lab: { file: "labs/m07_harness/loop.py", region: "nodes" },
+      output: "m07.demo",
+      pick: ["2 ", "  waves", "  model calls"],
+      verify: t("The waves read planner, then two tool nodes, then planner. Model calls are 2.", "波次依次是：规划节点、两个工具节点、规划节点。模型调用次数为 2。"),
+      needs: [
+        { step: "harness.flat", what: t("the logic to preserve", "需要保持的逻辑") },
+        { step: "harness.graph", what: t("the executor", "执行器") },
+      ],
+      produces: t("An agent whose tool calls in one turn run in parallel.", "同一轮工具调用可以并行执行的智能体。"),
     },
     {
-      title: "Put every tool behind one registry and cap results",
-      why: "The planner should not know where a tool lives. A single registry also gives you one place to enforce size limits, which protects the context budget from the inference module.",
-      body: [
-        "Register hand-written functions and MCP tools in the same table: name, schema, callable.",
-        "Cap each result (8,000 characters on the reference build) and cap the total per request (40,000). Tell the model when a result was truncated.",
-        "Log every call with arguments, duration, and result size.",
+      id: "budget",
+      title: t("Handle a spent budget as a designed outcome", "把预算耗尽当作设计内的结果来处理"),
+      why: t("It depends on the round counter in the planner. Without it, hitting the limit returns nothing after the user has waited the longest.", "它依赖规划节点里的轮次计数。没有它的话，达到上限时什么都不返回，而此时用户已经等了最久。"),
+      do: [
+        t("Count rounds in the planner.", "在规划节点里统计轮次。"),
+        t("When the count passes the limit, append a harness note and run the planner once more with no tools.", "超过上限时，追加一条 Harness 提示，再运行一次不带工具的规划节点。"),
+        t("Mark harness notes so they are never mistaken for the user's words. The lab prefixes them with `[harness]`.", "给 Harness 的提示做标记，避免被当成用户说的话。lab 用 `[harness]` 作前缀。"),
+        t("Log that the budget ran out.", "记录预算已耗尽。"),
       ],
-      verify: "A tool that returns a megabyte of text reaches the model as a bounded string with a truncation note.",
+      output: "m07.demo",
+      pick: ["3 "],
+      verify: t("With a model that never stops searching and a budget of 2, the run still ends with an answer from the evidence.", "面对一个不停搜索的模型，预算设为 2 时，运行仍然以基于证据的回答结束。"),
+      needs: [{ step: "harness.nodes", what: t("the planner node", "规划节点") }],
+      produces: t("A bounded run that always returns something, and a logged signal for the learner.", "一个有上限且总有返回的运行过程，以及一条供学习任务使用的日志信号。"),
     },
     {
-      title: "Compose the system prompt from parts",
-      why: "Composition comes after tools because the prompt has to describe when to use them. It comes before guards because guards reference which skill was loaded.",
-      body: [
-        "Start with a short base prompt. Add at most one matched skill. Add a memory section for the caller.",
-        "Keep the base short. It is charged on every turn. On the reference build a rule is added only after it has been broken once.",
+      id: "compose",
+      title: t("Compose the system prompt from parts", "分部分组装系统提示词"),
+      why: t("Composition has to exist before skills and memory can plug in. It is kept short because the prompt is charged on every turn.", "先要有组装这一步，技能和记忆才有地方接入。它要保持简短，因为提示词每一轮都计费。"),
+      do: [
+        t("Start with a short base prompt that says when to use tools and what may be reported.", "从简短的基础提示词开始，说明何时使用工具、可以报告什么。"),
+        t("Add at most one skill, chosen by a function you pass in.", "加入至多一个技能，由你传入的函数来选择。"),
+        t("Add a memory briefing for this caller, if a memory object is passed in.", "如果传入了记忆对象，就加上该调用方的记忆摘要。"),
       ],
-      code: {
-        lang: "python",
-        text: `def compose_system_prompt(messages, partition_key):
-    parts = [read_agent_md()]
-    skill = match_skill(last_user_text(messages))   # zero or one
-    if skill:
-        parts.append(skill.body)
-    memory = compose_memory_section(partition_key)
-    if memory:
-        parts.append(memory)
-    return "\\n\\n".join(parts)`,
-      },
-      verify: "The skill-match log shows most requests matching no skill. That is the expected case.",
+      lab: { file: "labs/m07_harness/loop.py", region: "compose" },
+      verify: t("With no skills and no memory passed in, the prompt is the base prompt alone.", "不传技能和记忆时，提示词就只有基础部分。"),
+      needs: [{ step: "harness.nodes", what: t("the agent class to extend", "要扩展的智能体类") }],
+      produces: t("`compose_system_prompt()`: the plug point for the skills and memory modules.", "`compose_system_prompt()`：技能和记忆模块的接入点。"),
     },
     {
-      title: "Put cheap deterministic gates in front of expensive ones",
-      why: "Triage runs before the planner, so it has to exist before you tune the planner. It also removes whole classes of slow requests.",
-      body: [
-        "Some questions are about the agent itself and need no tools. Detect them with a regex first, then with embedding similarity to a few canonical examples, and only then let the model decide.",
-        "Log each triage decision with the reason, so a wrong route can be traced.",
+      id: "hooks",
+      title: t("Add hooks before tool execution", "在工具执行前加入钩子"),
+      why: t("Hooks sit inside the tool node, so that node must exist. They enforce policy in code, which holds whatever the model was told.", "钩子位于工具节点内部，所以工具节点必须先存在。它们用代码强制执行策略，不管模型被告知了什么都有效。"),
+      do: [
+        t("A hook takes a tool name and arguments and returns a reason to block, or nothing.", "钩子接收工具名和参数，返回阻止的原因，或什么都不返回。"),
+        t("A blocked call returns an error object as the tool message. The model sees the refusal.", "被阻止的调用会返回一个错误对象作为工具消息。模型能看到这次拒绝。"),
+        t("Log every block.", "记录每一次阻止。"),
       ],
-      verify: "Asking the agent what it can do returns quickly with zero tool calls in the log.",
+      output: "m07.demo",
+      pick: ["4 "],
+      verify: t("With expense data blocked, the answer states the cap and says it could not read the records.", "报销数据被阻止后，回答说出了上限，并说明无法读取记录。"),
+      needs: [{ step: "harness.nodes", what: t("the tool node", "工具节点") }],
+      produces: t("`pre_tool_hooks`: the plug point for the guardrails module.", "`pre_tool_hooks`：护栏模块的接入点。"),
     },
     {
-      title: "Handle budget exhaustion as a designed outcome",
-      why: "It depends on the wave budget from step 3. Without it, hitting the limit returns an error after the user has waited the longest.",
-      body: [
-        "When rounds run out, make one final model call with tools removed and an instruction to answer from the evidence gathered so far.",
-        "Count how often this happens. A question shape that regularly exhausts the budget needs a purpose-built batch tool.",
+      id: "run",
+      title: t("Assemble run(): guard, retry, log, record", "组装 run()：护栏、重试、日志、记录"),
+      why: t("This is the last piece because it orders everything else: compose, execute, check, respond, record.", "这是最后一块，因为它给其余部分排好顺序：组装、执行、检查、响应、记录。"),
+      do: [
+        t("Compose the prompt and run the graph.", "组装提示词并运行图。"),
+        t("If a guard is passed in and rejects the draft: append its corrective note, run one more turn without tools, check again. If it still fails, return the guard's fallback text.", "如果传入了护栏且草稿被拒：追加纠正提示，再跑一轮不带工具的调用，重新检查。仍然不通过就返回护栏的兜底文本。"),
+        t("Write one request log line: question, answer, tools used, model calls, guard result, budget flag.", "写一行请求日志：问题、回答、用过的工具、模型调用次数、护栏结果、预算标记。"),
+        t("Hand the exchange to memory after the answer exists.", "在回答产生之后，再把这次对话交给记忆模块。"),
       ],
-      verify: "With the budget set to 1, a multi-step question still returns a grounded partial answer.",
+      lab: { file: "labs/m07_harness/loop.py", region: "run" },
+      output: "m07.demo",
+      pick: ["5 ", "6 "],
+      verify: t("Two log files exist. The empty-result question is answered with what was searched and the diagnostic.", "生成了两个日志文件。结果为空的问题，回答中说明了查了什么，并附上诊断信息。"),
+      needs: [
+        { step: "harness.compose", what: t("the system prompt", "系统提示词") },
+        { step: "harness.budget", what: t("a run that always ends", "一个总会结束的运行过程") },
+        { step: "harness.hooks", what: t("the hook path", "钩子路径") },
+        { step: "state.cursor", what: t("append_log() for JSON-lines logs", "用于 JSON Lines 日志的 append_log()") },
+      ],
+      produces: t("`Agent.run()` and two logs: requests.jsonl and tool_calls.jsonl.", "`Agent.run()` 以及两份日志：requests.jsonl 和 tool_calls.jsonl。"),
     },
     {
-      title: "Add hooks around tool execution",
-      why: "Hooks need the registry and the loop to exist. They are where policy is enforced in code, which is stronger than asking the model to behave.",
-      body: [
-        "A pre-tool hook can block a call. The reference build restricts file writes to one folder.",
-        "A post-tool hook can trigger follow-up work, such as re-indexing after a write.",
+      id: "triage",
+      title: t("Put cheap deterministic gates in front of the planner", "在规划节点前放置便宜的确定性关卡"),
+      why: t("Triage runs before the planner, so add it once the planner path is stable. It removes whole classes of slow requests.", "分流在规划节点之前运行，所以等规划路径稳定后再加。它能直接消除几类慢请求。"),
+      do: [
+        t("List request types that need no tools, such as questions about the agent itself.", "列出不需要工具的请求类型，比如关于智能体自身的问题。"),
+        t("Detect them with a regex first, then with embedding similarity to a few examples, and let the model decide only what is left.", "先用正则识别，再用与少量示例的向量相似度识别，剩下的才交给模型判断。"),
+        t("Log each decision with its reason.", "记录每次判断及其理由。"),
       ],
-      code: {
-        lang: "python",
-        text: `def write_path_guard(name: str, args: dict) -> str | None:
-    """Return a reason to block, or None to allow."""
-    if name in WRITE_TOOLS:
-        p = Path(args.get("path", "")).resolve()
-        if not p.is_relative_to(ALLOWED_ROOT):
-            return f"writes are limited to {ALLOWED_ROOT.name}/"
-    return None`,
-      },
-      verify: "A write outside the allowed folder is refused and the refusal appears in the tool log.",
+      lab: { file: "labs/m07_harness/triage.py", region: "triage" },
+      run: "python3 -m labs.m07_harness.triage",
+      output: "m07.triage",
+      verify: t("Three self questions go out with 1 model call and 0 tool calls instead of 2 and 1. The policy question still reaches the planner with tools.", "三个关于智能体自身的问题，从 2 次模型调用加 1 次工具调用降到 1 次模型调用、0 次工具调用。关于政策的问题仍然带着工具交给规划节点。"),
+      needs: [{ step: "harness.run", what: t("the request log, to find which requests waste tool rounds", "请求日志，用来找出哪些请求在浪费工具轮次") }],
+      produces: t("Fewer model calls on requests that never needed tools.", "对那些本来就不需要工具的请求，减少了模型调用。"),
     },
     {
-      title: "Check the answer against the evidence",
-      why: "The guard is last in the run because it needs the complete evidence set and the draft. It is built after logging exists, since each rule was written from a logged failure.",
-      body: [
-        "Extract precise figures, counts, and named entities from the draft. Look for each in the tool results of this request.",
-        "A figure is grounded if it equals an evidence number at some unit scale, or is the sum or difference of two grounded figures.",
-        "If the draft fails, send one corrective message naming what was unsupported and let the model retry. If the retry fails, return a plain statement of what was found, without the unsupported figures.",
-        "For streaming, hold tokens until the check passes.",
+      id: "stream",
+      title: t("Add streaming last", "最后再加流式输出"),
+      why: t("Streaming changes how output leaves the loop and interacts with the guard. Add it when the loop and guard are stable.", "流式输出会改变结果离开循环的方式，并与护栏相互影响。等循环和护栏稳定后再加。"),
+      do: [
+        t("Emit server-sent events in the standard chunk format.", "按标准分块格式发送 SSE 事件。"),
+        t("Accumulate tool-call deltas until a call is complete, then execute it.", "累积工具调用的增量片段，直到一个调用完整，再执行。"),
+        t("Hold answer tokens until the guard has passed, then release them line by line.", "在护栏通过之前先扣住回答的 token，通过后逐行放出。"),
+        t("Evaluate the streaming path separately. It is different code and fails differently.", "流式路径要单独评估。它是另一套代码，失败方式也不同。"),
       ],
-      verify: "Force a wrong figure into a draft in a test. The guard rejects it and names the figure.",
-    },
-    {
-      title: "Stream, and record after responding",
-      why: "Streaming changes how the loop yields output, so add it once the loop and guard are stable. Recording goes after the response so memory and logging never add latency.",
-      body: [
-        "Emit server-sent events in the standard chunk format. Accumulate tool-call deltas until a call is complete, then execute it.",
-        "Write the exchange to memory as a fire-and-forget task with its own error handling.",
-        "Hold a busy marker for the whole stream so background jobs pause until the answer finishes.",
+      lab: { file: "labs/m07_harness/stream.py", region: "gate" },
+      codeNote: t("The same file has merge_tool_call_delta(), which reassembles a tool call that arrives in fragments.", "同一个文件里还有 merge_tool_call_delta()，用来把分片到达的工具调用重新拼起来。"),
+      run: "python3 -m labs.m07_harness.stream",
+      output: "m07.stream",
+      verify: t("Four fragments rebuild one tool call. The first event reaches the client at once, and the figure from the rejected draft never does.", "四个分片重新拼成一个工具调用。第一个事件立即到达客户端，而被拒绝草稿里的数字始终没有到达。"),
+      needs: [
+        { step: "harness.run", what: t("a stable loop", "稳定的循环") },
+        { step: "guardrails.retry", what: t("the guard, which decides when tokens may be released", "护栏，由它决定何时可以放出 token") },
       ],
-      verify: "First token arrives within a few seconds on a warm model, and a memory-store failure does not change the response.",
+      produces: t("A streamed response path with the same guarantees.", "一条具有同样保障的流式响应路径。"),
     },
   ],
   together: [
-    { with: "skills", how: "The harness matches one skill per request and injects its body. Skills change behavior without changing harness code." },
-    { with: "memory", how: "Memory is read during prompt composition and written after the response." },
-    { with: "guardrails", how: "Hooks act on tool calls. The answer guard acts on the final draft. Both are called by the loop." },
-    { with: "evaluation", how: "Every request, tool call, skill match, and triage decision is logged as JSON lines. Evals and self-observation read those logs." },
-    { with: "multi-agent", how: "The same wave executor runs sub-agents as nodes. A sub-agent is a planner with its own tools and budget." },
+    { with: "skills", how: t("The harness asks for at most one skill per request and injects its body.", "Harness 每个请求最多取一个技能，并注入其正文。") },
+    { with: "memory", how: t("Memory is read during prompt composition and written after the response.", "记忆在组装提示词时读取，在响应之后写入。") },
+    { with: "guardrails", how: t("Hooks act on tool calls. The answer guard acts on the draft. Both are called by the loop.", "钩子作用于工具调用，回答护栏作用于草稿。两者都由循环调用。") },
+    { with: "evaluation", how: t("Evals send requests through run() and read the two logs.", "评估通过 run() 发送请求，并读取这两份日志。") },
+    { with: "multi-agent", how: t("The same executor runs sub-agents as nodes. A sub-agent is an Agent with fewer tools.", "同一个执行器把子智能体当节点运行。子智能体就是工具更少的 Agent。") },
   ],
   failures: [
     {
       when: "2026-10",
-      title: "Right query, right rows, wrong answer",
-      what: "The agent ran correct queries, received correct rows, then answered with a table about an unrelated subject and invented totals. Nothing compared the answer with the tool results.",
-      fix: "A deterministic guard that requires precise figures in the answer to appear in the evidence.",
-      lesson: "Correct retrieval does not guarantee a grounded answer. Check the last step.",
+      title: t("Right query, right rows, wrong answer", "查询对了，数据对了，回答错了"),
+      what: t("The agent ran correct queries, received correct rows, then answered with a table about an unrelated subject and invented totals. Nothing compared the answer with the tool results.", "智能体执行了正确的查询、拿到了正确的数据，却给出了一张无关主题的表格和编造的合计数。当时没有任何环节把回答与工具结果做比对。"),
+      fix: t("A deterministic guard that requires figures in the answer to appear in the evidence.", "加入确定性的护栏，要求回答中的数字必须出现在证据里。"),
+      lesson: t("Correct retrieval does not guarantee a grounded answer. Check the last step.", "检索正确不代表回答有依据。最后一步也要检查。"),
     },
     {
       when: "2026-10",
-      title: "An answer with no tool call passed unchecked",
-      what: "A follow-up question was answered with three invented totals and no query. The guard only ran when tools had been called.",
-      fix: "On data turns, check tool-free answers against the conversation so far.",
-      lesson: "Decide what the default is when a check has nothing to compare against.",
+      title: t("Out of rounds meant no answer", "轮次用完就没有回答"),
+      what: t("When the tool-round limit was reached, the user got a limit message after the longest wait.", "达到工具轮次上限时，用户等了最久，却只得到一条“已达上限”的提示。"),
+      fix: t("One final turn without tools that answers from the evidence gathered.", "增加最后一轮不带工具的调用，根据已收集的证据作答。"),
+      lesson: t("Design what happens at every limit. A limit with no behavior is an outage.", "每个上限触发时会发生什么，都要事先设计。没有后续行为的上限就是一次故障。"),
     },
     {
-      when: "2026-10",
-      title: "A guard that blocked a requested example",
-      what: "A user asked for a made-up numeric example. The guard rejected the invented amounts and the user got an apology.",
-      fix: "Detect explicit requests for examples and skip the figure check on that turn.",
-      lesson: "Every guard needs a list of legitimate cases it must let through, with tests.",
-    },
-    {
-      when: "2026-09",
-      title: "Sixteen thousand log lines from one probe",
-      what: "The health endpoint required a key. The watchdog sent none, so 58 percent of the server log was 401 responses, and the supervisor could not tell healthy from sick.",
-      fix: "An unauthenticated liveness response with no configuration detail. Details still require a key.",
-      lesson: "Separate liveness from detail, and keep noise out of logs that other jobs read.",
+      when: "2026-07",
+      title: t("A point-to-point loop that could not fan out", "无法扇出的点到点循环"),
+      what: t("The first loop ran tool calls one after another. Three lookups in one turn took three times as long.", "最初的循环逐个执行工具调用。同一轮里的三次查询要花三倍时间。"),
+      fix: t("A wave executor with merge rules.", "改用带合并规则的波次执行器。"),
+      lesson: t("Concurrency needs merge rules first. The executor is 40 lines once they exist.", "并发先要有合并规则。规则有了之后，执行器只需要 40 行。"),
     },
   ],
   portability: {
-    databricks:
-      "Write the loop as an MLflow ResponsesAgent or with a framework such as LangGraph, log it to Unity Catalog, and deploy it to Model Serving. Tracing replaces your JSON-lines logs. Agent Bricks offers managed agents when you do not need a custom loop.",
-    watsonx:
-      "watsonx Orchestrate is the harness. You declare agents, tools, and collaborators with the Agent Development Kit, and the platform runs the loop. Custom loop logic goes into tools or a LangGraph agent you import.",
-    codex:
-      "Codex is a finished harness for coding work. You shape it with AGENTS.md, skills, MCP servers, and approval and sandbox settings. To build your own loop, use the OpenAI Agents SDK, which supplies the planner loop, handoffs, guardrails, and sessions.",
-    cursor:
-      "Cursor is a finished harness inside an editor. Rules, AGENTS.md, MCP, hooks, and subagents are your control points. You cannot change its loop, so policy belongs in hooks and tools.",
-    claude:
-      "Claude Code is a harness with the same parts: a project instruction file, skills, hooks, MCP tools, subagents. The Agent SDK exposes that loop as a library so you can run it in your own service.",
-    other:
-      "The reference loop is plain Python with an HTTP client. Copy the two files and change the engine URL. Nothing in it is specific to the machine.",
+    databricks: t(
+      "Write the loop with any framework and wrap it as an MLflow ResponsesAgent. Deploy it with Agent Bricks, as a Databricks App or on Agent Runtime. MLflow tracing replaces your JSON-lines logs.",
+      "用任意框架编写循环，并封装为 MLflow ResponsesAgent。通过 Agent Bricks 部署，可以是 Databricks App，也可以运行在 Agent Runtime 上。MLflow tracing 取代你的 JSON Lines 日志。",
+    ),
+    watsonx: t("watsonx Orchestrate is the harness. You declare agents, tools, and collaborators with the Agent Development Kit, and the platform runs the loop. Custom loop logic goes into tools or an imported LangGraph agent.", "watsonx Orchestrate 本身就是 Harness。你用 Agent Development Kit 声明智能体、工具和协作者，平台负责运行循环。自定义的循环逻辑放进工具，或放进导入的 LangGraph 智能体。"),
+    codex: t("Codex is a finished harness for coding work. You shape it with AGENTS.md, skills, MCP servers, and approval and sandbox settings. To build your own loop, use the OpenAI Agents SDK.", "Codex 是面向编程任务的现成 Harness。你通过 AGENTS.md、技能、MCP 服务以及审批和沙箱设置来调整它。要自建循环，就用 OpenAI Agents SDK。"),
+    cursor: t("Cursor is a finished harness inside an editor. Rules, AGENTS.md, MCP, hooks, and subagents are your control points. You cannot change its loop, so policy belongs in hooks and tools.", "Cursor 是嵌在编辑器里的现成 Harness。规则、AGENTS.md、MCP、钩子和子智能体是你的控制点。它的循环改不了，所以策略要放在钩子和工具里。"),
+    claude: t("Claude Code is a harness with the same parts: a project instruction file, skills, hooks, MCP tools, subagents. The Agent SDK exposes that loop as a library.", "Claude Code 是具有相同部件的 Harness：项目指令文件、技能、钩子、MCP 工具、子智能体。Agent SDK 把这个循环以库的形式提供出来。"),
+    other: t("The lab loop is plain Python and one HTTP call. Copy the folder and set the endpoint URL.", "lab 的循环是纯 Python 加一个 HTTP 调用。复制目录，设置端点 URL 即可。"),
   },
   checks: [
     {
-      q: "Why build the flat loop before the wave graph?",
-      a: "The graph is the flat loop plus concurrency and safe merging. The flat loop is the correctness reference and is easy to test. If you start with the graph you debug orchestration and agent behavior at the same time.",
+      q: t("Why build the flat loop before the wave graph?", "为什么先做扁平循环，再做波次图？"),
+      a: t("The graph is the flat loop plus concurrency and safe merging. The flat loop is the correctness reference and is easy to test. Start with the graph and you debug orchestration and agent behavior at the same time.", "图就是扁平循环加上并发和安全合并。扁平循环是正确性的参照，也容易测试。如果一上来就做图，就得同时调试编排逻辑和智能体行为。"),
     },
     {
-      q: "How does the executor avoid running the planner three times after three tool calls?",
-      a: "The next wave is a dict keyed by node name. Each tool node names the planner as its successor, and writing the same key three times leaves one entry.",
+      q: t("How does the executor avoid running the planner three times after three tool calls?", "三次工具调用之后，执行器如何避免把规划节点运行三次？"),
+      a: t("The next wave is a dict keyed by node name. Each tool node names the planner as its successor, and writing the same key three times leaves one entry.", "下一波是以节点名为键的字典。每个工具节点都把规划节点作为后继，同一个键写三次，最后只有一条。"),
     },
     {
-      q: "Why does the harness depend on the state module?",
-      a: "Concurrent tool nodes each produce updates. The merge rules decide which keys accumulate and which overwrite. Those rules have to be fixed before nodes run in parallel, or results are silently lost.",
+      q: t("List the plug points and which module fills each.", "列出各个接入点，以及分别由哪个模块填充。"),
+      a: t("skills: a function from text to one skill or none. memory: an object with briefing and record_async. guard: a function from messages and a draft to a verdict. pre_tool_hooks: functions from a tool call to a reason or nothing.", "skills：输入文本、返回一个技能或空的函数。memory：带 briefing 和 record_async 的对象。guard：输入消息和草稿、返回裁定的函数。pre_tool_hooks：输入工具调用、返回原因或空的函数。"),
     },
     {
-      q: "Where would you enforce a rule that the agent may never write outside one folder, and why there?",
-      a: "In a pre-tool hook. It runs in code on every call regardless of what the model was told, and it produces a logged refusal.",
+      q: t("Where do you enforce that the agent may never write outside one folder, and why there?", "“智能体绝不能写到某个目录之外”这条规则应该在哪里强制执行？为什么？"),
+      a: t("In a pre-tool hook. It runs in code on every call regardless of what the model was told, and it produces a logged refusal.", "在工具执行前的钩子里。它以代码形式在每次调用时运行，不受模型被告知了什么的影响，并且会留下拒绝日志。"),
     },
     {
-      q: "You are moving this agent to a managed platform that owns the loop. What do you still own?",
-      a: "Tool definitions and their result limits, the instructions and skills, the checks on the final answer, the evaluation sets, and the logs or traces you review. The loop itself is the most replaceable part.",
+      q: t("You move to a platform that owns the loop. What do you still own?", "你迁移到一个由平台掌管循环的环境。哪些东西仍然归你？"),
+      a: t("Tool definitions and their limits, the instructions and skills, the checks on the answer, the eval sets, and the logs or traces you review. The loop is the most replaceable part.", "工具定义及其限制、指令和技能、对回答的检查、评估集，以及你要审阅的日志或 trace。循环本身是最容易被替换的部分。"),
     },
   ],
   terms: [
-    { term: "Wave", def: "The set of nodes that run concurrently in one step of the executor." },
-    { term: "Fan-in", def: "Several nodes converging on one successor, which then runs once." },
-    { term: "Triage", def: "A cheap decision made before the planner about how to handle a request." },
-    { term: "Hook", def: "Code that runs before or after a tool call and can block or extend it." },
+    { term: t("Wave", "波次"), def: t("The set of nodes that run concurrently in one step of the executor.", "执行器一步之内并发运行的一组节点。") },
+    { term: t("Fan-in", "扇入"), def: t("Several nodes converging on one successor, which then runs once.", "多个节点汇聚到同一个后继节点，该后继只运行一次。") },
+    { term: t("Round", "轮次"), def: t("One planner turn that requested tools.", "规划节点请求了工具的一轮调用。") },
+    { term: t("Hook", "钩子"), def: t("Code that runs before a tool call and can block it.", "在工具调用前运行、可以阻止调用的代码。") },
   ],
 };

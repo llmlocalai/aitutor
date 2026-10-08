@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- macOS. Copy to ~/Library/LaunchAgents/, replace AGENT_HOME, then:
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.example.agent-server.plist
+     launchd starts services with a minimal PATH and no shell profile, so every path here is absolute. -->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.example.agent-server</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>AGENT_HOME/venv/bin/python3</string>
+    <string>-m</string><string>uvicorn</string><string>main:app</string>
+    <string>--host</string><string>127.0.0.1</string><string>--port</string><string>8788</string>
+  </array>
+  <key>WorkingDirectory</key><string>AGENT_HOME</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin</string></dict>
+  <key>KeepAlive</key><true/>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>AGENT_HOME/logs/agent-server.log</string>
+  <key>StandardErrorPath</key><string>AGENT_HOME/logs/agent-server.log</string>
+</dict></plist>

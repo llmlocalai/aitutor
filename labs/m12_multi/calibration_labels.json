@@ -1,0 +1,23 @@
+{
+  "_note": "Hand labels for judge calibration. supported = the passage states the claim. Each passage is one section of the sample policy.",
+  "items": [
+    {"claim": "Lodging is reimbursed up to 220 dollars per night.", "section": 3, "supported": true},
+    {"claim": "Hotel stays are paid at actual cost with a nightly ceiling of 220 dollars.", "section": 3, "supported": true},
+    {"claim": "A stay above the lodging cap needs written approval before the trip.", "section": 3, "supported": true},
+    {"claim": "Lodging above the cap can be approved after the trip.", "section": 3, "supported": false},
+    {"claim": "Lodging is reimbursed up to 250 dollars per night.", "section": 3, "supported": false},
+    {"claim": "The meal limit is 95 dollars per day in high-cost cities.", "section": 2, "supported": true},
+    {"claim": "Alcohol is reimbursable with a receipt.", "section": 2, "supported": false},
+    {"claim": "Receipts are needed for a single meal over 25 dollars.", "section": 2, "supported": true},
+    {"claim": "Economy class is required for flights under six hours.", "section": 4, "supported": true},
+    {"claim": "Business class is allowed for flights of six hours or more.", "section": 4, "supported": false},
+    {"claim": "Flights must be booked 14 days ahead unless a business reason is recorded.", "section": 4, "supported": true},
+    {"claim": "A trip costing more than 2,500 dollars needs approval before booking.", "section": 5, "supported": true},
+    {"claim": "An advance may be up to 60 percent of the approved estimate.", "section": 5, "supported": true},
+    {"claim": "An advance may not exceed 80 percent of the approved estimate.", "section": 5, "supported": false},
+    {"claim": "Expense reports are due within 30 days after the trip ends.", "section": 6, "supported": true},
+    {"claim": "Reports must be filed within one month of returning.", "section": 6, "supported": true},
+    {"claim": "Reports filed after 60 days are reimbursed automatically.", "section": 6, "supported": false},
+    {"claim": "An unliquidated advance older than 45 days is taken out of payroll.", "section": 6, "supported": true}
+  ]
+}

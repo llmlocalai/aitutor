@@ -1,54 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { byId, modules, relate } from "@/lib/curriculum";
+import { useMemo, useState } from "react";
+import T from "@/components/T";
+import { useLang } from "@/components/lang";
+import { makeGraph, type Slim } from "@/lib/graph";
+import { ui } from "@/lib/ui";
 
-export default function WhyBefore() {
+export default function WhyBefore({ mods: modules }: { mods: Slim[] }) {
+  const lang = useLang();
+  const { byId, relate } = useMemo(() => makeGraph(modules), [modules]);
   const [a, setA] = useState("knowledge");
-  const [b, setB] = useState("evaluation");
+  const [b, setB] = useState("self-evolving");
   const r = relate(a, b);
+  const options = modules.map((m) => (
+    <option key={m.id} value={m.id}>{m.n}. {m.title[lang]}</option>
+  ));
 
   return (
     <div className="panel">
       <div className="pair">
         <label>
-          <span className="eyebrow">Module A </span>
-          <br />
-          <select value={a} onChange={(e) => setA(e.target.value)}>
-            {modules.map((m) => (
-              <option key={m.id} value={m.id}>{m.title}</option>
-            ))}
-          </select>
+          <span className="eyebrow"><T v={ui.moduleA} /></span><br />
+          <select value={a} onChange={(e) => setA(e.target.value)}>{options}</select>
         </label>
         <label>
-          <span className="eyebrow">Module B </span>
-          <br />
-          <select value={b} onChange={(e) => setB(e.target.value)}>
-            {modules.map((m) => (
-              <option key={m.id} value={m.id}>{m.title}</option>
-            ))}
-          </select>
+          <span className="eyebrow"><T v={ui.moduleB} /></span><br />
+          <select value={b} onChange={(e) => setB(e.target.value)}>{options}</select>
         </label>
       </div>
 
-      {r.kind === "same" && <p className="muted">Pick two different modules.</p>}
+      {r.kind === "same" && <p className="muted"><T v={ui.pickTwo} /></p>}
 
       {r.kind === "before" && (
         <>
           <p>
-            <b>{byId[r.first].title}</b> comes before <b>{byId[r.second].title}</b>
-            {r.steps.length > 1 ? `, through ${r.steps.length - 1} module${r.steps.length > 2 ? "s" : ""} in between.` : "."}
+            <b><T v={byId[r.first].title} /></b> <T v={ui.comesBefore} /> <b><T v={byId[r.second].title} /></b>
           </p>
           <ol className="chain">
             {r.steps.map((s, i) => (
               <li key={s.id}>
                 <b>
-                  <Link href={`/modules/${s.id}`}>{byId[s.id].title}</Link> needs{" "}
-                  {byId[i === 0 ? r.first : r.steps[i - 1].id].title}
+                  <Link href={`/modules/${s.id}`}><T v={byId[s.id].title} /></Link> <T v={ui.needs} />{" "}
+                  <T v={byId[i === 0 ? r.first : r.steps[i - 1].id].title} />
                 </b>
                 <br />
-                <span className="muted">{s.why}</span>
+                <span className="muted"><T v={s.why} /></span>
               </li>
             ))}
           </ol>
@@ -57,14 +54,15 @@ export default function WhyBefore() {
 
       {r.kind === "independent" && (
         <>
-          <p>
-            Neither depends on the other. You can build <b>{byId[a].title}</b> and{" "}
-            <b>{byId[b].title}</b> in either order, or at the same time.
-          </p>
+          <p><T v={ui.independent} /></p>
           <p className="muted small">
-            {r.shared.length
-              ? `Both rest on: ${r.shared.map((x) => byId[x].title).join(", ")}.`
-              : "They share no prerequisites."}
+            {r.shared.length ? (
+              <>
+                <T v={ui.bothRest} /> {r.shared.map((x) => byId[x].title[lang]).join(lang === "zh" ? "、" : ", ")}
+              </>
+            ) : (
+              <T v={ui.noShared} />
+            )}
           </p>
         </>
       )}

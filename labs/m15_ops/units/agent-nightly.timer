@@ -1,0 +1,10 @@
+# Linux. Pair with an agent-nightly.service that runs the nightly loop once.
+[Unit]
+Description=Nightly learning window
+
+[Timer]
+OnCalendar=*-*-* 01:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

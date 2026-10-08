@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { CodeBlock as CB } from "@/lib/types";
+import T from "@/components/T";
+import { ui } from "@/lib/ui";
 
-export default function CodeBlock({ code }: { code: CB }) {
+export default function CodeBlock({ text, label, tone }: { text: string; label: string; tone?: "out" }) {
   const [done, setDone] = useState(false);
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(code.text);
+      await navigator.clipboard.writeText(text);
       setDone(true);
       setTimeout(() => setDone(false), 1400);
     } catch {
@@ -15,14 +16,12 @@ export default function CodeBlock({ code }: { code: CB }) {
     }
   };
   return (
-    <div className="code">
+    <div className={`code ${tone === "out" ? "out" : ""}`}>
       <div className="bar">
-        <span>{code.file ?? code.lang}</span>
-        <button type="button" onClick={copy}>{done ? "Copied" : "Copy"}</button>
+        <span>{label}</span>
+        <button type="button" onClick={copy}><T v={done ? ui.copied : ui.copy} /></button>
       </div>
-      <pre>
-        <code>{code.text}</code>
-      </pre>
+      <pre><code>{text}</code></pre>
     </div>
   );
 }

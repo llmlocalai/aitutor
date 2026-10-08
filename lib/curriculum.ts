@@ -1,33 +1,42 @@
-import type { Module, PlatformId } from "./types";
+import type { LS, Module, PlatformId, Step } from "./types";
 import { inference } from "@/content/modules/inference";
+import { apiGateway } from "@/content/modules/api-gateway";
+import { knowledge } from "@/content/modules/knowledge";
+import { state } from "@/content/modules/state";
 import { ragGraph } from "@/content/modules/rag-graph";
+import { toolsMcp } from "@/content/modules/tools-mcp";
 import { harness } from "@/content/modules/harness";
+import { skills } from "@/content/modules/skills";
+import { memory } from "@/content/modules/memory";
+import { guardrails } from "@/content/modules/guardrails";
 import { evaluation } from "@/content/modules/evaluation";
-import { outlines } from "@/content/modules/outlines";
+import { multiAgent } from "@/content/modules/multi-agent";
+import { selfEvolving } from "@/content/modules/self-evolving";
+import { sdk } from "@/content/modules/sdk";
+import { ops } from "@/content/modules/ops";
 
-const all: Module[] = [inference, ragGraph, harness, evaluation, ...outlines];
-
-export const modules: Module[] = [...all].sort(
-  (a, b) => a.layer - b.layer || a.title.localeCompare(b.title),
-);
+/** In lab order, 1 to 15. */
+export const modules: Module[] = [
+  inference, apiGateway, knowledge, state, ragGraph, toolsMcp, harness, skills,
+  memory, guardrails, evaluation, multiAgent, selfEvolving, sdk, ops,
+].sort((a, b) => a.n - b.n);
 
 export const byId: Record<string, Module> = Object.fromEntries(modules.map((m) => [m.id, m]));
 
-export const platforms: { id: Exclude<PlatformId, "local">; name: string; kind: string }[] = [
-  { id: "databricks", name: "Databricks", kind: "Managed data and AI platform" },
-  { id: "watsonx", name: "IBM watsonx", kind: "Managed AI platform" },
-  { id: "codex", name: "Codex", kind: "Coding agent and SDK" },
-  { id: "cursor", name: "Cursor", kind: "Editor with an agent" },
-  { id: "claude", name: "Claude Code / Agent SDK", kind: "Coding agent and SDK" },
-  { id: "other", name: "Another machine", kind: "Self-hosted" },
-];
+export const platformNames: Record<PlatformId, string> = {
+  databricks: "Databricks",
+  watsonx: "IBM watsonx",
+  codex: "Codex",
+  cursor: "Cursor",
+  claude: "Claude Code / Agent SDK",
+  other: "Another machine",
+};
+export const platformIds = Object.keys(platformNames) as PlatformId[];
 
-/** Modules that list `id` as a prerequisite. */
 export function dependents(id: string): Module[] {
   return modules.filter((m) => m.prereqs.some((p) => p.id === id));
 }
 
-/** Every module that must exist before `id`, direct or indirect. */
 export function ancestors(id: string): Set<string> {
   const seen = new Set<string>();
   const walk = (x: string) => {
@@ -42,83 +51,85 @@ export function ancestors(id: string): Set<string> {
   return seen;
 }
 
-/** A valid build order for the given set (default: everything). Stable and deterministic. */
-export function buildOrder(only?: Set<string>): Module[] {
-  const pool = modules.filter((m) => !only || only.has(m.id));
+// ---- steps ----------------------------------------------------------------
+
+export interface StepRef {
+  key: string; // "<module>.<step>"
+  module: Module;
+  step: Step;
+  index: number; // 1-based position inside its module
+}
+
+export const steps: StepRef[] = modules.flatMap((m) =>
+  m.steps.map((s, i) => ({ key: `${m.id}.${s.id}`, module: m, step: s, index: i + 1 })),
+);
+export const stepByKey: Record<string, StepRef> = Object.fromEntries(steps.map((s) => [s.key, s]));
+
+/** Steps that consume something from the given step. */
+export function feeds(key: string): { ref: StepRef; what: LS }[] {
+  const out: { ref: StepRef; what: LS }[] = [];
+  for (const s of steps) {
+    for (const n of s.step.needs ?? []) {
+      if (n.step === key) out.push({ ref: s, what: n.what });
+    }
+  }
+  return out;
+}
+
+/**
+ * One valid order for every step: each step comes after everything it needs.
+ * Ties are broken by lab order, so the result is stable and close to module order.
+ */
+export function masterOrder(): StepRef[] {
   const done = new Set<string>();
-  const out: Module[] = [];
-  while (out.length < pool.length) {
-    const next = pool.find(
-      (m) => !done.has(m.id) && m.prereqs.every((p) => done.has(p.id) || (only && !only.has(p.id))),
-    );
-    if (!next) break; // cycle guard: should never happen
-    done.add(next.id);
+  const out: StepRef[] = [];
+  const pending = [...steps];
+  while (pending.length) {
+    const i = pending.findIndex((s) => (s.step.needs ?? []).every((n) => done.has(n.step)));
+    if (i < 0) throw new Error("cycle in step links: " + pending.map((p) => p.key).join(", "));
+    const [next] = pending.splice(i, 1);
+    done.add(next.key);
     out.push(next);
   }
   return out;
 }
 
-/** The shortest chain of prerequisite edges from `from` up to `to`, if `to` depends on `from`. */
-export function chain(from: string, to: string): { id: string; why: string }[] | null {
-  const queue: { id: string; path: { id: string; why: string }[] }[] = [{ id: to, path: [] }];
-  const seen = new Set<string>([to]);
-  while (queue.length) {
-    const cur = queue.shift()!;
-    for (const p of byId[cur.id]?.prereqs ?? []) {
-      const path = [{ id: cur.id, why: p.why }, ...cur.path];
-      if (p.id === from) return path;
-      if (!seen.has(p.id)) {
-        seen.add(p.id);
-        queue.push({ id: p.id, path });
+/** Everything a step transitively needs, in build order. */
+export function pathTo(key: string): StepRef[] {
+  const need = new Set<string>();
+  const walk = (k: string) => {
+    for (const n of stepByKey[k]?.step.needs ?? []) {
+      if (!need.has(n.step)) {
+        need.add(n.step);
+        walk(n.step);
       }
     }
-  }
-  return null;
+  };
+  walk(key);
+  return masterOrder().filter((s) => need.has(s.key));
 }
 
-export type Relation =
-  | { kind: "same" }
-  | { kind: "before"; first: string; second: string; steps: { id: string; why: string }[] }
-  | { kind: "independent"; shared: string[] };
-
-/** Answers "why does A come before B?" for any pair. */
-export function relate(a: string, b: string): Relation {
-  if (a === b) return { kind: "same" };
-  const ab = chain(a, b);
-  if (ab) return { kind: "before", first: a, second: b, steps: ab };
-  const ba = chain(b, a);
-  if (ba) return { kind: "before", first: b, second: a, steps: ba };
-  const aa = ancestors(a);
-  const bb = ancestors(b);
-  return { kind: "independent", shared: [...aa].filter((x) => bb.has(x)) };
-}
-
-/** Plain-text digest of a lesson, sent to the tutor as context. */
-export function lessonDigest(m: Module): string {
+/** Plain-text digest of a lesson in one language, sent to the tutor as context. */
+export function lessonDigest(m: Module, lang: "en" | "zh"): string {
+  const L = (v: LS) => v[lang];
   const lines: string[] = [
-    `MODULE: ${m.title}`,
-    `WHAT: ${m.what}`,
-    `WHY: ${m.why}`,
-    `HOW:\n- ${m.how.join("\n- ")}`,
+    `MODULE ${m.n}: ${L(m.title)}`,
+    `WHAT: ${L(m.what)}`,
+    `WHY: ${L(m.why)}`,
+    "HOW:\n- " + m.how.map(L).join("\n- "),
   ];
   if (m.prereqs.length) {
-    lines.push(
-      "PREREQUISITES:\n" +
-        m.prereqs.map((p) => `- ${byId[p.id]?.title ?? p.id}: ${p.why}`).join("\n"),
-    );
-  }
-  if (m.steps) {
-    lines.push(
-      "BUILD STEPS:\n" +
-        m.steps.map((s, i) => `${i + 1}. ${s.title}. Why here: ${s.why}`).join("\n"),
-    );
-  }
-  if (m.failures) {
-    lines.push("FAILURES SEEN:\n" + m.failures.map((f) => `- ${f.title}: ${f.lesson}`).join("\n"));
+    lines.push("NEEDS FIRST:\n" + m.prereqs.map((p) => `- ${L(byId[p.id].title)}: ${L(p.why)} | stub: ${L(p.stub)}`).join("\n"));
   }
   lines.push(
-    "ON OTHER PLATFORMS:\n" +
-      platforms.map((p) => `- ${p.name}: ${m.portability[p.id]}`).join("\n"),
+    "STEPS:\n" +
+      m.steps
+        .map((s, i) => {
+          const needs = (s.needs ?? []).map((n) => `${n.step} (${L(n.what)})`).join("; ");
+          return `${i + 1}. ${L(s.title)}\n   why here: ${L(s.why)}\n   do: ${s.do.map(L).join(" / ")}\n   uses: ${needs || "nothing"}\n   produces: ${L(s.produces)}\n   done when: ${L(s.verify)}${s.run ? `\n   run: ${s.run}` : ""}`;
+        })
+        .join("\n"),
   );
-  return lines.join("\n\n").slice(0, 9000);
+  lines.push("FAILURES:\n" + m.failures.map((f) => `- ${L(f.title)}: ${L(f.lesson)}`).join("\n"));
+  return lines.join("\n\n").slice(0, 12000);
 }
