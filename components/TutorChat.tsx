@@ -6,7 +6,7 @@ import { useLang } from "@/components/lang";
 import type { LS } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
-type Msg = { role: "user" | "assistant"; content: string; via?: string };
+type Msg = { role: "user" | "assistant"; content: string; via?: string; model?: string };
 
 export default function TutorChat({ context, topic }: { context?: LS; topic?: LS }) {
   const lang = useLang();
@@ -37,7 +37,7 @@ export default function TutorChat({ context, topic }: { context?: LS; topic?: LS
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error ?? `${r.status}`);
-      setLog([...next, { role: "assistant", content: data.reply, via: data.via }]);
+      setLog([...next, { role: "assistant", content: data.reply, via: data.via, model: data.model }]);
     } catch (e) {
       setErr(e instanceof Error && e.message.length > 3 ? e.message : ui.tuError[lang]);
     } finally {
@@ -62,7 +62,7 @@ export default function TutorChat({ context, topic }: { context?: LS; topic?: LS
           <div key={i} className={`msg ${m.role}`}>
             {m.content}
             {m.via && (
-              <span className="via"><T v={ui.tuVia} /> <T v={m.via === "local" ? ui.tuLocal : ui.tuCloud} /></span>
+              <span className="via"><T v={ui.tuVia} /> <T v={m.via === "local" ? ui.tuLocal : ui.tuCloud} />{m.model ? ` · ${m.model}` : ""}</span>
             )}
           </div>
         ))}

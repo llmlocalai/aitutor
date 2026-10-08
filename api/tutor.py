@@ -130,37 +130,86 @@ def _chat(base: str, key: str, model: str, messages: list[dict], timeout: float)
     return text.strip()
 
 
-def answer(messages: list[dict], context: str, lang: str = "en") -> tuple[str, str]:
-    """Returns (reply, via). Raises RuntimeError when no backend is usable."""
+def _env(*names: str, default: str = "") -> str:
+    """First non-empty value among several names. datamatter's names come first."""
+    for n in names:
+        v = os.environ.get(n, "").strip()
+        if v:
+            return v
+    return default
+
+
+def links() -> list[dict]:
+    """The model chain, in order: local primary, local secondary, cloud.
+    Same variables as datamatter (LOCAL_LLM_*, CLOUD_LLM_*); the older names still work."""
+    out = []
+    local = _env("LOCAL_LLM_FUNNEL_URL", "LOCAL_AGENT_URL").rstrip("/")
+    if local and not local.endswith("/v1"):
+        local += "/v1"
+    key = _env("LOCAL_LLM_API_KEY", "LOCAL_LLM_SHARED_SECRET", "LOCAL_AGENT_KEY")
+    ms = _env("LOCAL_LLM_TIMEOUT_MS")
+    local_timeout = int(ms) / 1000 if ms.isdigit() else float(_env("LOCAL_TIMEOUT", default="60"))
+    if local.startswith(("https://", "http://127.0.0.1", "http://localhost")):
+        for model in (_env("LOCAL_LLM_MODEL_PRIMARY", "LOCAL_MODEL"), _env("LOCAL_LLM_MODEL_SECONDARY")):
+            if model:
+                out.append({"kind": "local", "base": local, "key": key, "model": model, "timeout": local_timeout})
+    cloud = _env("CLOUD_LLM_BASE_URL", "CLOUD_BASE_URL").rstrip("/")
+    ckey, cmodel = _env("CLOUD_LLM_API_KEY", "CLOUD_API_KEY"), _env("CLOUD_LLM_MODEL", "CLOUD_MODEL")
+    if cloud and ckey and cmodel:
+        out.append({"kind": "cloud", "base": cloud, "key": ckey, "model": cmodel,
+                    "timeout": float(_env("CLOUD_TIMEOUT", default="30"))})
+    return out
+
+
+BUDGET_S = 110.0          # vercel.json gives the function 120 s
+CLOUD_RESERVE_S = 25.0    # time kept back so the cloud link can still answer
+
+
+def answer(messages: list[dict], context: str, lang: str = "en") -> tuple[str, str, str]:
+    """Returns (reply, via, model). Tries each link in order; falls back only on failure."""
     system = SYSTEM + ("\n\nCONTEXT\n" + context if context else "")
     if lang == "zh":
         system += "\n\nReply in Simplified Chinese. Keep code, commands, file names and API names in their original form."
     full = [{"role": "system", "content": system}] + messages
-    tried = []
-
-    local = os.environ.get("LOCAL_AGENT_URL", "").rstrip("/")
-    if local.startswith(("https://", "http://127.0.0.1", "http://localhost")):
-        try:
-            base = local if local.endswith("/v1") else local + "/v1"
-            return _chat(base, os.environ.get("LOCAL_AGENT_KEY", ""),
-                         os.environ.get("LOCAL_MODEL", ""), full,
-                         _env_int("LOCAL_TIMEOUT", 40)), "local"
-        except Exception as e:  # unreachable, asleep, timed out, or refused
-            tried.append(f"local: {type(e).__name__}")
-
-    cloud = os.environ.get("CLOUD_BASE_URL", "").rstrip("/")
-    if cloud and os.environ.get("CLOUD_API_KEY") and os.environ.get("CLOUD_MODEL"):
-        try:
-            return _chat(cloud, os.environ["CLOUD_API_KEY"], os.environ["CLOUD_MODEL"],
-                         full, _env_int("CLOUD_TIMEOUT", 40)), "cloud"
-        except Exception as e:
-            tried.append(f"cloud: {type(e).__name__}")
-
-    if not tried:
+    chain = links()
+    if not chain:
         raise RuntimeError("The tutor is not connected to a model yet. The lessons, map, and "
                            "self-checks work without it.")
-    raise RuntimeError("No model answered. The local build may be asleep and no cloud fallback "
-                       "is configured or it failed. Try again in a minute.")
+    start, tried = time.time(), []
+    has_cloud = chain[-1]["kind"] == "cloud"
+    for link in chain:
+        left = BUDGET_S - (time.time() - start)
+        if link["kind"] == "local" and has_cloud:
+            left -= CLOUD_RESERVE_S
+        timeout = min(link["timeout"], left)
+        if timeout < 5:
+            tried.append(f"{link['model']}: no time left")
+            continue
+        try:
+            return _chat(link["base"], link["key"], link["model"], full, timeout), link["kind"], link["model"]
+        except Exception as e:  # unreachable, asleep, timed out, refused, or model missing
+            tried.append(f"{link['model']}: {type(e).__name__}")
+    raise RuntimeError("No model answered (" + "; ".join(tried) + "). The local build may be asleep. "
+                       "Try again in a minute.")
+
+
+def status() -> list[dict]:
+    """Per-link state without spending a completion: ready, model-missing, refused, unreachable."""
+    out = []
+    for link in links():
+        state = "configured"
+        if link["kind"] == "local":
+            try:
+                req = urllib.request.Request(link["base"] + "/models", headers={"Authorization": f"Bearer {link['key']}"})
+                with urllib.request.urlopen(req, timeout=6) as r:
+                    ids = [m.get("id") for m in json.loads(r.read().decode()).get("data", [])]
+                state = "ready" if link["model"] in ids else "model-missing"
+            except urllib.error.HTTPError as e:
+                state = "refused" if e.code in (401, 403) else f"http {e.code}"
+            except Exception:
+                state = "unreachable"
+        out.append({"kind": link["kind"], "model": link["model"], "state": state})
+    return out
 
 
 def _send(h: BaseHTTPRequestHandler, status: int, obj: dict) -> None:
@@ -196,13 +245,13 @@ class handler(BaseHTTPRequestHandler):
         if not messages or messages[-1]["role"] != "user":
             return _send(self, 400, {"error": "Send at least one question."})
         try:
-            reply, via = answer(messages, context, lang)
+            reply, via, model = answer(messages, context, lang)
         except RuntimeError as e:
             return _send(self, 503, {"error": str(e)})
-        return _send(self, 200, {"reply": reply, "via": via})
+        return _send(self, 200, {"reply": reply, "via": via, "model": model})
 
     def do_GET(self):  # noqa: N802
-        _send(self, 405, {"error": "Use POST."})
+        _send(self, 200, {"links": status()})
 
     def log_message(self, *args):  # keep visitor questions out of logs
         return
