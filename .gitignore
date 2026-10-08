@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.vercel
+.DS_Store
+sync/.state.json
+sync/sync.log
+tsconfig.tsbuildinfo
+next-env.d.ts

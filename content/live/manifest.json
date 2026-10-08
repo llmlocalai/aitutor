@@ -1,0 +1,2747 @@
+{
+ "generatedAt": "2026-10-08T01:30:30Z",
+ "source": "sync.py",
+ "stats": {
+  "commits": 58,
+  "docs": 44,
+  "files": 136,
+  "redactions": 74
+ },
+ "commits": [
+  {
+   "hash": "d230583",
+   "date": "2026-10-07",
+   "subject": "Corroboration needs two independent texts: copies of one passage count once; duplicate the regulation copy retired from the learner queue",
+   "modules": [
+    "self-evolving",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "c79c4a3",
+   "date": "2026-10-07",
+   "subject": "Learner: 8 minutes of source checks in every window, so claim verification keeps pace with what is written",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "8be65af",
+   "date": "2026-10-07",
+   "subject": "Search returns one copy of a paragraph that is in several files; same@10 and distinct@10 in the retrieval eval; dated scheduler log; notice when a no-query draft is replaced; skill: a status is half an answer",
+   "modules": [
+    "evaluation",
+    "skills"
+   ]
+  },
+  {
+   "hash": "43efd92",
+   "date": "2026-10-07",
+   "subject": "Claim judges: the agency and the agency are one name; claims rejected for that are checked again",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "2b71663",
+   "date": "2026-10-07",
+   "subject": "claim_verify: a simplification alone keeps a claim in service; --redecide re-applies the rule to recorded votes",
+   "modules": [
+    "self-evolving",
+    "guardrails"
+   ]
+  },
+  {
+   "hash": "43ebe69",
+   "date": "2026-10-07",
+   "subject": "Claim verification live: nightly two-vote check, claims failing both leave service as 'unsupported'; omission alone keeps a claim; VERIFY line in the daily report",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "2b71a81",
+   "date": "2026-10-07",
+   "subject": "claim_verify: two-vote check of served claims against their source (dry run and calibration); off-topic the oversight body reports retired from the learner queue",
+   "modules": [
+    "self-evolving",
+    "guardrails"
+   ]
+  },
+  {
+   "hash": "e7f77cf",
+   "date": "2026-10-07",
+   "subject": "Out of tool rounds: one final turn without tools answers from the evidence gathered; restate standing after promotion; ordered promotion queue",
+   "modules": [
+    "harness",
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "868d646",
+   "date": "2026-10-07",
+   "subject": "BUSY sentinel is held until a streamed response finishes, so the learner pauses for the whole chat answer",
+   "modules": [
+    "self-evolving",
+    "harness"
+   ]
+  },
+  {
+   "hash": "d740ca8",
+   "date": "2026-10-07",
+   "subject": "recall_claims returns the source passage beside each claim and tells the model the passage is the authority",
+   "modules": [
+    "self-evolving",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "e17d960",
+   "date": "2026-10-07",
+   "subject": "Claim fidelity: sample by bank folder, not by chunk",
+   "modules": [
+    "self-evolving",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "4227e8f",
+   "date": "2026-10-07",
+   "subject": "Claim fidelity eval: a sample of served claims is checked against the cited passage by the 35B model; weekly, with a report line",
+   "modules": [
+    "self-evolving",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "cf3fef4",
+   "date": "2026-10-07",
+   "subject": "Learner: claims queue rotates through authority, newest and reports lanes; gate-blocked claims are retired, not left in quarantine",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "c23400e",
+   "date": "2026-10-07",
+   "subject": "Claims: restate_standing re-rates every claim in one statement; corroboration counts documents; legacy trusted claims re-rated and gate-checked",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "187854a",
+   "date": "2026-10-07",
+   "subject": "Authority: hearings, committee prints and mandated reports are tier 2 and typed other; their single-source claims are no longer trusted",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "f29aa9e",
+   "date": "2026-10-07",
+   "subject": "Concept promotion: cap what is promoted, not what is read; the pass had been stuck behind 500 gate failures",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "f010ff5",
+   "date": "2026-10-07",
+   "subject": "Trusted vocabulary: definition authorities only, placeholders and headings rejected, existing rows demoted; claims pass gets trusted terms only",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "hash": "dbffdc1",
+   "date": "2026-10-07",
+   "subject": "Knowledge graph: 'defines' edges from set definitional forms, used in retrieval for definitional questions; gold set and nightly eval",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "816a464",
+   "date": "2026-10-07",
+   "subject": "Learner queue: tier 3 sorts after core material; documents that get no vocabulary pass move to claims in one statement",
+   "modules": [
+    "self-evolving",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "79bec66",
+   "date": "2026-10-07",
+   "subject": "Collector: feed filter matches broad terms on the title only, domain organizations on title and summary",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "8a2d900",
+   "date": "2026-10-07",
+   "subject": "Collector: per-feed relevance filter; the oversight body all-reports and legal feeds keep only domain and financial-management items",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "b3b5775",
+   "date": "2026-10-07",
+   "subject": "Conversation learner ignores eval threads; report treats findings from unchanged threads as no new traffic",
+   "modules": [
+    "state"
+   ]
+  },
+  {
+   "hash": "b83ce0e",
+   "date": "2026-10-07",
+   "subject": "the spending dataset collector: fiscal-year scope never starts later than FY2021",
+   "modules": [
+    "knowledge",
+    "api-gateway"
+   ]
+  },
+  {
+   "hash": "1dc4915",
+   "date": "2026-10-06",
+   "subject": "query_spending returns the total and names the period it covers; award warehouse builds itself when a newer archive lands, with a report alarm",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "hash": "cf90a23",
+   "date": "2026-10-06",
+   "subject": "Guard: on a spending turn a draft sourced from a web search alone is rejected and sent to the spending tools; skill says the same",
+   "modules": [
+    "guardrails",
+    "skills"
+   ]
+  },
+  {
+   "hash": "ea72fdf",
+   "date": "2026-10-06",
+   "subject": "Stream eval in the weekly cycle and the report; spending skill: a follow-up means another query; tests keep out of the production guard log; wiki watcher drops queued triggers; tuner skips manual-only sources",
+   "modules": [
+    "skills",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "12f80b4",
+   "date": "2026-10-05",
+   "subject": "Answers that used tools stream line by line as they clear the guard; new chunks get their Qwen3 embedding after ingest",
+   "modules": [
+    "knowledge",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "540ee09",
+   "date": "2026-10-05",
+   "subject": "Guard: a requested made-up example is recorded, not rejected; wiki ingest runs 23:00-07:00",
+   "modules": [
+    "knowledge",
+    "guardrails"
+   ]
+  },
+  {
+   "hash": "b4cbaa5",
+   "date": "2026-10-05",
+   "subject": "Collector: the agency IG and the oversight site through the the oversight site listing (two-step), executive orders query fixed, closed the oversight body archive marked manual",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "0e70acf",
+   "date": "2026-10-04",
+   "subject": "Gateway answers the watchdog probe; guard: no-tool check on data turns only, strict first draft; wiki samples start, middle and end; collector tuner floor and restored cadences",
+   "modules": [
+    "ops",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "ffc210c",
+   "date": "2026-10-04",
+   "subject": "Answer guard: vendor names, answers given without a tool call, streaming gate; FINANCE on Qwen3 embeddings; wiki watcher batch cap, lock and wait; downloads script",
+   "modules": [
+    "api-gateway",
+    "tools-mcp"
+   ]
+  },
+  {
+   "hash": "e3a33d0",
+   "date": "2026-10-03",
+   "subject": "Chat eval: the round-limit message counts as a fallback, not a bad answer delivered",
+   "modules": [
+    "guardrails",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "7d67151",
+   "date": "2026-10-03",
+   "subject": "Answer guard checks counts; chat eval in the Sunday cycle; CHAT line in the daily report",
+   "modules": [
+    "guardrails",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "e9cb1e9",
+   "date": "2026-10-03",
+   "subject": "Reranker: cap and release the MLX buffer cache (process had grown to 71 GB)",
+   "modules": [
+    "rag-graph",
+    "inference"
+   ]
+  },
+  {
+   "hash": "7e78882",
+   "date": "2026-10-03",
+   "subject": "Answer guard: plain message when the model returns nothing twice; chat eval allows 6000 output tokens",
+   "modules": [
+    "guardrails",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "996450f",
+   "date": "2026-10-03",
+   "subject": "Retry model calls that return HTTP 500 (malformed tool call) and empty final answers",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "hash": "92d576a",
+   "date": "2026-10-03",
+   "subject": "Answer guard: dollar figures must come from tool results (both answer paths); follow-ups inherit the skill; multi-turn chat eval",
+   "modules": [
+    "tools-mcp",
+    "skills"
+   ]
+  },
+  {
+   "hash": "9bfb7c9",
+   "date": "2026-10-01",
+   "subject": "Memory store on Postgres, second attempt (qualified upsert columns); recall skips the current thread, memory briefing cannot fail a request",
+   "modules": [
+    "memory",
+    "state"
+   ]
+  },
+  {
+   "hash": "78745d5",
+   "date": "2026-10-01",
+   "subject": "Memory store on Postgres (mem schema), recall skips the current thread, memory briefing cannot fail a request",
+   "modules": [
+    "state",
+    "memory"
+   ]
+  },
+  {
+   "hash": "154a26c",
+   "date": "2026-10-01",
+   "subject": "Recall similarity floor 0.35 (eval: lowest hit 0.55, highest unrelated 0.24)",
+   "modules": [
+    "memory",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "d3abe73",
+   "date": "2026-10-01",
+   "subject": "Conversation recall: mem.turns index, recall_conversations tool, recall gate in the daily cycle",
+   "modules": [
+    "memory",
+    "state"
+   ]
+  },
+  {
+   "hash": "4c20009",
+   "date": "2026-10-01",
+   "subject": "Chain audit: files removed from disk are counted separately, not as awaiting ingest",
+   "modules": [
+    "ops",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "80b8b19",
+   "date": "2026-10-01",
+   "subject": "Daily report: unreadable learning store is one explicit problem, never zeros; backfill status merges per collection; collector pause expires before the same-hour run",
+   "modules": [
+    "ops",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "7f41a7e",
+   "date": "2026-09-30",
+   "subject": "Weekly agent quiz in the daily cycle; AGENT line in the report",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "719d4d2",
+   "date": "2026-09-30",
+   "subject": "Audit fixes: self-gap dedupe, SQLite stores in the nightly backup; agent quiz",
+   "modules": [
+    "ops",
+    "state"
+   ]
+  },
+  {
+   "hash": "a62af1b",
+   "date": "2026-09-30",
+   "subject": "Tests: isolate conversations.db and the retrieval trace",
+   "modules": [
+    "state",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "af3fa42",
+   "date": "2026-09-30",
+   "subject": "Skills: route by natural-language examples only (descriptions as fallback)",
+   "modules": [
+    "skills",
+    "guardrails"
+   ]
+  },
+  {
+   "hash": "c49ec3a",
+   "date": "2026-09-30",
+   "subject": "Skills: '_none' margin for embedding routing; default chosen by the eval",
+   "modules": [
+    "skills",
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "eafcb04",
+   "date": "2026-09-30",
+   "subject": "Skills: embedding routing, up to two skills per request, routing eval",
+   "modules": [
+    "skills"
+   ]
+  },
+  {
+   "hash": "6b5b2c9",
+   "date": "2026-09-30",
+   "subject": "Citation expansion on by default; citation index refreshed daily",
+   "modules": []
+  },
+  {
+   "hash": "543b79e",
+   "date": "2026-09-30",
+   "subject": "Citation layer: kb_finance.citations, citation gold set, graph expansion (off)",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "0ee2659",
+   "date": "2026-09-30",
+   "subject": "Daily regression tests; Qwen3 switch readiness in the report",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "727d791",
+   "date": "2026-09-30",
+   "subject": "kb_extract: OCR scanned PDFs with macOS Vision",
+   "modules": []
+  },
+  {
+   "hash": "f51dc25",
+   "date": "2026-09-30",
+   "subject": "K12 on Qwen3 embeddings, search tracing, retrieval tests, ingest fix",
+   "modules": [
+    "rag-graph",
+    "knowledge"
+   ]
+  },
+  {
+   "hash": "fec2139",
+   "date": "2026-09-30",
+   "subject": "Qwen3 embeddings (off by default) and a daily retrieval check",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "b73e1fb",
+   "date": "2026-09-30",
+   "subject": "Retrieval SQL v2: use the HNSW index (search 5.4 s -> about 1 s before rerank)",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "hash": "9117934",
+   "date": "2026-09-30",
+   "subject": "Retrieval: Qwen3 reranker on by default (gold set hit@10 0.34 -> 0.62, MRR 0.162 -> 0.414)",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "hash": "b65682a",
+   "date": "2026-09-30",
+   "subject": "Baseline 2026-09-30: code and scripts after the Postgres cutover, pinned MCP servers, nightly pg_dump",
+   "modules": [
+    "tools-mcp",
+    "state"
+   ]
+  }
+ ],
+ "docs": [
+  {
+   "path": "apps/agent-server/skills/finance-citation.md",
+   "title": "FINANCE: name the actual authority, don't just summarize \u2014 and show it in practice, not just recite the rule",
+   "updated": "2026-10-07",
+   "headings": [
+    "Citation (unchanged from Step 3 \u2014 the \"just the facts\" requirement)",
+    "Depth (added 2026-07-28, from graded baseline feedback)",
+    "A status is half an answer (added 2026-10-07, from the agent quiz)"
+   ],
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/skills/spending-investigation.md",
+   "title": "Spending orchestration",
+   "updated": "2026-10-06",
+   "headings": [
+    "0. The question behind every question",
+    "1. Routing table",
+    "2. Mandatory sequences",
+    "3. The reconciliation rule",
+    "3b. DEFC \u2014 which law the money came from",
+    "4. Status discipline",
+    "5. Summing discipline",
+    "6. Two failure modes with equal weight"
+   ],
+   "modules": [
+    "harness",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "CLAUDE.md",
+   "title": "CLAUDE.md \u2014 build-host Mac Studio",
+   "updated": "2026-09-22",
+   "headings": [
+    "The one thing to know",
+    "Which tool",
+    "The skills carry the routing \u2014 use them",
+    "Where you are matters",
+    "Never assert absence",
+    "Money words are not interchangeable",
+    "Presenting results",
+    "Operating this machine"
+   ],
+   "modules": [
+    "rag-graph",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "FIXES-2026-09-07.md",
+   "title": "Fixes applied \u2014 2026-09-07",
+   "updated": "2026-09-07",
+   "headings": [
+    "1. Tool results are bounded \u2014 agentloop.py",
+    "2. selfobserve.py can no longer fabricate corroboration \u2014 and 184 bad findings removed",
+    "3. The the document service credential is redacted and scrubbed \u2014 collect.py",
+    "4. The watchdog now actually checks health \u2014 Install-Autostart.command",
+    "5. Twenty-one tools removed from every prompt \u2014 mcpservers.json",
+    "6. CLAUDE.md no longer misinforms every request",
+    "One thing I got wrong, and reverted",
+    "Not touched, deliberately"
+   ],
+   "modules": [
+    "ops",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "FINISH-TODAY-2026-08-20.md",
+   "title": "Finish the Update Today \u2014 remaining steps",
+   "updated": "2026-09-07",
+   "headings": [
+    "Why it hung \u2014 four facts from the disk and the log",
+    "Step 1 \u2014 Maintenance window (~25 min)",
+    "Step 2 \u2014 Dynamic gateway (~20 min)",
+    "Step 3 \u2014 Rewire the router (~10 min)",
+    "Step 4 \u2014 Rotate the disclosed credentials (~5 min)",
+    "Step 5 \u2014 Retire stale models (~10 min)",
+    "Not today",
+    "Today's checklist"
+   ],
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "AUDIT-2026-09-07.md",
+   "title": "Full-stack audit \u2014 2026-09-07",
+   "updated": "2026-09-07",
+   "headings": [
+    "The short version",
+    "1. Confirmed live bugs",
+    "2. What actually works \u2014 and the number that says otherwise",
+    "3. Where the work is stuck on a human",
+    "4. Outdated information",
+    "5. What I would do, in order",
+    "6. The thing that is genuinely good"
+   ],
+   "modules": [
+    "rag-graph",
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "SELF-EVOLUTION-ENHANCEMENT-2026-09-07.md",
+   "title": "Self-evolution: what was broken, what changed",
+   "updated": "2026-09-07",
+   "headings": [
+    "1. The experience half of the loop was switched off",
+    "2. The findings file was 97% duplicates",
+    "3. 58% of the server log was one misconfigured probe",
+    "4. There was no conversation to learn from",
+    "Cleanup",
+    "Left alone, deliberately",
+    "Still open",
+    "To activate"
+   ],
+   "modules": [
+    "self-evolving",
+    "memory"
+   ]
+  },
+  {
+   "path": "RUNBOOK-CLAUDE-CODE-the agency.md",
+   "title": "Runbook \u2014 making the Claude Code CLI smart about the agency",
+   "updated": "2026-08-23",
+   "headings": [
+    "Step 1 \u2014 make the files executable (30 seconds)",
+    "Step 2 \u2014 selftest against the real stores (2 minutes)",
+    "Step 3 \u2014 start Claude Code and approve the server (2 minutes)",
+    "Step 4 \u2014 confirm the skills were discovered \u26a0\ufe0f THE UNCERTAIN ONE",
+    "Step 5 \u2014 the test that means something",
+    "Step 6 \u2014 measure, do not assume",
+    "Step 7 \u2014 decide three things I could not decide for you",
+    "Step 8 \u2014 the two things that make this fragile"
+   ],
+   "modules": [
+    "skills",
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "AI_Model_Integration_Guide.md",
+   "title": "AI Local Server \u2192 Vercel Integration Guide",
+   "updated": "2026-08-22",
+   "headings": [
+    "Multi-Model Chain Architecture with Intelligent Routing",
+    "\ud83d\udd34 2026-08-06 \u2014 TTS went from working to 501. Root cause, and why the error message mislead",
+    "\ud83c\udfc1 Finished this pass (2026-08-03, round 2) \u2014 everything I could do without your Mac's shel",
+    "\ud83d\udcda Institutional knowledge source (added 2026-08-03)",
+    "\ud83e\udde9 Root cause: why 4 downloaded models don't show in ollama list or \"the venv\" (confirmed 2",
+    "\ud83d\udd0d MiniMax-H3 evaluated as a vision replacement (2026-08-05) \u2014 not swapped in, here's why",
+    "\u2705 Implementation Status (2026-08-03) \u2014 What's Actually Built",
+    "\ud83d\udd04 \"Legacy\" agent-server vs \"multi-model\" agent-server \u2014 one service, not two"
+   ],
+   "modules": [
+    "ops",
+    "inference"
+   ]
+  },
+  {
+   "path": "SOP-LLM-OPERATIONS.md",
+   "title": "SOP \u2014 Operating the Local LLM Server",
+   "updated": "2026-08-22",
+   "headings": [
+    "Part 0 \u2014 Quick reference",
+    "Part 1 \u2014 What this system is",
+    "Part 2 \u2014 How to use it",
+    "Part 3 \u2014 Monitoring",
+    "Part 4 \u2014 Maintenance",
+    "Part 5 \u2014 Updating",
+    "Part 6 \u2014 Backup and restore",
+    "Part 7 \u2014 Troubleshooting"
+   ],
+   "modules": [
+    "ops",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/README.md",
+   "title": "Claude Code \u2192 your own models",
+   "updated": "2026-08-21",
+   "headings": [
+    "0 \u00b7 What this is, and what it does not touch",
+    "1 \u00b7 Before you start \u2014 five checks",
+    "2 \u00b7 Install LiteLLM",
+    "3 \u00b7 Create the key",
+    "4 \u00b7 Start it and prove it works",
+    "5 \u00b7 Point Claude Code at it (on the Mac Studio)",
+    "6 \u00b7 The dropdown",
+    "7 \u00b7 Make it survive a reboot"
+   ],
+   "modules": [
+    "api-gateway",
+    "sdk"
+   ]
+  },
+  {
+   "path": "BUGFIX-2026-08-20.md",
+   "title": "Bug Fixes \u2014 2026-08-20, post-update",
+   "updated": "2026-08-20",
+   "headings": [
+    "P0 \u2014 Live outage: your gateway currently allows zero working models",
+    "P1 \u2014 The 401 was a wrong key, not a broken gateway",
+    "P2 \u2014 The watchdog is down and paused",
+    "P3 \u2014 You have no coding model",
+    "P4 \u2014 Correction: you don't have video generation. I was wrong.",
+    "P5 \u2014 The MLX swap worked, but the benchmark is not what it looks like",
+    "P6 \u2014 Disk reclaimed correctly; your df reading was just taken too early",
+    "P7\u2013P9 \u2014 Lower priority, worth a look this week"
+   ],
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "MODEL-LINEUP-AND-DYNAMIC-GATEWAY-2026-08-20.md",
+   "title": "Dynamic Gateway + Full-Capability Model Lineup",
+   "updated": "2026-08-20",
+   "headings": [
+    "Part 1 \u2014 Make the allow-list dynamic",
+    "Part 2 \u2014 Full-capability lineup",
+    "Order"
+   ],
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "SYSTEM-AUDIT-AND-UPDATE-PLAN-2026-08-20.md",
+   "title": "Whole-System Audit and Revised Update Plan",
+   "updated": "2026-08-20",
+   "headings": [
+    "1. What you've actually built",
+    "2. Three findings that change the update plan",
+    "3. Exposure review \u2014 the public surface",
+    "4. Is the learning loop actually learning?",
+    "5. Revised update plan",
+    "6. Fit check",
+    "7. Suggested order",
+    "Sources"
+   ],
+   "modules": [
+    "inference",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "UPDATE-RUNBOOK-2026-08-20.md",
+   "title": "AI Stack Update Runbook \u2014 2026-08-20",
+   "updated": "2026-08-20",
+   "headings": [
+    "Two corrections to what I told you first",
+    "TL;DR \u2014 what actually buys you speed",
+    "Baseline \u2014 recorded 2026-08-20",
+    "Finding \u2014 your vision rollback fallback does not exist",
+    "Step 1 \u2014 Upgrade Ollama (low value, do it anyway)",
+    "\u26a0\ufe0f Homebrew hazard list \u2014 do NOT run bare brew upgrade",
+    "Step 2 \u2014 Move your chat models onto the MLX engine",
+    "Step 3 \u2014 The two big models worth a decision"
+   ],
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "EVAL-SET-V2.md",
+   "title": "Eval set v2 \u2014 built 2026-08-19",
+   "updated": "2026-08-19",
+   "headings": [
+    "What changed, and why each change was necessary",
+    "citecheck.py \u2014 the key no longer rests on me",
+    "Running it",
+    "RESULT \u2014 2026-08-18 21:16, and my predictions scored",
+    "What I expected, written down before the run"
+   ],
+   "modules": [
+    "rag-graph",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "ZERO-RETRIEVAL-DIAGNOSIS-2026-08-18.md",
+   "title": "Issues 7, 8 and 9 \u2014 diagnosis and fix",
+   "updated": "2026-08-18",
+   "headings": [
+    "0. RESULT \u2014 the quiz ran, and it settled the question",
+    "0. The eval is saturated, and my ranking of the retrievers was wrong",
+    "0-ter. Current result, and one retraction",
+    "0-bis. Why atoms sat at exactly 27/30, five runs running",
+    "0a. STOP \u2014 every score above this line is suspect",
+    "0b. Why 65.5%, and what actually gets you higher",
+    "1. The headline",
+    "2. The trap, and why the obvious order is backwards"
+   ],
+   "modules": [
+    "evaluation",
+    "memory"
+   ]
+  },
+  {
+   "path": "ROLE-DIMENSION-ARCHITECTURE-v2.md",
+   "title": "The Role Dimension \u2014 Architecture v2",
+   "updated": "2026-08-16",
+   "headings": [
+    "0. What changed from v1, and why",
+    "1. The learning-science foundation",
+    "2. Authority research: what the role dimension can be built from",
+    "3. The graph model",
+    "4. How the graph thinks \u2014 named traversals",
+    "5. Measured feasibility \u2014 the locus and artifact layers are nearly free",
+    "6. Build sequence, revised",
+    "7. Failure modes"
+   ],
+   "modules": [
+    "multi-agent"
+   ]
+  },
+  {
+   "path": "ROLE-DIMENSION-ARCHITECTURE.md",
+   "title": "The Role Dimension \u2014 Architecture",
+   "updated": "2026-08-16",
+   "headings": [
+    "0. The one-paragraph version",
+    "1. Why not a corpus per role",
+    "2. The axis model",
+    "3. What a capability actually contains",
+    "4. The binding problem \u2014 and the prerequisite nobody will notice until it blocks them",
+    "5. Roles must be ingested, not invented",
+    "6. The corner roles",
+    "7. Build sequence"
+   ],
+   "modules": [
+    "multi-agent"
+   ]
+  },
+  {
+   "path": "study-notes/01_System_Architecture.md",
+   "title": "01 \u2014 System Architecture",
+   "updated": "2026-08-15",
+   "headings": [
+    "The one-paragraph version",
+    "Layer 1 \u2014 Hardware and the model engine",
+    "Layer 2 \u2014 Two front doors, on purpose",
+    "Layer 3 \u2014 Knowledge, in three tiers",
+    "Layer 4 \u2014 The agent-server request pipeline",
+    "Layer 5 \u2014 Networking and exposure",
+    "Layer 6 \u2014 Supporting apps",
+    "Layer 7 \u2014 Backup"
+   ],
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "study-notes/02_Build_Process_Step_By_Step.md",
+   "title": "02 \u2014 The Build Process, Step by Step",
+   "updated": "2026-08-15",
+   "headings": [
+    "Phase 0 \u2014 Mac foundation",
+    "Phase 1 \u2014 The engine",
+    "Phase 2 \u2014 The rest of the model stack",
+    "Phase 3 \u2014 Making it usable: Open WebUI and knowledge banks",
+    "Phase 4 \u2014 Connecting everything else",
+    "Phase 4\u00bd \u2014 The public demo bridge",
+    "Phase 5 \u2014 Opening it up to a small team",
+    "Phase 6 \u2014 Backup"
+   ],
+   "modules": [
+    "knowledge",
+    "inference"
+   ]
+  },
+  {
+   "path": "study-notes/00_Project_Timeline.md",
+   "title": "00 \u2014 Project Timeline: How build-host Got Built",
+   "updated": "2026-08-15",
+   "headings": [
+    "The shape of the week",
+    "Day 0 \u2014 July 24: Foundation",
+    "July 25 \u2014 The engine, the models, and the first public face",
+    "July 26 \u2014 Knowledge banks and the LLM Wiki",
+    "July 27 \u2014 Fixing retrieval, and the agent is born",
+    "July 28 \u2014 The big build day",
+    "July 29 \u2014 Streaming, latency, and turning it into an operable system",
+    "July 30 (today) \u2014 Diagnosing and fixing a real latency bug"
+   ],
+   "modules": [
+    "knowledge",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "study-notes/07_Switching_LLM_Models_Guide.md",
+   "title": "07 \u2014 How to Change or Add LLM Models",
+   "updated": "2026-08-15",
+   "headings": [
+    "First, understand why this is easy",
+    "The VRAM math you must do first",
+    "Adding a model",
+    "Removing a model",
+    "Trying a model before committing",
+    "Changing the embedding model \u2014 different process, do this carefully",
+    "Setting a default, or forcing a specific model for specific traffic",
+    "Tuning how Ollama serves whatever models you have"
+   ],
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "AI_SERVER_SETUP_GUIDE.md",
+   "title": "AIDATA Local AI Server \u2014 Master Guide (Phased Plan)",
+   "updated": "2026-08-15",
+   "headings": [
+    "Phased Roadmap (Multi-Purpose Server)",
+    "\u2b50 OPERATIONS BOARD \u2014 Status, Usage & Maintenance (as of 2026-07-24)",
+    "Phase 7 \u2014 Building Agentic AI on This Foundation \u2014 \u26a0\ufe0f MOVED to its own doc, v2, 2026-07-27",
+    "Software Shopping List \u2014 Everything Is Free",
+    "1. What This Machine Can Run",
+    "2. Top 5 Candidates",
+    "Phase 0 \u2014 Mac Foundation (Day 0)",
+    "Phase 1 \u2014 Core AI Server (MAIN model first)"
+   ],
+   "modules": [
+    "inference",
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/agent-server/skills/spending-orchestration.md",
+   "title": "Merged into spending-investigation.md on 2026-08-15.",
+   "updated": "2026-08-15",
+   "headings": [],
+   "modules": [
+    "skills"
+   ]
+  },
+  {
+   "path": "USER-GUIDE.md",
+   "title": "BUILD-HOST \u2014 user guide",
+   "updated": "2026-08-15",
+   "headings": [
+    "1. What the agent can do that it could not a week ago",
+    "2. How to ask",
+    "3. Reading the answers",
+    "4. What it cannot do",
+    "5. Vercel front-end \u2014 two changes needed",
+    "6. Troubleshooting",
+    "7. A worked example"
+   ],
+   "modules": [
+    "self-evolving",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "SELF-EVOLUTION-LESSONS.md",
+   "title": "What the failures teach about making the agent actually get smarter",
+   "updated": "2026-08-15",
+   "headings": [
+    "1. The single pattern behind every failure",
+    "2. Three structural rules that follow",
+    "3. The learning loop is not learning from any of this",
+    "4. Where the epistemic model must extend",
+    "5. Honest ranking of what to build next",
+    "6. What the detector found on its first run",
+    "7. Auto-relaxation, and the failure it nearly introduced",
+    "7b. The fix that broke production, four hours later"
+   ],
+   "modules": [
+    "self-evolving",
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/README.md",
+   "title": "BUILD-HOST \u2014 Operations Runbook",
+   "updated": "2026-08-15",
+   "headings": [
+    "Status",
+    "PHASE A \u2014 Seal the eval sets",
+    "PHASE B \u2014 Put services under supervision",
+    "PHASE C \u2014 Three production fixes",
+    "What each patch actually does",
+    "PHASE D \u2014 Log hygiene",
+    "PHASE F \u2014 The scheduler (replaces manual Phase E)",
+    "PHASE G \u2014 Review, then switch to apply"
+   ],
+   "modules": [
+    "self-evolving",
+    "ops"
+   ]
+  },
+  {
+   "path": "ASSESSMENT-LEARNING-2026-08-14.md",
+   "title": "Self-assessment: the learning system after ~100 hours of autonomous running",
+   "updated": "2026-08-14",
+   "headings": [
+    "The headline numbers, and why each one is misleading",
+    "A. What genuinely works",
+    "B. What is broken",
+    "C. What was designed and never built",
+    "D. Honest assessment of my own design",
+    "E. What to fix, in order"
+   ],
+   "modules": [
+    "self-evolving",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "BRAIN-ARCHITECTURE.md",
+   "title": "BUILD-HOST \u2014 Cognitive Architecture & Self-Evolving Learning Loop",
+   "updated": "2026-08-09",
+   "headings": [
+    "0. The premise, stated honestly",
+    "1. Design principles",
+    "2. The brain map",
+    "3. Memory architecture",
+    "4. The nightly loop",
+    "5. The promotion gate",
+    "6. What the agent must never do at night",
+    "7. Attention \u2014 fixing the wake-up router"
+   ],
+   "modules": [
+    "self-evolving",
+    "skills"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/PATCHES.md",
+   "title": "Stage 0 patches \u2014 ready to apply, deliberately NOT applied",
+   "updated": "2026-08-09",
+   "headings": [
+    "PATCH 1 \u2014 TTS: stop synthesizing non-speech, stop returning 200 on garbage",
+    "PATCH 2 \u2014 Log nresults and topscore (2 lines, unblocks Diet A)",
+    "PATCH 3 \u2014 Token cap \u2192 413 before dispatch",
+    "PATCH 4 \u2014 Preemption sentinel (required by R1, \u00a74.0.3)",
+    "PATCH 5 \u2014 LaunchAgents with KeepAlive (Stage 0a)",
+    "PATCH 6 \u2014 Log rotation (Stage 0b)"
+   ],
+   "modules": [
+    "inference",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "FINDINGS-2026-08-09.md",
+   "title": "Production findings \u2014 surfaced by the first Phase 1 replay run",
+   "updated": "2026-08-09",
+   "headings": [
+    "FINDING 1 \u2014 TTS returns HTTP 200 with ~4 seconds of garbage audio",
+    "FINDING 2 \u2014 157 HTTP 502s, 6.9% error rate for BrainBank",
+    "FINDING 3 \u2014 the highest-value failure signal is not being logged",
+    "FINDING 4 \u2014 97% of tool-using requests never iterate",
+    "What to do, in order"
+   ],
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "ASSESSMENT-2026-08-07.md",
+   "title": "AIDATA \u2014 Consolidation & Streamlining Assessment",
+   "updated": "2026-08-07",
+   "headings": [
+    "Verdict in one paragraph",
+    "1. Disk \u2014 what is actually earning its space",
+    "2. \"Two environments \u2014 mandatory or not?\"",
+    "3. Scripts \u2014 11 launchers, overlapping responsibility",
+    "4. Documentation \u2014 84,000 words, heavily overlapping",
+    "5. Effectiveness \u2014 what's built vs. what's wired",
+    "6. Prioritized plan",
+    "7. One thing to watch"
+   ],
+   "modules": [
+    "inference",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "study-notes/08_Extending_The_Harness_Agent.md",
+   "title": "08 \u2014 Extending the Harness Agent",
+   "updated": "2026-07-31",
+   "headings": [
+    "Adding a new local tool",
+    "Adding a new MCP server",
+    "Adding a new skill",
+    "Adding a new hook",
+    "Using or adding a new model",
+    "Structural extensions worth building next",
+    "A general principle for extending this system"
+   ],
+   "modules": [
+    "tools-mcp",
+    "skills"
+   ]
+  },
+  {
+   "path": "study-notes/06_Improvement_Roadmap.md",
+   "title": "06 \u2014 Improvement Roadmap",
+   "updated": "2026-07-31",
+   "headings": [
+    "Do now \u2014 cheap, high-value, low-risk",
+    "Do soon \u2014 real work, real payoff",
+    "Consider later \u2014 bigger bets",
+    "A note on sequencing"
+   ],
+   "modules": [
+    "api-gateway",
+    "ops"
+   ]
+  },
+  {
+   "path": "study-notes/05_Gap_Analysis.md",
+   "title": "05 \u2014 Gap Analysis",
+   "updated": "2026-07-31",
+   "headings": [
+    "Security and secrets",
+    "Knowledge base completeness",
+    "Retrieval and RAG quality",
+    "The agent harness itself (from reading the code directly)",
+    "Fine-tuning",
+    "Documentation and housekeeping",
+    "How to read this list"
+   ],
+   "modules": [
+    "knowledge",
+    "ops"
+   ]
+  },
+  {
+   "path": "study-notes/04_Cheat_Sheet.md",
+   "title": "04 \u2014 Operations Cheat Sheet",
+   "updated": "2026-07-31",
+   "headings": [
+    "The five buttons (double-click at the root of AIDATA)",
+    "Emergency: something's broken",
+    "The two servers \u2014 don't confuse them",
+    "Talking to the server from a terminal",
+    "Managing API keys",
+    "Adding or removing a model",
+    "Changing agent behavior",
+    "Adding documents to a knowledge bank"
+   ],
+   "modules": [
+    "api-gateway",
+    "ops"
+   ]
+  },
+  {
+   "path": "study-notes/03_Agent_Harness_Deep_Dive.md",
+   "title": "03 \u2014 The Agent Harness, Deep Dive",
+   "updated": "2026-07-31",
+   "headings": [
+    "The request, start to finish",
+    "Tools: two sources, one registry",
+    "Memory: narrow by design",
+    "Retrieval: ChromaDB plus a trust layer",
+    "The self-referential routing gate, concretely",
+    "Guardrails, as actual code",
+    "Why this design holds up"
+   ],
+   "modules": [
+    "api-gateway",
+    "harness"
+   ]
+  },
+  {
+   "path": "AGENT_SERVER_GUIDE_v2.md",
+   "title": "Local Agent Server \u2014 Build Guide v2",
+   "updated": "2026-07-30",
+   "headings": [
+    "Quick Start \u2014 what the keys are for, and how to wire one into a Vercel app",
+    "Master executive summary \u2014 read this first (new session / new context window)",
+    "Daily log",
+    "ACTION ITEMS \u2014 what YOU need to do (manual, on the real Mac)",
+    "0. Mission, in one paragraph",
+    "1. What changed from the v1 decisions (2026-07-27 \u2192 this rewrite)",
+    "2. Target architecture",
+    "3. The commercial-grade API key system (the MUST item)"
+   ],
+   "modules": [
+    "tools-mcp",
+    "memory"
+   ]
+  },
+  {
+   "path": "AGENT_LATENCY_INVESTIGATION_SUMMARY.md",
+   "title": "Agent-Server Latency Investigation \u2014 Summary (2026-07-30)",
+   "updated": "2026-07-30",
+   "headings": [
+    "Step 1 \u2014 Noticed the symptom",
+    "Step 2 \u2014 Went to the logs instead of guessing",
+    "Step 3 \u2014 Found the actual root cause",
+    "Step 4 \u2014 Compared the architecture against frontier agent design",
+    "Step 5 \u2014 Fixed the prompt (AGENT.md)",
+    "Step 6 \u2014 Added a deterministic backstop (Step 5.9: regex triage)",
+    "Step 7 \u2014 Real-world test exposed the gate's limit",
+    "Step 8 \u2014 Added a second, smarter tier (Step 5.10: embedding routing)"
+   ],
+   "modules": [
+    "harness",
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/MCP_SERVERS_CATALOG.md",
+   "title": "MCP Server Catalog \u2014 candidates for mcpservers.json",
+   "updated": "2026-07-28",
+   "headings": [
+    "Official reference servers (modelcontextprotocol/servers repo)",
+    "Web Search / Web Fetch",
+    "PDF",
+    "Planning / Orchestration",
+    "Financial data (market data / filings)",
+    "Financial planning / accounting (books, invoicing)",
+    "Time series",
+    "How to actually enable any of these"
+   ],
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/agent-server/skills/k12-standards-citation.md",
+   "title": "K12: name the standard, match the grade, teach it like a tutor \u2014 not a textbook",
+   "updated": "2026-07-28",
+   "headings": [
+    "Citation (why this stays a \"just the facts\" requirement first)",
+    "Tone and depth (added 2026-07-28, from graded baseline feedback)"
+   ],
+   "modules": [
+    "rag-graph",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "SYSTEM_OVERVIEW_SUMMARY.md",
+   "title": "AIDATA Server \u2014 High-Level Overview & Maintenance Map",
+   "updated": "2026-07-26",
+   "headings": [
+    "The System in One Paragraph",
+    "The Pieces",
+    "How a Question Flows Through the System",
+    "What Needs Updating Later (Maintenance Map)",
+    "Current Status Snapshot (July 25, 2026 \u2014 verified on disk)"
+   ],
+   "modules": [
+    "knowledge",
+    "inference"
+   ]
+  },
+  {
+   "path": "KNOWLEDGE_MANAGEMENT_GUIDE.md",
+   "title": "Knowledge Management Guide \u2014 Making Your Local AI Domain-Smart",
+   "updated": "2026-07-24",
+   "headings": [
+    "The Big Picture: Three Tiers",
+    "Tier 1 \u2014 Vector RAG Done Right (your foundation)",
+    "Tier 2 \u2014 The LLM Wiki (curated knowledge layer)",
+    "Tier 3 \u2014 Graph Knowledge (only when relationships are the question)",
+    "What Goes Where \u2014 Decision Table",
+    "Rollout Plan"
+   ],
+   "modules": [
+    "knowledge",
+    "rag-graph"
+   ]
+  }
+ ],
+ "files": [
+  {
+   "path": "apps/agent-server/test_retrieval.py",
+   "lines": 121,
+   "updated": "2026-10-08",
+   "summary": "guards on the retrieval changes of 2026-09-30. Run: venv/bin/python3 test_retrieval.py (no database, no network) 1. SQL v2 renders for nomic (768) and Qwen3 (1024) with no stray fields, and passes the query vector as a parameter (the 5.4 s bug was a CTE) 2.",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/brain_store.py",
+   "lines": 1708,
+   "updated": "2026-10-08",
+   "summary": "the quarantined learned-knowledge store (BRAIN-ARCHITECTURE.md \u00a73.1). Deliberately modelled on memory_store.py, right down to the conventions: contextmanager connection, schema-if-not-exists, 0600 permissions, PRAGMA journal_mode=TRUNCATE, and idempotent additive migrations via ...",
+   "modules": [
+    "memory",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/corroboration_audit.py",
+   "lines": 135,
+   "updated": "2026-10-08",
+   "summary": "two copies of one text are one voice. venv/bin/python3 nightly/corroboration_audit.py # incremental venv/bin/python3 nightly/corroboration_audit.py --all # every claim with 2+ documents venv/bin/python3 nightly/corroboration_audit.py --stats \"Corroborated\" means a claim is ...",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/scheduler.py",
+   "lines": 801,
+   "updated": "2026-10-07",
+   "summary": "the circadian clock (BRAIN-ARCHITECTURE.md \u00a74.0). This is the piece that turns \"a script you remember to run\" into a system that runs itself. It owns two things and nothing else: R1 When the Vercel app calls the LLM server, learning PAUSES. External requests always win.",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/claim_verify.py",
+   "lines": 383,
+   "updated": "2026-10-07",
+   "summary": "check served claims against their source, two votes, and take the ones that fail both out of service.",
+   "modules": [
+    "self-evolving",
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/agent_loop.py",
+   "lines": 1531,
+   "updated": "2026-10-07",
+   "summary": "builds the specific planner/tool graph on top of graph.py's generic engine, and exposes the same run() contract main.py already calls.",
+   "modules": [
+    "harness"
+   ]
+  },
+  {
+   "path": "apps/agent-server/answer_guard.py",
+   "lines": 508,
+   "updated": "2026-10-07",
+   "summary": "a final answer may not state dollar figures the tools did not return (2026-10-02). Why: on 2026-10-02 the agent ran the right a commodity and a commodity queries, got the right rows back, and then answered with a table of an unrelated item purchases (\"$18.96 Billion\", \"Nuccio shipyard\").",
+   "modules": [
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/retrieval_eval.py",
+   "lines": 261,
+   "updated": "2026-10-07",
+   "summary": "does search_knowledge_base find the right passage? (2026-09-30) The weekly quiz measures whether a 9B model answers better with learned atoms. Nothing measured retrieval itself, so a chunker, embedding or ranking change could make search worse and no number would move.",
+   "modules": [
+    "evaluation",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/knowledge_base.py",
+   "lines": 526,
+   "updated": "2026-10-07",
+   "summary": "the search_knowledge_base tool. This is the single highest-leverage piece of Phase 7 step 2 (v2 guide \u00a74).",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/passage_dedup.py",
+   "lines": 68,
+   "updated": "2026-10-07",
+   "summary": "the same paragraph from two copies of a document is one result. The the regulation is in the bank three times: the per-volume PDFs, Download-the regulation-PDF and Full-the regulation-Policy-PDF. Appropriations acts and committee reports repeat each other.",
+   "modules": [
+    "rag-graph",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/claim_fidelity.py",
+   "lines": 185,
+   "updated": "2026-10-07",
+   "summary": "do the claims the agent serves say what their source says? venv/bin/python3 nightly/claim_fidelity.py --n 200 # print only venv/bin/python3 nightly/claim_fidelity.py --n 200 --write # + history \"Authoritative\" means the source document is tier 1.",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/test_streaming.py",
+   "lines": 548,
+   "updated": "2026-10-07",
+   "summary": "sandbox test suite for Step 5.7 (streaming + latency). Run: python3 test_streaming.py Tests against a REAL stub Ollama HTTP server (a live uvicorn process on a real port, speaking real SSE), not mocks \u2014 same discipline every prior step in this codebase used.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/main.py",
+   "lines": 624,
+   "updated": "2026-10-07",
+   "summary": "Agent Server \u2014 apps/agent-server/main.py ========================================= STEP 2 of the \"mini Claude Code\" build (see AGENT_SERVER_GUIDE_v2.md). Step 1 \u2014 bare passthrough, plaintext-key auth. Built/tested 2026-07-27.",
+   "modules": [
+    "tools-mcp",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/recall_claims.py",
+   "lines": 173,
+   "updated": "2026-10-07",
+   "summary": "the agent-facing wrapper around claim_recall. REGISTERED 2026-08-18, AFTER IT EARNED IT. ------------------------------------------ This file sat unregistered until the T5 discrimination drill said it was worth registering.",
+   "modules": [
+    "memory",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/learning_status.py",
+   "lines": 143,
+   "updated": "2026-10-07",
+   "summary": "lets the agent answer questions ABOUT ITS OWN LEARNING with facts instead of assumptions. WHY THIS EXISTS --------------- Asked \"what new knowledge did you gain in the last 100 hours?\", the agent answered: \"Honest answer: nothing. And that's not a gap \u2014 it's by design.",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/corpus_map.py",
+   "lines": 333,
+   "updated": "2026-10-07",
+   "summary": "Stage 1 of learning: KNOW WHAT YOU HAVE. This is the layer that was missing, and its absence is why the first attempt at Diet B was wrong.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/corpus_pipeline.py",
+   "lines": 1045,
+   "updated": "2026-10-07",
+   "summary": "go over EVERY file, in stages, resumably. This replaces the first Diet B, which walked 81,636 chunks in database order and had no idea what any of them were.",
+   "modules": [
+    "knowledge",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/defines.py",
+   "lines": 206,
+   "updated": "2026-10-07",
+   "summary": "the \"defines\" edge of the knowledge graph. venv/bin/python3 nightly/defines.py --index # scan new chunks (incremental) venv/bin/python3 nightly/defines.py --stats venv/bin/python3 nightly/defines.py --build-gold # once; sealed The citation layer links a passage to what it CITES.",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/define_keys.py",
+   "lines": 88,
+   "updated": "2026-10-07",
+   "summary": "which term does a passage DEFINE, and which term does a question ask about. The citation layer answers \"which passages cite 31 U.S.C. 1341\". This is the other typed edge a budget analyst needs: \"which passage says what an 'unliquidated obligation' IS\".",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/conversation_learn.py",
+   "lines": 431,
+   "updated": "2026-10-07",
+   "summary": "learn from what people actually said. python3 nightly/conversation_learn.py # report, write nothing python3 nightly/conversation_learn.py --apply # record python3 nightly/conversation_learn.py --all # ignore the cursor WHY THIS EXISTS =============== This system had three ways ...",
+   "modules": [
+    "self-evolving",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/spending.py",
+   "lines": 1298,
+   "updated": "2026-10-06",
+   "summary": "the federal spending tools, exposed to live traffic. Three tools, matching the three shapes a real question takes: query_spending aggregate: how much, by whom, on what, when search_requirements free text: what was ACTUALLY bought screen_purchase_request pre-award: should this be ...",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/agent-server/test_answer_guard.py",
+   "lines": 216,
+   "updated": "2026-10-06",
+   "summary": "the 2026-10-02 an unrelated item answer must fail the guard and the correct a commodity answer must pass. Exits non-zero on failure.",
+   "modules": [
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/llm-wiki/watch-wiki.sh",
+   "lines": 92,
+   "updated": "2026-10-06",
+   "summary": "the \"hook\" that auto-triggers llm_wiki.py when the knowledge banks change. What it does: watches knowledge-bank/ (excluding Wiki/, _index/, _archive/, _inbox/) with fswatch, and on any change, runs `llm_wiki.py ingest` for BOTH banks.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/test_endpoint_e2e.py",
+   "lines": 248,
+   "updated": "2026-10-06",
+   "summary": "end-to-end test through main.py's REAL FastAPI app. test_streaming.py proves agent_loop's streaming logic.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/stream_eval.py",
+   "lines": 135,
+   "updated": "2026-10-06",
+   "summary": "what the chat box actually does (2026-10-06). chat_eval.py and agent_quiz.py call agent_loop.run(), the non-streaming path. The chat box streams.",
+   "modules": [
+    "api-gateway",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/llm-wiki/llm_wiki.py",
+   "lines": 706,
+   "updated": "2026-10-04",
+   "summary": "a local, Karpathy-pattern \"LLM Wiki\" for the AI_DATA knowledge banks. Three layers (see knowledge-bank/Wiki/WIKI-SCHEMA.md for the full spec): 1. RAW \u2014 knowledge-bank/<Bank>/** (immutable source documents \u2014 never touched) 2.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/chat_eval.py",
+   "lines": 143,
+   "updated": "2026-10-04",
+   "summary": "how does the agent answer real multi-turn questions? (2026-10-02) The quiz and the gold sets are single questions with one right letter or one right passage. They never measured the thing a person does in the chat box: ask something, then follow up in five words.",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/conversation_recall.py",
+   "lines": 67,
+   "updated": "2026-10-04",
+   "summary": "the agent can look up what was said before (2026-10-01). Thin wrapper over conversation_index.search(). Registered after nightly/recall_eval.py passed its gate (see evals/memory/history.jsonl).",
+   "modules": [
+    "state",
+    "memory"
+   ]
+  },
+  {
+   "path": "apps/agent-server/backends/rerank_server.py",
+   "lines": 207,
+   "updated": "2026-10-03",
+   "summary": "Standalone reranker server for build-host agent-server's rerank_route.py. Added 2026-08-03.",
+   "modules": [
+    "inference",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/ops/run_tests.sh",
+   "lines": 19,
+   "updated": "2026-10-03",
+   "summary": "run the agent-server regression scripts (2026-09-30). Each is a plain script that exits non-zero on failure. Writes logs/tests.status.json. Safe: the brain test uses a throwaway <db>_test database and the endpoint tests use /tmp and stub model servers.",
+   "modules": [
+    "ops",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/conversation_index.py",
+   "lines": 213,
+   "updated": "2026-10-01",
+   "summary": "searchable index of past conversations (2026-10-01). The audit scored memory 2 of 5: conversations.db keeps every exchange for 90 days and nothing can search it, so \"what did we decide about X last week\" has no answer.",
+   "modules": [
+    "state",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/replay.py",
+   "lines": 489,
+   "updated": "2026-10-01",
+   "summary": "Phase 1 of the nightly loop (BRAIN-ARCHITECTURE.md \u00a74.1). \"Hippocampal replay\": read the day's traffic, find where the agent failed, turn each failure into a gap the agent can later study.",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/memory_store.py",
+   "lines": 359,
+   "updated": "2026-10-01",
+   "summary": "Step 3.6 (AGENT_SERVER_GUIDE_v2.md \u00a74/\u00a77.1): the durable episodic + user-profile memory layer.",
+   "modules": [
+    "memory"
+   ]
+  },
+  {
+   "path": "apps/agent-server/test_memory_pg.py",
+   "lines": 74,
+   "updated": "2026-10-01",
+   "summary": "memory_store on Postgres behaves like it did on SQLite (2026-10-01). Runs the same calls against both backends under a throwaway partition, compares what comes back, removes its rows. Exits non-zero on a difference.",
+   "modules": [
+    "memory"
+   ]
+  },
+  {
+   "path": "apps/ops/migrate_memory_pg.py",
+   "lines": 50,
+   "updated": "2026-10-01",
+   "summary": "copy memory.db into Postgres schema mem (2026-10-01). Idempotent. agent:self observations are collapsed to the newest row per distinct finding (10,998 rows were 26 findings re-logged hourly). venv/bin/python3 ../ops/migrate_memory_pg.py # migrate + verify",
+   "modules": [
+    "memory",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/registry.py",
+   "lines": 197,
+   "updated": "2026-10-01",
+   "summary": "collects every tool into the two things agent_loop.py needs: the OpenAI-style schema list to hand Ollama (so the model knows what it can call), and a name -> async-callable map to actually execute a call.",
+   "modules": [
+    "self-evolving",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/recall_eval.py",
+   "lines": 135,
+   "updated": "2026-10-01",
+   "summary": "does conversation recall find the right exchange, stay quiet when nothing fits, and keep users apart? (2026-10-01) Seeds two synthetic users (partitions eval:recall-a / eval:recall-b) straight into mem.turns, asks paraphrased questions, removes the seed rows.",
+   "modules": [
+    "memory",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/embed_backfill.py",
+   "lines": 245,
+   "updated": "2026-10-01",
+   "summary": "fill chunks.embedding_q3 with Qwen3-Embedding-0.6B (2026-09-30). Why: on the tier-1 gold test (evals/retrieval, embed-experiment) the Qwen3 embedder put the answering passage in the top 10 for 91% of questions against 77% for nomic-embed-text, and 96% against 89% with the ...",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/agent_quiz.py",
+   "lines": 102,
+   "updated": "2026-10-01",
+   "summary": "the discrimination quiz through the REAL agent path (2026-09-30). The audit's top evaluation gap: quiz_runner.py measures the 9B model with and without atoms, never what a user gets.",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/ops/pg_backup.sh",
+   "lines": 76,
+   "updated": "2026-10-01",
+   "summary": "nightly dump of the knowledge store (2026-09-30). WHAT: pg_dump --format=custom of the whole build-host database (brain.* learned atoms, kb.* file ledger, kb_finance / kb_k12 chunk vectors).",
+   "modules": [
+    "ops",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/skills/loader.py",
+   "lines": 219,
+   "updated": "2026-10-01",
+   "summary": "Step 3: skills router (AGENT_SERVER_GUIDE_v2.md \u00a74). Each file in this directory is a plain Markdown skill: a `---`-delimited frontmatter block with a one-line `description:`, then the skill body below the closing `---`.",
+   "modules": [
+    "skills"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/skill_eval.py",
+   "lines": 87,
+   "updated": "2026-10-01",
+   "summary": "does the router load the right skills? (2026-09-30) Gold: evals/skills/gold_v1.json, 58 hand-labelled requests (15 FINANCE, 15 spending, 12 K12, 4 that need two skills, 12 that need none).",
+   "modules": [
+    "skills",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/citations.py",
+   "lines": 197,
+   "updated": "2026-09-30",
+   "summary": "the citation layer of the FINANCE knowledge graph (2026-09-30). The audit scored the knowledge graph 1 of 5: concept co-mention only, and retrieval never walks it.",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/citation_keys.py",
+   "lines": 85,
+   "updated": "2026-09-30",
+   "summary": "find legal and financial-management citations in text and reduce each to one normal key (2026-09-30). Shared by nightly/citations.py (which indexes every FINANCE chunk into kb_finance.citations) and tools/knowledge_base.py (which looks up the keys a question mentions).",
+   "modules": [
+    "self-evolving",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/kb_extract.py",
+   "lines": 523,
+   "updated": "2026-09-30",
+   "summary": "turn a source file into clean, structure-aware chunks. Replaces the extraction and chunking half of kb_ingest.py (2026-09-22). WHAT WAS WRONG pypdf's extract_text() returns a flat string per page with no notion of headings, columns, tables or running headers.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/kb_ingest.py",
+   "lines": 321,
+   "updated": "2026-09-30",
+   "summary": "build the chunk index that tools/knowledge_base.py searches. 2026-09-22 \u2014 REWRITTEN FOR POSTGRES + PGVECTOR. What changed and why: STORE chroma -> kb_finance.chunks / kb_k12.chunks (pgstore.py).",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/embed_experiment.py",
+   "lines": 264,
+   "updated": "2026-09-30",
+   "summary": "does a newer embedding model find the right FINANCE passage more often than nomic-embed-text? (2026-09-30) The gold set (evals/retrieval/gold_v1.json) was built from tier-1 chunks (regulations, statute, the agency guidance).",
+   "modules": [
+    "rag-graph",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/profile_search.py",
+   "lines": 95,
+   "updated": "2026-09-30",
+   "summary": "where do the 5.5 seconds of one search go? (2026-09-30) Times each stage of search_knowledge_base for 10 gold-set questions: embedding (Ollama), dense-only SQL, lexical-only SQL, the full hybrid SQL.",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "Backup-AI-Offsite.command",
+   "lines": 276,
+   "updated": "2026-09-30",
+   "summary": "Backup-AI-Offsite.command [destination] [full] Writes ONE encrypted file containing everything on this Mac that cannot be recreated, to somewhere that is not this Mac. WHY THIS EXISTS AND Backup-AI.command DOES NOT REPLACE IT.",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/ops/pin_mcp.py",
+   "lines": 122,
+   "updated": "2026-09-30",
+   "summary": "pin every MCP server in mcp_servers.json to an exact version (2026-09-30). Why: every server was launched as `npx -y <pkg>` or `uvx <pkg>`, which resolves the newest release on each cold start.",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/ops/pg_restore_test.sh",
+   "lines": 43,
+   "updated": "2026-09-30",
+   "summary": "pg_restore_test.sh <dumpfile> \u2014 prove a dump restores (2026-09-30). Restores brain.*, kb.* and kb_k12.* from the dump into a throwaway database (build-host_restoretest), compares row counts with the live database, checks a K12 vector search works on the restored copy, then ...",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/ops/patch_offsite.py",
+   "lines": 71,
+   "updated": "2026-09-30",
+   "summary": "let Backup-AI-Offsite.command run unattended (2026-09-30). Targeted edits, each asserted to match exactly once: * pause(): `read -k 1` becomes a no-op when NONINTERACTIVE is set * passphrase from the login Keychain when OFFSITE_KEYCHAIN_SERVICE is set (item created only by ...",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/ops/git_baseline.sh",
+   "lines": 67,
+   "updated": "2026-09-30",
+   "summary": "put the code and scripts on AI_DATA under git (2026-09-30). Idempotent: re-running commits whatever changed since, with the same checks. 1. whitelist .gitignore (only code + config; secrets and data never) 2.",
+   "modules": [
+    "knowledge",
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "Restart-Agent-Server.command",
+   "lines": 506,
+   "updated": "2026-09-30",
+   "summary": "Double-click button: stops and restarts the NEW agent-server harness (apps/agent-server/main.py, FastAPI + agent_loop.py, port 8788).",
+   "modules": [
+    "ops",
+    "inference"
+   ]
+  },
+  {
+   "path": "Install-Autostart.command",
+   "lines": 944,
+   "updated": "2026-09-30",
+   "summary": "Install-Autostart.command GOAL: after a power cut, a reboot, a sleep/wake, or a crash, every LLM service comes back BY ITSELF. No double-clicking anything. WHAT IS ALREADY TRUE (since the 2026-08-09 migration): six services are supervised by launchd with KeepAlive.",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "start-ai-stack.command",
+   "lines": 47,
+   "updated": "2026-09-30",
+   "summary": "REWRITTEN by Install-Autostart.command. The services this script used to nohup are now launchd jobs, so starting them means LOADING them, not spawning a second copy.",
+   "modules": [
+    "ops",
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/migrate_to_pg.py",
+   "lines": 582,
+   "updated": "2026-09-30",
+   "summary": "move brain.db, claims_index.db and the chroma index into PostgreSQL + pgvector. One-way, resumable, verifiable.",
+   "modules": [
+    "rag-graph",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/mcp-servers/brainbank/server.py",
+   "lines": 358,
+   "updated": "2026-09-22",
+   "summary": "brainbank MCP server \u2014 exposes agent-server's tool registry to Claude Code. WHY THIS EXISTS --------------- Nothing the self-evolution pipeline learns is in the model's weights.",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/claim_recall.py",
+   "lines": 397,
+   "updated": "2026-09-22",
+   "summary": "the missing wire between 144,386 learned atoms and a live answer, plus the instrumentation that proves whether it helps.",
+   "modules": [
+    "memory",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/seal_evals.py",
+   "lines": 256,
+   "updated": "2026-09-22",
+   "summary": "creates the measurement substrate the whole learning loop depends on (BRAIN-ARCHITECTURE.md \u00a74.5.1). RUN THIS BEFORE ANY LEARNING.",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/quiz_runner.py",
+   "lines": 696,
+   "updated": "2026-09-22",
+   "summary": "T5 Discrimination drill. The first thing this system has ever run that measures whether learning improved ANSWERS.",
+   "modules": [
+    "evaluation",
+    "memory"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/prioritise_corpus.py",
+   "lines": 203,
+   "updated": "2026-09-22",
+   "summary": "fix what the learner studies first. venv/bin/python nightly/prioritise_corpus.py # report only venv/bin/python nightly/prioritise_corpus.py --apply # re-tier + persist WHAT WAS WRONG ============== `documents_at_stage` orders by type, then authority tier, then **size ...",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/cite_check.py",
+   "lines": 207,
+   "updated": "2026-09-22",
+   "summary": "does the corpus actually support each eval item's key? WHY THIS EXISTS --------------- v1's answer key was mine. I wrote 18 discriminations from appropriations-law fundamentals and graded the agent against my own recollection.",
+   "modules": [
+    "memory",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/build_brain_dashboard.py",
+   "lines": 322,
+   "updated": "2026-09-22",
+   "summary": "regenerates brain.html (BRAIN-ARCHITECTURE.md \u00a78). Same pattern as the existing Eval-Dashboard.html and Knowledge-Bank-Pulls-Dashboard.html: a single self-contained HTML file with no server and no CDN, openable from Finder.",
+   "modules": [
+    "self-evolving",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/test_brain_store.py",
+   "lines": 134,
+   "updated": "2026-09-22",
+   "summary": "regression tests for the learned-knowledge store. Run: python3 test_brain_store.py These are not exhaustive unit tests; they are guards on the SIX properties that make brain_store.py safe to run unattended.",
+   "modules": [
+    "state",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/pgstore.py",
+   "lines": 442,
+   "updated": "2026-09-22",
+   "summary": "the ONLY sanctioned way to reach the knowledge database. Replaces three stores, 2026-09-22: brain.db (SQLite) learned atoms, concepts, the document ledger claims_index.db (SQLite) an FTS5 copy of brain.db's serveable atoms chroma (HNSW) the chunk vectors behind ...",
+   "modules": [
+    "state",
+    "memory"
+   ]
+  },
+  {
+   "path": "apps/agent-server/pgschema.sql",
+   "lines": 366,
+   "updated": "2026-09-22",
+   "summary": "the PostgreSQL + pgvector store that replaced brain.db, claims_index.db and the chroma index on 2026-09-22. Idempotent. Applied by pgstore.ensure_schema() and by tools/migrate_to_pg.py. Safe to run against a live database. WHY POSTGRES brain.db SQLite, one writer at a time.",
+   "modules": [
+    "state",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/llm_activity.py",
+   "lines": 639,
+   "updated": "2026-09-22",
+   "summary": "what is every local model doing RIGHT NOW. python3 llm_activity.py one snapshot, in the terminal python3 llm_activity.py --watch refresh every 5s until Ctrl-C python3 llm_activity.py --html also write $AI_DATA/llm-activity.html python3 llm_activity.py --html --watch keep ...",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/kb_sync.py",
+   "lines": 167,
+   "updated": "2026-09-22",
+   "summary": "the \"scan for changes\" automation: ingest new/changed files in each knowledge bank, then take anything that has left the active tree (deleted outright, or moved into an `_archive/` subfolder) out of the index.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/kb_embed.py",
+   "lines": 68,
+   "updated": "2026-09-22",
+   "summary": "embeddings for the knowledge base, batched. Same model and the same unprefixed input as every vector already stored (nomic-embed-text through Ollama), so old and new vectors share one space.",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "Setup-Claude-Code-Brainbank.command",
+   "lines": 196,
+   "updated": "2026-09-22",
+   "summary": "Double-click button: gives Claude Code access to the knowledge bank. Built 2026-08-23, after a Claude Code session on local-qwen38 was asked about the agency a commodity spending and answered \"I don't have that in my knowledge\" \u2014 while brain.db held 144,781 atoms and the spending tables ...",
+   "modules": [
+    "tools-mcp",
+    "sdk"
+   ]
+  },
+  {
+   "path": "Check-Learning-Progress.command",
+   "lines": 333,
+   "updated": "2026-09-22",
+   "summary": "Check-Learning-Progress.command ONE BUTTON: is the agent actually learning, and is any of it usable yet? Built 2026-08-15. brain.html (the dashboard) shows totals.",
+   "modules": [
+    "self-evolving",
+    "ops"
+   ]
+  },
+  {
+   "path": "Check-All-LLM-Status.command",
+   "lines": 1312,
+   "updated": "2026-09-22",
+   "summary": "Check-All-LLM-Status.command ONE BUTTON: is every local LLM, every API surface, and every backend actually working right now? Built 2026-08-15.",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "Backup-AI.command",
+   "lines": 154,
+   "updated": "2026-09-22",
+   "summary": "Double-click button: backs up the irreplaceable state of the local AI stack to backups/<timestamp>/. Built 2026-07-29.",
+   "modules": [
+    "ops",
+    "state"
+   ]
+  },
+  {
+   "path": "stop-ai-stack.command",
+   "lines": 39,
+   "updated": "2026-09-10",
+   "summary": "REWRITTEN by Install-Autostart.command. Ollama, gateway.py and Open WebUI are now launchd jobs. `kill`ing them starts a fight launchd always wins and you always lose: KeepAlive restarts the process within ThrottleInterval, so the stop appears not to work.",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/bench_workers.py",
+   "lines": 106,
+   "updated": "2026-09-10",
+   "summary": "Measure what parallel mining actually buys \u2014 2026-09-10. The claim being tested is narrow and worth testing rather than assuming: mlx_lm.server answers one request at a time, so N servers should give close to N times the throughput UNTIL memory bandwidth saturates.",
+   "modules": [
+    "self-evolving",
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/verify_fixes.py",
+   "lines": 125,
+   "updated": "2026-09-08",
+   "summary": "re-checks the 2026-09-07 fixes, on demand. $AI_DATA/apps/agent-server/venv/bin/python3 $AI_DATA/apps/agent-server/verify_fixes.py Exits 0 if every check passes, 1 otherwise, so it can go in a cycle step.",
+   "modules": [
+    "guardrails",
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/self_observe.py",
+   "lines": 794,
+   "updated": "2026-09-07",
+   "summary": "learn from the agent's own failed tool calls. python3 nightly/self_observe.py # report, write nothing python3 nightly/self_observe.py --apply # record self-observation atoms python3 nightly/self_observe.py --all # ignore the cursor, re-read everything WHY THIS EXISTS ...",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/conversation_store.py",
+   "lines": 439,
+   "updated": "2026-09-07",
+   "summary": "the transcript the system never kept. WHY THIS EXISTS =============== Before 2026-09-07 this server learned from exactly two things: documents it read at night, and its own failed tool calls. It did not learn from the people using it, and the reason was not policy.",
+   "modules": [
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/learned.py",
+   "lines": 168,
+   "updated": "2026-09-07",
+   "summary": "what did the agent learn recently? The question this answers is the one you actually want to ask a system that studies while you sleep: not \"is it running\" (the scheduler log says that) and not \"how far through the corpus is it\" (corpus_pipeline --status says that), but WHAT DID ...",
+   "modules": [
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/bench_latency.py",
+   "lines": 153,
+   "updated": "2026-09-07",
+   "summary": "measures the streaming win instead of asserting it. Replays THIS server's own real production numbers (from logs/agents/requests.jsonl: p50 26.3s, p90 88.7s, 72 tok/s effective) against a stub that generates at that same measured rate, and reports time-to-first- token vs total ...",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/memory_pipeline.py",
+   "lines": 385,
+   "updated": "2026-09-07",
+   "summary": "Step 3.6: the ONLY code path allowed to write to memory_store.py from live traffic.",
+   "modules": [
+    "memory",
+    "state"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/rotate-logs.sh",
+   "lines": 113,
+   "updated": "2026-09-03",
+   "summary": "copy-truncate rotation for AI_DATA logs. WHY COPY-TRUNCATE AND NOT MOVE: Ollama, agent-server and the MLX backends hold their log files open with O_APPEND.",
+   "modules": [
+    "ops",
+    "inference"
+   ]
+  },
+  {
+   "path": "Setup-MCP-WebSearch.command",
+   "lines": 166,
+   "updated": "2026-08-22",
+   "summary": "Double-click button: adds a real WEB SEARCH tool to the agent. Built 2026-07-29, after the chatbot searched for a web-search tool and correctly reported it didn't have one. WHY IT WAS NEVER BUILT: it isn't a bug or an oversight.",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "Setup-MCP-Fetch.command",
+   "lines": 136,
+   "updated": "2026-08-22",
+   "summary": "Double-click button: installs the `fetch` MCP server (read a web page, convert to markdown) into its own isolated venv, verifies it actually works, and enables it in mcp_servers.json. Built 2026-07-29.",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "LocalAPI-Claude.command",
+   "lines": 353,
+   "updated": "2026-08-22",
+   "summary": "LocalAPI-Claude.command rev 2026-08-22b The one command for the Claude Code local API. Start, restart, or re-run after pulling a model. Idempotent.",
+   "modules": [
+    "sdk",
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/LocalAPI-Claude.command",
+   "lines": 353,
+   "updated": "2026-08-22",
+   "summary": "LocalAPI-Claude.command rev 2026-08-22b The one command for the Claude Code local API. Start, restart, or re-run after pulling a model. Idempotent.",
+   "modules": [
+    "sdk",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/budget_execution.py",
+   "lines": 501,
+   "updated": "2026-08-21",
+   "summary": "U7/U8: the account layer, and the reconciliation. Two tools: budget_execution the appropriation's own story: total resources -> obligated -> outlaid -> unobligated, by Treasury Account, program activity or object class. THE ONLY PLACE OUTLAYS LIVE.",
+   "modules": [
+    "harness"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/supplemental.py",
+   "lines": 367,
+   "updated": "2026-08-21",
+   "summary": "supplemental_appropriations: emergency and disaster money, by the law that created it.",
+   "modules": [
+    "harness"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/defc.py",
+   "lines": 256,
+   "updated": "2026-08-21",
+   "summary": "Disaster Emergency Fund Codes: the shared vocabulary. DEFC is how a federal dollar says which emergency, disaster or supplemental law it came from.",
+   "modules": [
+    "sdk",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/QUICKSTART-10-MIN.command",
+   "lines": 209,
+   "updated": "2026-08-21",
+   "summary": "QUICKSTART-10-MIN.command Double-click this. It does everything: 1. installs litellm (if missing) 2. generates a key 3. writes a minimal config pointed at whichever model you actually have 4. starts the proxy in the background 5. tests it end to end 6.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/verify-claude-code-gateway.sh",
+   "lines": 184,
+   "updated": "2026-08-21",
+   "summary": "verify-claude-code-gateway.sh Proves the proxy works BEFORE you open Claude Code, so a failure points at one specific thing instead of at \"Claude Code is broken\".",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/Restart-Claude-Code-Gateway.command",
+   "lines": 42,
+   "updated": "2026-08-21",
+   "summary": "Restart-Claude-Code-Gateway.command The one to double-click after editing config.yaml.",
+   "modules": [
+    "sdk",
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/Stop-Claude-Code-Gateway.command",
+   "lines": 44,
+   "updated": "2026-08-21",
+   "summary": "Stop-Claude-Code-Gateway.command Stops the LiteLLM proxy. Handles both the manual launcher and the launchd job \u2014 if the launchd job is loaded, killing the PID alone just makes launchd start it again, which looks like the stop failed.",
+   "modules": [
+    "api-gateway",
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/claude-code-gateway/Start-Claude-Code-Gateway.command",
+   "lines": 98,
+   "updated": "2026-08-21",
+   "summary": "Start-Claude-Code-Gateway.command Starts the LiteLLM Anthropic-format proxy that Claude Code talks to. Double-clickable from Finder, or run from a terminal. This is the MANUAL launcher.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "Make-Audiobook.command",
+   "lines": 125,
+   "updated": "2026-08-20",
+   "summary": "document -> audio, English or Chinese. Double-click it, and it asks for a file or URL, then a voice.",
+   "modules": [
+    "ops",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/audiobook/make_audiobook.py",
+   "lines": 623,
+   "updated": "2026-08-20",
+   "summary": "document -> verified audiobook (English + Chinese) $AI_DATA/apps/agent-server/venv/bin/python3 make_audiobook.py FILE All synthesis, normalization and quality checking lives in tts_engine.py.",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/audiobook/tts_engine.py",
+   "lines": 590,
+   "updated": "2026-08-20",
+   "summary": "production text-to-speech for long documents (EN + ZH) ===================================================================== Replaces the naive \"post a big chunk, hope it comes back\" approach with the loop commercial audiobook pipelines actually use: normalize -> small units -> ...",
+   "modules": [
+    "inference",
+    "knowledge"
+   ]
+  },
+  {
+   "path": "gw-check.command",
+   "lines": 56,
+   "updated": "2026-08-20",
+   "summary": "verify the gateway without ever typing or pasting a key. WHY THIS EXISTS Every 401 on 2026-08-20 came from the same typo: TWO spaces after \"Bearer\".",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "Install-Collector-Schedule.command",
+   "lines": 158,
+   "updated": "2026-08-16",
+   "summary": "double-click button, re-runnable Puts the DAILY CYCLE under launchd: com.example.collect-daily 03:15 every day daily-cycle.sh daily com.example.collect-weekly Sun 05:10 daily-cycle.sh full The cycle is collect -> retune plan from log -> INGEST -> audit learning chain ...",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "Collect-Knowledge-Sources.command",
+   "lines": 87,
+   "updated": "2026-08-16",
+   "summary": "double-click button Acquires authoritative Federal budget / financial-management sources into knowledge-bank/FINANCE-Knowledge-Bank/. Everything about WHERE material comes from lives in _collector/sources.json \u2014 adding a source is a JSON edit.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "Check-Public-Path.command",
+   "lines": 191,
+   "updated": "2026-08-15",
+   "summary": "Check-Public-Path.command Traces the FULL path an outside app takes to reach this Mac, hop by hop, and names the first hop that is broken. WHY A SEPARATE BUTTON. Check-All-LLM-Status.command answers \"is the service healthy on this Mac\".",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "start-ai-server.command",
+   "lines": 72,
+   "updated": "2026-08-15",
+   "summary": "Ollama ONLY, in the FOREGROUND, for debugging. start-ai-server.command \u2014 Ollama alone, foreground, watch the output start-ai-stack.command \u2014 the whole stack, via launchd The names differ by one word and both start Ollama.",
+   "modules": [
+    "inference",
+    "ops"
+   ]
+  },
+  {
+   "path": "Enable-Unattended-Recovery.command",
+   "lines": 246,
+   "updated": "2026-08-15",
+   "summary": "Enable-Unattended-Recovery.command Makes this Mac come back from a power cut, a crash, or a macOS update reboot entirely on its own \u2014 no password typed, no button pressed.",
+   "modules": [
+    "state",
+    "ops"
+   ]
+  },
+  {
+   "path": "Check-Boot-Recovery.command",
+   "lines": 271,
+   "updated": "2026-08-15",
+   "summary": "Check-Boot-Recovery.command ONE QUESTION: if the power died right now, would this Mac come back serving, entirely by itself? Built 2026-08-15. Every other piece of supervision on this Mac assumes a logged-in session exists.",
+   "modules": [
+    "ops",
+    "state"
+   ]
+  },
+  {
+   "path": "Pause-Watchdog.command",
+   "lines": 45,
+   "updated": "2026-08-15",
+   "summary": "toggle the health watchdog off/on. WHY THIS EXISTS. Restart-Agent-Server.command deliberately never kills a backend you started by hand in a Terminal you are watching for tracebacks.",
+   "modules": [
+    "ops"
+   ]
+  },
+  {
+   "path": "apps/agent-server/model_router.py",
+   "lines": 234,
+   "updated": "2026-08-15",
+   "summary": "task-type detection + model selection for chat-family requests (default / fast / vision). Added 2026-08-03 on top of the existing Step 5.7 agent-server, per AI_Model_Integration_Guide.md.",
+   "modules": [
+    "inference",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/spending_context.py",
+   "lines": 495,
+   "updated": "2026-08-15",
+   "summary": "U3, U5 and U6: the layers that turn a number into a finding. The four tools in spending.py answer \"how much\". These answer the three questions that have to follow, and that the agent has so far had to guess at: U3 lookup_code what is this thing CALLED in the data?",
+   "modules": [
+    "state",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/concept_lookup.py",
+   "lines": 127,
+   "updated": "2026-08-10",
+   "summary": "the point where learned knowledge finally reaches a live answer. Until this file existed, the learning loop was an accumulator: it read documents, extracted a vocabulary, validated it, and stored it somewhere the question-answering path could not see.",
+   "modules": [
+    "rag-graph",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/nightly/probe_model.py",
+   "lines": 219,
+   "updated": "2026-08-10",
+   "summary": "dump the RAW response shape from a model backend. Exists because diet_kb.py's first real run failed with KeyError: <redacted> five times in a row, ~8s per call.",
+   "modules": [
+    "self-evolving",
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/speech_route.py",
+   "lines": 917,
+   "updated": "2026-08-09",
+   "summary": "/v1/audio/speech (TTS) for build-host agent-server (FastAPI). Added 2026-08-03, scaffolded \u2014 see the \"NOT WIRED\" status in model_catalog.json's _not_ollama.speech_tts entry.",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/auth.py",
+   "lines": 194,
+   "updated": "2026-08-08",
+   "summary": "request-time authentication/authorization for the agent server. Runs BEFORE the request body is ever touched (same ordering discipline as step 1's main.py) so a bad key always gets a clean, fast rejection regardless of what \u2014 if anything \u2014 valid the body contains.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/keys_admin.py",
+   "lines": 171,
+   "updated": "2026-08-08",
+   "summary": "manage commercial-grade API keys for the agent server. Replaces apps/build-host-site/local-server/manage_keys.py for THIS server (that script still administers the old plaintext api_keys.json used by the legacy gateway.py \u2014 untouched, separate system, on purpose, until Phase ...",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/keystore.py",
+   "lines": 216,
+   "updated": "2026-08-08",
+   "summary": "commercial-grade key storage for the agent server. Replaces the old plaintext apps/build-host-site/local-server/api_keys.json approach (still used by the legacy gateway.py, untouched, not this file's concern).",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "start-ai-server.sh",
+   "lines": 23,
+   "updated": "2026-08-07",
+   "summary": "EDITED 2026-08-07 \u2014 the OLLAMA_* block that used to be duplicated here now lives in ollama-env.sh, the single source of truth.",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "restart-ai-stack.command",
+   "lines": 56,
+   "updated": "2026-08-07",
+   "summary": "EDITED 2026-08-07 \u2014 this file used to be four lines, the last of which was: nohup $AI_DATA/start-ai-stack.command >/dev/null 2>&1 & That redirect discarded every message the start script produced, including fatal ones.",
+   "modules": [
+    "inference",
+    "ops"
+   ]
+  },
+  {
+   "path": "ollama-env.sh",
+   "lines": 93,
+   "updated": "2026-08-07",
+   "summary": "SINGLE SOURCE OF TRUTH for Ollama's environment Created 2026-08-07 after the outage described below.",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/backends/stt_server.py",
+   "lines": 204,
+   "updated": "2026-08-04",
+   "summary": "Standalone speech-to-text server for build-host agent-server's new /v1/audio/transcriptions route (added to speech_route.py 2026-08-03).",
+   "modules": [
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/backends/image_server.py",
+   "lines": 154,
+   "updated": "2026-08-04",
+   "summary": "Standalone image-generation server for build-host agent-server's media_route.py. Added 2026-08-03.",
+   "modules": [
+    "ops",
+    "inference"
+   ]
+  },
+  {
+   "path": "apps/agent-server/media_route.py",
+   "lines": 139,
+   "updated": "2026-08-03",
+   "summary": "/v1/images/generations for build-host agent-server (FastAPI). Added 2026-08-03, scaffolded \u2014 see the \"NOT WIRED\" status in model_catalog.json's _not_ollama.media_image_video entry.",
+   "modules": [
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/rerank_route.py",
+   "lines": 127,
+   "updated": "2026-08-03",
+   "summary": "/v1/rerank for build-host agent-server (FastAPI). Added 2026-08-03, scaffolded \u2014 see the \"NOT WIRED\" status in model_catalog.json's _not_ollama.reranker entry.",
+   "modules": [
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "apps/agent-server/embeddings_route.py",
+   "lines": 169,
+   "updated": "2026-08-01",
+   "summary": "/v1/embeddings for build-host agent-server (FastAPI). Adds the one route brainbank's knowledge engine needs. Everything else on agent-server is untouched.",
+   "modules": [
+    "rag-graph",
+    "api-gateway"
+   ]
+  },
+  {
+   "path": "apps/agent-server/mcp_client.py",
+   "lines": 190,
+   "updated": "2026-07-29",
+   "summary": "Step 4 (AGENT_SERVER_GUIDE_v2.md \u00a74): connects MCP (Model Context Protocol) servers configured in mcp_servers.json and registers every tool they expose into tools/registry.py \u2014 the exact same registry search_knowledge_base lives in.",
+   "modules": [
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/agent-server/build_finetune_dataset.py",
+   "lines": 193,
+   "updated": "2026-07-29",
+   "summary": "Step 7 (AGENT_SERVER_GUIDE_v2.md \u00a74 Step 7). Scope, stated honestly up front: this is the ONE piece of Step 7 that's genuinely buildable and testable without the real Mac's hardware \u2014 turning this project's own already-graded eval data into an MLX-LM-shaped training file.",
+   "modules": [
+    "inference",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/run_test_questions.py",
+   "lines": 438,
+   "updated": "2026-07-29",
+   "summary": "sends every question in knowledge-bank/test-questions.md through the REAL agent server (with tools enabled) and saves each answer + what the tool actually retrieved, so you can grade pass/fail by hand.",
+   "modules": [
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/build_eval_dashboard.py",
+   "lines": 390,
+   "updated": "2026-07-29",
+   "summary": "Step 5.5 (AGENT_SERVER_GUIDE_v2.md \u00a77.3a). Reads the audit-log family this project already writes on every request (logs/agents/requests.jsonl, tool_calls.jsonl, feedback.jsonl) plus every graded knowledge-bank/test-questions-results-*.md run, and renders a single static local ...",
+   "modules": [
+    "knowledge",
+    "evaluation"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/study_plan.py",
+   "lines": 107,
+   "updated": "2026-07-28",
+   "summary": "Step 3.6: the get_study_plan tool. This is the concrete deliverable behind the MUST-have requirement (2026-07-28): a customized K12 study plan grounded in this specific student's actual observed knowledge gaps, not a generic one the model would otherwise have to guess at.",
+   "modules": [
+    "memory",
+    "self-evolving"
+   ]
+  },
+  {
+   "path": "apps/agent-server/hooks/registry.py",
+   "lines": 81,
+   "updated": "2026-07-28",
+   "summary": "Step 5 (AGENT_SERVER_GUIDE_v2.md \u00a74): a small, pluggable pre/post tool-call event registry. A pre-tool hook is `fn(tool_name: str, arguments: dict) -> dict | None`.",
+   "modules": [
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/hooks/__init__.py",
+   "lines": 21,
+   "updated": "2026-07-28",
+   "summary": "hooks/ \u2014 Step 5 (AGENT_SERVER_GUIDE_v2.md \u00a74): a small, pluggable pre/post tool-call event registry, plus the two first real hooks.",
+   "modules": [
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/hooks/kb_auto_sync.py",
+   "lines": 66,
+   "updated": "2026-07-28",
+   "summary": "Step 5's second real hook: after a filesystem write/edit/move tool call actually SUCCEEDS against a path under one of the two knowledge banks, automatically triggers kb_sync.py for that bank \u2014 the same reconciliation Sync-Knowledge-Base.command already runs by hand (\u00a74 Step ...",
+   "modules": [
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/hooks/write_path_guard.py",
+   "lines": 102,
+   "updated": "2026-07-28",
+   "summary": "Step 5's first real hook: blocks any tool call that looks like a filesystem write/edit/create/move operation whose target path(s) fall outside an allow-listed set of directories.",
+   "modules": [
+    "tools-mcp",
+    "guardrails"
+   ]
+  },
+  {
+   "path": "apps/agent-server/diagnose_retrieval_gaps.py",
+   "lines": 236,
+   "updated": "2026-07-28",
+   "summary": "one-shot diagnostic for the 5 \"budget-exhausted\" FAILs in the 2026-07-28 test-questions baseline (test-questions-results- 20260728-165833.md). All 5 hit the 6-round tool-call budget without ever finding a good passage.",
+   "modules": [
+    "knowledge",
+    "rag-graph"
+   ]
+  },
+  {
+   "path": "Sync-Knowledge-Base.command",
+   "lines": 12,
+   "updated": "2026-07-28",
+   "summary": "Double-click button: scans both knowledge banks for changes \u2014 ingests new or edited files, and removes index entries for anything deleted or moved into an _archive/ subfolder.",
+   "modules": [
+    "knowledge"
+   ]
+  },
+  {
+   "path": "apps/agent-server/graph.py",
+   "lines": 111,
+   "updated": "2026-07-28",
+   "summary": "minimal state-graph execution engine. Why this exists (v2 refinement, 2026-07-27): step 2's agent_loop.py was a flat sequential loop \u2014 call the model, run whatever tools it asked for in one batch, repeat.",
+   "modules": [
+    "harness"
+   ]
+  },
+  {
+   "path": "apps/agent-server/tools/__init__.py",
+   "lines": 6,
+   "updated": "2026-07-27",
+   "summary": "Tool registry package. Each tool module exports SCHEMA (an OpenAI function-calling schema dict) and a callable matching that schema's parameters.",
+   "modules": [
+    "state",
+    "tools-mcp"
+   ]
+  },
+  {
+   "path": "apps/open-webui-filters/knowledge_scope_filter.py",
+   "lines": 177,
+   "updated": "2026-07-27",
+   "summary": "title: Knowledge Scope Filter author: build-host setup version: 1.0.0 description: > Anti-leakage + noise-stripping inlet filter for Open WebUI RAG.",
+   "modules": [
+    "knowledge"
+   ]
+  }
+ ],
+ "evals": [
+  {
+   "name": "retrieval K12 main dedup-on",
+   "ts": "2026-10-07T21:53:33",
+   "metrics": {
+    "n": 100,
+    "hit@1": 0.55,
+    "hit@5": 0.7,
+    "hit@10": 0.74,
+    "near@10": 0.79,
+    "doc@10": 0.84,
+    "mrr": 0.625,
+    "p50_seconds": 1.76
+   }
+  },
+  {
+   "name": "retrieval FINANCE define dedup-on",
+   "ts": "2026-10-07T21:50:17",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.45,
+    "hit@5": 0.75,
+    "hit@10": 0.8,
+    "near@10": 0.85,
+    "doc@10": 0.933,
+    "mrr": 0.567,
+    "p50_seconds": 1.87
+   }
+  },
+  {
+   "name": "retrieval FINANCE cite dedup-on",
+   "ts": "2026-10-07T21:48:00",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.517,
+    "hit@5": 0.783,
+    "hit@10": 0.85,
+    "near@10": 0.883,
+    "doc@10": 0.933,
+    "mrr": 0.642,
+    "p50_seconds": 1.89
+   }
+  },
+  {
+   "name": "retrieval FINANCE main dedup-on",
+   "ts": "2026-10-07T21:45:42",
+   "metrics": {
+    "n": 100,
+    "hit@1": 0.37,
+    "hit@5": 0.66,
+    "hit@10": 0.7,
+    "near@10": 0.76,
+    "doc@10": 0.89,
+    "mrr": 0.492,
+    "p50_seconds": 1.9
+   }
+  },
+  {
+   "name": "retrieval FINANCE define dedup-off",
+   "ts": "2026-10-07T21:41:49",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.45,
+    "hit@5": 0.817,
+    "hit@10": 0.917,
+    "near@10": 0.917,
+    "doc@10": 0.967,
+    "mrr": 0.601,
+    "p50_seconds": 2.14
+   }
+  },
+  {
+   "name": "retrieval FINANCE cite dedup-off",
+   "ts": "2026-10-07T21:39:21",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.517,
+    "hit@5": 0.85,
+    "hit@10": 0.95,
+    "near@10": 0.95,
+    "doc@10": 0.983,
+    "mrr": 0.663,
+    "p50_seconds": 3.45
+   }
+  },
+  {
+   "name": "retrieval FINANCE main dedup-off",
+   "ts": "2026-10-07T21:35:50",
+   "metrics": {
+    "n": 100,
+    "hit@1": 0.37,
+    "hit@5": 0.68,
+    "hit@10": 0.76,
+    "near@10": 0.81,
+    "doc@10": 0.91,
+    "mrr": 0.511,
+    "p50_seconds": 2.09
+   }
+  },
+  {
+   "name": "retrieval FINANCE define tier-check",
+   "ts": "2026-10-07T12:17:59",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.45,
+    "hit@5": 0.817,
+    "hit@10": 0.917,
+    "near@10": 0.917,
+    "doc@10": 0.967,
+    "mrr": 0.601,
+    "p50_seconds": 1.86
+   }
+  },
+  {
+   "name": "retrieval FINANCE cite tier-check",
+   "ts": "2026-10-07T12:15:43",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.517,
+    "hit@5": 0.85,
+    "hit@10": 0.95,
+    "near@10": 0.95,
+    "doc@10": 0.983,
+    "mrr": 0.663,
+    "p50_seconds": 2.93
+   }
+  },
+  {
+   "name": "retrieval FINANCE main tier-check",
+   "ts": "2026-10-07T12:12:31",
+   "metrics": {
+    "n": 100,
+    "hit@1": 0.37,
+    "hit@5": 0.68,
+    "hit@10": 0.76,
+    "near@10": 0.81,
+    "doc@10": 0.91,
+    "mrr": 0.511,
+    "p50_seconds": 1.89
+   }
+  },
+  {
+   "name": "retrieval FINANCE cite define-check",
+   "ts": "2026-10-07T11:42:01",
+   "metrics": {
+    "n": 60,
+    "hit@1": 0.517,
+    "hit@5": 0.85,
+    "hit@10": 0.95,
+    "near@10": 0.95,
+    "doc@10": 0.983,
+    "mrr": 0.663,
+    "p50_seconds": 2.82
+   }
+  },
+  {
+   "name": "retrieval FINANCE main define-check",
+   "ts": "2026-10-07T11:39:05",
+   "metrics": {
+    "n": 100,
+    "hit@1": 0.37,
+    "hit@5": 0.69,
+    "hit@10": 0.77,
+    "near@10": 0.81,
+    "doc@10": 0.9,
+    "mrr": 0.512,
+    "p50_seconds": 2.0
+   }
+  }
+ ]
+}

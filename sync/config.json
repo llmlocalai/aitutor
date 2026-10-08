@@ -1,0 +1,278 @@
+{
+  "_note": "Edit this file to change what the sync job may publish. Everything under the root is eligible unless a rule here excludes it. Secrets, databases and credential files are excluded in code and cannot be re-enabled here.",
+  "extensions": [
+    ".md",
+    ".py",
+    ".sh",
+    ".command",
+    ".sql"
+  ],
+  "max_file_bytes": 600000,
+  "limits": {
+    "commits": 60,
+    "docs": 80,
+    "files": 150
+  },
+  "deny_dirs": [
+    "models",
+    "pgdata",
+    "backups",
+    "logs",
+    "data",
+    "audio",
+    "scratch",
+    "knowledge-bank",
+    "references",
+    "projects",
+    "git",
+    "_to_delete",
+    "_writetest",
+    "evals/heldout",
+    "evals/frozen",
+    "evals/chat",
+    "evals/memory",
+    "evals/claims",
+    "evals/stream",
+    "evals/quiz-runs",
+    "apps/open-webui",
+    "apps/deeptutormac",
+    "apps/pecn",
+    "apps/llmpowerhouse-site",
+    "apps/agent-server/finetune-data",
+    "apps/agent-server/vercel-integration",
+    "apps/claude-code-gateway/logs",
+    "apps/agent-server/spending",
+    "apps/mcp-servers/fetch"
+  ],
+  "deny_dir_names": [
+    "venv",
+    ".venv",
+    "node_modules",
+    "__pycache__",
+    ".git",
+    "_backup-pre-multimodel",
+    "_backup-pre-step5.7",
+    "logs",
+    "site-packages",
+    "lib",
+    "bin",
+    "include",
+    "dist",
+    "build",
+    ".next"
+  ],
+  "deny_files": [
+    "ACCOUNT-DATA-HANDOFF.md",
+    "WINDOWS-HANDOFF.md",
+    "MAC_BASICS_CHEATSHEET.md",
+    "USASPENDING-*",
+    "Collect-USAspending*",
+    "PR-SCREENING-*",
+    "PRE-AWARD-*",
+    "COLLECTION-*",
+    "DAILY-REPORT-*",
+    "Set-Offsite-Passphrase*",
+    "*.bak-*",
+    "*.pre-*",
+    "*.example.*",
+    "Install-Account-Refresh*",
+    "Hermes.command"
+  ],
+  "eval_history": [
+    "evals/retrieval/history.jsonl",
+    "evals/skills/history.jsonl"
+  ],
+  "eval_metric_keys": [
+    "n",
+    "hit@1",
+    "hit@5",
+    "hit@10",
+    "near@10",
+    "doc@10",
+    "mrr",
+    "p50_seconds",
+    "accuracy",
+    "correct",
+    "total"
+  ],
+  "replace": [
+    [
+      "/Volumes/AI_DATA",
+      "$AI_DATA"
+    ],
+    [
+      "com.llmpowerhouse.",
+      "com.example."
+    ],
+    [
+      "llmpowerhouse.local",
+      "build-host"
+    ],
+    [
+      "LLMPOWERHOUSE",
+      "BUILD-HOST"
+    ],
+    [
+      "llmpowerhouse",
+      "build-host"
+    ],
+    [
+      ":8443",
+      ":<port>"
+    ],
+    [
+      ":8787",
+      ":<port>"
+    ],
+    [
+      ":8788",
+      ":<port>"
+    ]
+  ],
+  "domain_terms": [
+    [
+      "DOD-FM-Knowledge-Bank",
+      "FINANCE-Knowledge-Bank"
+    ],
+    [
+      "DOD-FM",
+      "FINANCE"
+    ],
+    [
+      "DoD-FM",
+      "FINANCE"
+    ],
+    [
+      "dod-fm",
+      "finance"
+    ],
+    [
+      "dodfm",
+      "finance"
+    ],
+    [
+      "DoD FM",
+      "finance"
+    ],
+    [
+      "DOD FM",
+      "finance"
+    ],
+    [
+      "Department of Defense",
+      "the agency"
+    ],
+    [
+      "Department of War",
+      "the agency"
+    ],
+    [
+      "DODIG",
+      "the auditor"
+    ],
+    [
+      "DoDIG",
+      "the auditor"
+    ],
+    [
+      "DoD",
+      "the agency"
+    ],
+    [
+      "DOD",
+      "the agency"
+    ],
+    [
+      "OUSD(C)",
+      "the office"
+    ],
+    [
+      "OUSD",
+      "the office"
+    ],
+    [
+      "USAspending",
+      "the spending dataset"
+    ],
+    [
+      "usaspending",
+      "spending-dataset"
+    ],
+    [
+      "FMR",
+      "the regulation"
+    ],
+    [
+      "DFAS",
+      "the finance service"
+    ],
+    [
+      "GAO",
+      "the oversight body"
+    ],
+    [
+      "Antideficiency Act",
+      "the funding statute"
+    ],
+    [
+      "FCPS",
+      "the district"
+    ],
+    [
+      "TJHSST",
+      "the school"
+    ],
+    [
+      "Fairfax",
+      "the county"
+    ],
+    [
+      "lobster",
+      "a commodity"
+    ],
+    [
+      "Lobster",
+      "A commodity"
+    ],
+    [
+      "crab",
+      "a commodity"
+    ],
+    [
+      "submarine",
+      "an unrelated item"
+    ],
+    [
+      "dod",
+      "agency"
+    ],
+    [
+      "Dod",
+      "agency"
+    ],
+    [
+      "K12-Knowledge-Bank",
+      "EDU-Knowledge-Bank"
+    ],
+    [
+      "defense organizations",
+      "domain organizations"
+    ],
+    [
+      "defense",
+      "domain"
+    ],
+    [
+      "Defense",
+      "Domain"
+    ],
+    [
+      "oversight.gov",
+      "the oversight site"
+    ],
+    [
+      "govinfo",
+      "the document service"
+    ]
+  ]
+}

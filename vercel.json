@@ -1,0 +1,6 @@
+{
+  "functions": {
+    "api/tutor.py": { "maxDuration": 60 },
+    "api/live.py": { "maxDuration": 10 }
+  }
+}
