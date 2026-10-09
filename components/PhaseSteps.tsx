@@ -10,8 +10,10 @@ import { ui } from "@/lib/ui";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** The phase and step body shared by the Databricks pages. Server component: reads kit files at build. */
-export default function PhaseSteps({ phases, numberOf, byId, localLabel, kitRoot }: {
+export default function PhaseSteps({ phases, numberOf, byId, localLabel, kitRoot, extra }: {
   phases: Phase[]; numberOf: Record<string, number>; byId: Record<string, RStep>; localLabel: LS; kitRoot: string;
+  /** Extra content per step id, shown after the actions (the harness page puts model-specific notes here). */
+  extra?: Record<string, React.ReactNode>;
 }) {
   return (
     <>
@@ -63,6 +65,7 @@ export default function PhaseSteps({ phases, numberOf, byId, localLabel, kitRoot
 
                 <h4><T v={ui.dbxHow} /></h4>
                 <ol className="do">{s.how.map((h) => (<li key={h.en}><T v={h} /></li>))}</ol>
+                {extra?.[s.id]}
 
                 {(s.files?.length || s.code?.length) ? <h4><T v={ui.dbxScripts} /></h4> : null}
                 {s.files?.map((f) => {

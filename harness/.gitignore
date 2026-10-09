@@ -1,0 +1,4 @@
+# run outputs: results stay on the machine that ran them; summaries go to content/harness-results.json
+evals/out/
+probe/out/
+__pycache__/

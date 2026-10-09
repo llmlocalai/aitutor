@@ -1,0 +1,130 @@
+# Step 2 and 4. How the same harness is rendered and called for each model family.
+# These are starting defaults taken from vendor documentation (read October 2026) and from the reported
+# vendor prompts in the corpus. They are hypotheses until your evals confirm them (step 16): run the
+# structure experiment and change a default only when the paired delta is outside the noise floor.
+#   sections   xml | markdown       how runtime/assemble.py renders section headers
+#   rules      reasons | caps       a rule with its reason, or the bare emphatic form
+#   date       top | bottom         where the date and environment block goes
+#   skills     on_demand | inline   index plus load_skill, or every skill body in the prompt
+#   budget     max system prompt plus tool schema tokens before assemble.py warns
+#   replay     documentation only: the reasoning fields this family returns. runtime/loop.py already sends
+#              the whole assistant message back unchanged, so this list is for reading, never a setting
+#   sampling   values to send; empty means send none and keep the server default
+families:
+  generic:
+    label: Any OpenAI-compatible model
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 6000
+    replay: [content, tool_calls, reasoning_content, reasoning]
+    sampling: {}
+  claude:
+    label: Anthropic Claude (Opus, Sonnet, Haiku, Fable 5.x)
+    wire: anthropic
+    sections: xml
+    rules: reasons
+    date: bottom
+    skills: on_demand
+    budget: 12000
+    replay: [content]          # thinking blocks live inside content and must keep their signature
+    sampling: {}
+    effort: [low, medium, high, xhigh, max]
+  gpt:
+    label: OpenAI GPT-6 and GPT-5.x, Codex
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: bottom
+    skills: on_demand
+    budget: 12000
+    replay: [content, tool_calls, reasoning]   # Responses API: pass reasoning items back with tool outputs
+    sampling: {}               # remove temperature and top_p when reasoning effort is not none
+    effort: [none, low, medium, high, xhigh, max]
+  gemini:
+    label: Google Gemini 3.x
+    wire: gemini
+    sections: xml
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 10000
+    replay: [content, tool_calls, thought_signature]
+    sampling: {}               # keep temperature at the default; lower values can loop
+    effort: [minimal, low, medium, high]
+  grok:
+    label: xAI Grok 4.x
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 10000
+    replay: [content, tool_calls, reasoning]
+    sampling: {}               # presence and frequency penalties and stop return errors on reasoning models
+    effort: [low, medium, high, xhigh]
+  qwen:
+    label: Qwen 3 and 3.6 (local or hosted)
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 4000
+    replay: [content, tool_calls, reasoning_content]
+    sampling: {temperature: 0.6, top_p: 0.95, top_k: 20}   # thinking mode; never greedy
+  deepseek:
+    label: DeepSeek V4
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 4000
+    replay: [content, tool_calls, reasoning_content]       # omitting reasoning_content with tools returns 400
+    sampling: {}
+    effort: [low, high, max]
+  kimi:
+    label: Moonshot Kimi K3 and K2.6
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 8000
+    replay: [content, tool_calls, reasoning_content]
+    sampling: {}               # K3 fixes temperature and top_p; omit them
+    effort: [low, high, max]
+  glm:
+    label: Zhipu GLM 4.7 and 5.x
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 6000
+    replay: [content, tool_calls, reasoning_content]
+    sampling: {}
+  mistral:
+    label: Mistral Small, Medium 3.5, Large 4, Devstral
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 6000
+    replay: [content, tool_calls]              # keep ThinkChunks inside content
+    sampling: {}
+    effort: [none, high]
+  llama:
+    label: Meta Llama 4 (local or hosted)
+    wire: openai
+    sections: markdown
+    rules: reasons
+    date: top
+    skills: on_demand
+    budget: 3000
+    replay: [content, tool_calls]
+    sampling: {}

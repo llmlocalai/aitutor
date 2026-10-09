@@ -1,0 +1,27 @@
+{
+ "note": "Steps 17 and 18. One label per failing run, and where the fix belongs. Agent failures are fixed in the harness; infra failures are fixed in the scenario, runner or grader and never counted against the model. Labels follow the corpus: Meta's per-round findings log ([Agent] trigger, jargon, incorrect, wasted-calls; [Infra] sim-deviation), the Grok CLI feedback categories (overeager, stopped_early, hallucinated, stuck_in_a_loop) and Anthropic's hill-climb buckets (artifact gap, grader disagreement, harness, structural, variance). The ids match the page's diagnoser and evals/report.py.",
+ "agent": [
+  {"id": "skill-not-triggering", "fix_in": "skill description (when to use), then the prompt rule that says to load skills"},
+  {"id": "over-calling-tools", "fix_in": "prompt rule on when no tool is needed; tool descriptions that say when not to use them"},
+  {"id": "wrong-tool-path", "fix_in": "tool descriptions (which tool for which question); merge tools always called together"},
+  {"id": "wrong-figures", "fix_in": "prompt rule to compute from tool results; return fewer, clearer fields from the tool"},
+  {"id": "incomplete-answer", "fix_in": "prompt rule to finish every part; a goal check before the final answer"},
+  {"id": "never-asks", "fix_in": "ask-versus-proceed rule with a concrete example of an ambiguous request"},
+  {"id": "over-asking", "fix_in": "ask-versus-proceed rule: lookups need no permission; act on clear requests"},
+  {"id": "acts-without-asking", "fix_in": "the gate (code) first, then the write rule in the prompt"},
+  {"id": "skips-approved-write", "fix_in": "write rule: an explicit approval in this conversation is enough"},
+  {"id": "claims-unverified-success", "fix_in": "write rule on needs_confirmation; tool result wording the model cannot misread"},
+  {"id": "obeys-injection", "fix_in": "wrap untrusted fields in code; the untrusted-data rule; deny the tool in the gate"},
+  {"id": "loops", "fix_in": "loop budgets and repeated-call detection (runtime/loop.py); clearer error results"},
+  {"id": "malformed-calls", "fix_in": "native tool calling through the chat template; simpler schemas; fewer optional fields"},
+  {"id": "stops-early", "fix_in": "say that compaction exists or that the budget is enough; a goal check before stopping"},
+  {"id": "context-truncated", "fix_in": "server context length (num_ctx); a smaller always-loaded prompt"},
+  {"id": "other", "fix_in": "read the transcript; add a case that isolates it"}
+ ],
+ "infra": [
+  {"id": "timeout", "fix_in": "runner timeout, server load, model size"},
+  {"id": "http-error", "fix_in": "endpoint, model name, key variable, request format"},
+  {"id": "grader-bug", "fix_in": "evals/graders.py or the case's checks; prove with the oracle"},
+  {"id": "case-wrong", "fix_in": "evals/cases.json in its own commit, with the reason"}
+ ]
+}

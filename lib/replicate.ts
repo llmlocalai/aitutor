@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import replicateReport from "@/content/replicate-check.json";
 import nativeReport from "@/content/native-check.json";
+import harnessReport from "@/content/harness-check.json";
 
 const ROOT = process.cwd();
 const LANG: Record<string, string> = { ".py": "python", ".sql": "sql", ".sh": "bash", ".yml": "yaml", ".yaml": "yaml", ".json": "json", ".txt": "text", ".md": "markdown" };
@@ -18,13 +19,15 @@ export interface CheckReport {
 
 /** A script kit: a folder of files a page shows, and the check report that vouches for them. */
 export interface Kit { root: string; report: CheckReport; checker: string }
-export const KITS: Record<"replicate" | "native", Kit> = {
+export const KITS: Record<"replicate" | "native" | "harness", Kit> = {
   replicate: { root: "replicate/databricks", report: replicateReport as CheckReport, checker: "python3 replicate/databricks/check.py --write" },
   native: { root: "native/databricks", report: nativeReport as CheckReport, checker: "python3 native/databricks/check.py --write" },
+  harness: { root: "harness", report: harnessReport as unknown as CheckReport, checker: "python3 harness/check.py --write" },
 };
 export const replicateCheck = KITS.replicate.report;
 
-const kitOf = (rel: string): Kit => (rel.startsWith(KITS.native.root + "/") ? KITS.native : KITS.replicate);
+const kitOf = (rel: string): Kit =>
+  rel.startsWith(KITS.native.root + "/") ? KITS.native : rel.startsWith(KITS.harness.root + "/") ? KITS.harness : KITS.replicate;
 
 /** A kit file, read at build time, with its recorded check. Throws if the file is missing. */
 export function readScript(rel: string): { text: string; lang: string; check?: CheckEntry; stale: boolean; checker: string } {
@@ -42,9 +45,9 @@ export function staleScripts(kit: Kit = KITS.replicate): string[] {
   const walk = (dir: string) => {
     for (const e of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
       const rel = `${dir}/${e.name}`;
-      if (e.name === "__pycache__" || e.name === "agent_app" || e.name === ".pytest_cache") continue;
+      if (e.name === "__pycache__" || e.name === "agent_app" || e.name === ".pytest_cache" || (e.isDirectory() && e.name === "out")) continue;
       if (e.isDirectory()) walk(rel);
-      else if (e.name !== "check.py" && readScript(rel).stale) out.push(rel);
+      else if (e.name !== "check.py" && !e.name.endsWith(".pyc") && readScript(rel).stale) out.push(rel);
     }
   };
   walk(kit.root);

@@ -8,6 +8,13 @@ import * as dbx from "@/content/databricks";
 import * as nat from "@/content/databricks-native";
 import type { Phase, RStep } from "@/content/databricks/types";
 import { KITS, readScript, staleScripts, type Kit } from "./replicate";
+import fs from "node:fs";
+import path from "node:path";
+import * as hx from "@/content/harness";
+import harnessCorpus from "@/content/harness-corpus.json";
+import harnessResults from "@/content/harness-results.json";
+import harnessRules from "@/harness/lint/rules.json";
+import { guessKind, lintText, type Kind } from "./harness-lint";
 
 /**
  * Self-audit. Runs at build time (the /audit page calls it), so a broken link,
@@ -265,6 +272,79 @@ export function audit(): AuditReport {
     }
   }
 
+  {
+    const w = "harness";
+    const root = process.cwd();
+    for (const [k, v] of Object.entries(hx.intro)) ls(v, `${w}.intro.${k}`);
+    kitPage(w, hx, KITS.harness, true);
+    for (const s of hx.rsteps) {
+      for (const [f, v] of Object.entries(s.models ?? {})) ls(v as LS, `${w}.${s.id}.models.${f}`);
+      if (!s.models?.generic && Object.keys(s.models ?? {}).length < 3) warnings.push(`${w}.${s.id}: fewer than 3 model notes`);
+    }
+    hx.loops.forEach((l, i) => ls(l.label, `${w}.loop[${i}]`));
+    hx.consensus.forEach((c, i) => ls(c.what, `${w}.consensus[${i}]`));
+    hx.placement.forEach((p, i) => { ls(p.kind, `${w}.placement[${i}].kind`); ls(p.where, `${w}.placement[${i}].where`); });
+    for (const m of hx.models) {
+      const mw = `${w}.model.${m.id}`;
+      for (const k of ["kind", "structure", "tools", "reasoning", "sampling", "context"] as const) ls(m[k], `${mw}.${k}`);
+      m.profile.forEach((x, i) => ls(x, `${mw}.profile[${i}]`));
+      m.gotchas.forEach((x, i) => ls(x, `${mw}.gotchas[${i}]`));
+      m.evidence.forEach((x, i) => ls(x.note, `${mw}.evidence[${i}]`));
+      if (!m.docs.length) errors.push(`${mw}: no vendor page`);
+    }
+    // The diagnoser covers exactly the agent failure labels of the kit's taxonomy, and points at real files.
+    const tax = JSON.parse(fs.readFileSync(path.join(root, "harness/ops/failure_taxonomy.json"), "utf8")) as { agent: { id: string }[] };
+    const taxIds = tax.agent.map((x) => x.id).sort().join(",");
+    const syIds = hx.symptoms.map((x) => x.id).sort().join(",");
+    if (taxIds !== syIds) errors.push(`${w}: diagnoser symptoms (${syIds}) differ from failure_taxonomy.json agent labels (${taxIds})`);
+    for (const sy of hx.symptoms) {
+      const sw = `${w}.symptom.${sy.id}`;
+      ls(sy.title, `${sw}.title`); ls(sy.seen, `${sw}.seen`); ls(sy.evaluate, `${sw}.evaluate`);
+      for (const [f, v] of Object.entries(sy.models ?? {})) ls(v as LS, `${sw}.models.${f}`);
+      sy.causes.forEach((c, i) => {
+        ls(c.cause, `${sw}.cause[${i}]`); ls(c.test, `${sw}.cause[${i}].test`); ls(c.fix, `${sw}.cause[${i}].fix`);
+        c.options.forEach((o, j) => ls(o, `${sw}.cause[${i}].options[${j}]`));
+        for (const f of c.files) if (!fs.existsSync(path.join(root, f))) errors.push(`${sw}: names missing file ${f}`);
+      });
+      if (sy.causes.length < 1) errors.push(`${sw}: no causes`);
+    }
+    // Corpus numbers quoted in the text match the measured file.
+    const cf = harnessCorpus.files as unknown as { label: string; [k: string]: unknown }[];
+    for (const c of hx.corpusClaims) {
+      const f = cf.find((x) => x.label === c.label);
+      if (!f) errors.push(`${w}: corpus claim names unmeasured file ${c.label}`);
+      else if (Math.abs(Number(f[c.field]) - c.value) > 0.006) errors.push(`${w}: text says ${c.label} ${c.field} = ${c.value}, measured ${f[c.field]}`);
+    }
+    // The browser linter gives the same findings as the Python linter on every fixture.
+    const exp = JSON.parse(fs.readFileSync(path.join(root, "harness/lint/fixtures/expected.json"), "utf8")) as { cases: { file: string; kind: Kind; family: string; rules: string[] }[] };
+    for (const c of exp.cases) {
+      const got = lintText(fs.readFileSync(path.join(root, "harness/lint", c.file), "utf8"), c.kind, c.family).map((f) => f.rule).sort();
+      if (got.join(",") !== [...c.rules].sort().join(",")) errors.push(`${w}: browser linter on ${c.file} gives [${got}], Python gives [${c.rules}]`);
+    }
+    // Auto-detect names the right kind for each of the kit's own template files.
+    const kinds: [string, Kind][] = [["prompts/core.md", "system"], ["skills/expense-policy/SKILL.md", "skill"], ["skills/flag-for-review/SKILL.md", "skill"],
+      ["AGENTS.md", "agents"], ["agents/verifier.md", "subagent"], ["agents/explorer.md", "subagent"], ["memory/MEMORY.md", "memory"], ["tools/tools.json", "tools"]];
+    for (const [f, k] of kinds) {
+      const g = guessKind(fs.readFileSync(path.join(root, "harness/template", f), "utf8"));
+      if (g !== k) errors.push(`${w}: linter auto-detect calls template/${f} ${g}, expected ${k}`);
+    }
+    // One family list everywhere: the page, the linter budgets and families.yml.
+    const fy = fs.readFileSync(path.join(root, "harness/template/prompts/families.yml"), "utf8");
+    const yamlIds = [...fy.matchAll(/^ {2}([a-z]+):\s*$/gm)].map((m) => m[1]).sort().join(",");
+    const pageIds = [...hx.FAMILY_IDS].sort().join(",");
+    if (pageIds !== Object.keys(harnessRules.budgets).sort().join(",")) errors.push(`${w}: model families differ from lint/rules.json budgets`);
+    if (pageIds !== yamlIds) errors.push(`${w}: model families (${pageIds}) differ from families.yml (${yamlIds})`);
+    // The graders were proven on this build: the oracle passes everything, the null agent almost nothing.
+    const hr = KITS.harness.report as unknown as { baselines: { oracle: { runs: number; passed: number }; null: { runs: number; passed: number } } };
+    if (hr.baselines.oracle.passed !== hr.baselines.oracle.runs) errors.push(`${w}: oracle passed ${hr.baselines.oracle.passed} of ${hr.baselines.oracle.runs}; a grader or case is wrong`);
+    if (hr.baselines.null.passed > hr.baselines.null.runs * 0.15) warnings.push(`${w}: null agent passed ${hr.baselines.null.passed} of ${hr.baselines.null.runs}; some checks do not discriminate`);
+    for (const r of (harnessResults as unknown as { runs: { run: string; variants?: unknown[] }[] }).runs) if (!r.variants?.length) errors.push(`${w}: results run ${r.run} has no variants`);
+    const shown = new Set(hx.rsteps.flatMap((s) => s.files ?? []));
+    for (const f of Object.keys(KITS.harness.report.files)) {
+      if (!shown.has(f) && !/\/(tests|fixtures)\/|corpus\/measure\.py$/.test(f)) warnings.push(`${w}: ${f} is in the kit but shown on no step`);
+    }
+  }
+
   const links = steps.reduce((n, s) => n + (s.step.needs?.length ?? 0), 0);
   return {
     errors, warnings, forward,
@@ -289,6 +369,12 @@ export function audit(): AuditReport {
       "Databricks native files checked": Object.keys(KITS.native.report.files).length,
       "Databricks native tests passed": `${KITS.native.report.tests.run - KITS.native.report.tests.failed}/${KITS.native.report.tests.run}`,
       "architecture review questions": nat.rsteps.reduce((n, s) => n + (s.challenge?.length ?? 0), 0),
+      "harness steps": hx.rsteps.length,
+      "harness kit files checked": Object.keys(KITS.harness.report.files).length,
+      "harness tests passed": `${KITS.harness.report.tests.run - KITS.harness.report.tests.failed}/${KITS.harness.report.tests.run}`,
+      "harness model profiles": hx.models.length,
+      "harness diagnoser symptoms": hx.symptoms.length,
+      "harness model runs recorded": (harnessResults as unknown as { runs: unknown[] }).runs.length,
       "machine checks passed on the reference machine": Object.values(machine.results).filter((r) => r.status === "pass").length,
     },
   };

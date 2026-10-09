@@ -1,0 +1,18 @@
+{
+ "skill": "expense-policy",
+ "note": "Step 7. Routing evals for this skill's description. Negatives are near misses: they mention expenses or money but need no policy rule. evals/run_eval.py --triggers runs each query 3 times and counts a trigger when load_skill names this skill.",
+ "queries": [
+  {"query": "Is a 95 dollar dinner for one within policy?", "should_trigger": true},
+  {"query": "Can Eli claim the drinks at Bar Rosa?", "should_trigger": true},
+  {"query": "Does E-1002 need manager approval?", "should_trigger": true},
+  {"query": "Is a software subscription reimbursable?", "should_trigger": true},
+  {"query": "Are E-1006 and E-1007 duplicates under the rules?", "should_trigger": true},
+  {"query": "What is the meal limit?", "should_trigger": true},
+  {"query": "What did Dana spend on travel in September?", "should_trigger": false},
+  {"query": "Who submitted E-1004?", "should_trigger": false},
+  {"query": "What is 15 percent of 240?", "should_trigger": false},
+  {"query": "List Priya's expenses.", "should_trigger": false},
+  {"query": "How many days ago was September 3?", "should_trigger": false},
+  {"query": "Which vendor is on E-1001?", "should_trigger": false}
+ ]
+}

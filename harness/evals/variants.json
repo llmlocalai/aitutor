@@ -1,0 +1,17 @@
+{
+ "note": "Step 16. The structure experiment. Every variant renders the same core.md content, so a difference in scores comes from structure. The control is 'family-default': the family's own defaults from families.yml, which is what you would ship today. Every other variant changes one setting on top of those defaults, so its paired delta answers one question for this family. When a variant sets what the family already uses (xml for claude, date-last for gpt), it renders the same prompt as the control: that is an A/A check, and its delta shows how much this suite moves by chance.",
+ "control": "family-default",
+ "variants": [
+  {"id": "family-default", "question": "Control: the family's defaults from families.yml.", "settings": {}},
+  {"id": "markdown", "question": "Do Markdown headings beat the family's section markup?", "settings": {"markup": "markdown"}},
+  {"id": "xml", "question": "Do XML section tags beat the family's section markup?", "settings": {"markup": "xml"}},
+  {"id": "caps-rules", "question": "Do bare emphatic rules (MUST, NEVER) beat rules with reasons?", "settings": {"rules": "caps"}},
+  {"id": "bare-rules", "question": "Do the reasons matter, or only the rules? (same rules, reasons removed, no capitals)", "settings": {"rules": "bare"}},
+  {"id": "inline-skills", "question": "Does putting every skill body in the prompt (monolithic) beat loading on demand?", "settings": {"skills": "inline"}},
+  {"id": "minimal", "question": "Does the open-weight vendor style (identity, date and tools only) do as well?", "settings": {"only": ["identity", "environment"]}},
+  {"id": "runtime-checks", "question": "Do the runtime checks (one nudge on a promise ending, one correction on unverified figures) raise the pass rate, and what do they cost in steps?",
+   "settings": {}, "runtime": {"stopcheck": true, "verify": true}},
+  {"id": "date-top", "question": "Does putting the environment block first change date handling?", "settings": {"date": "top"}},
+  {"id": "date-last", "question": "Does putting the environment block last change date handling?", "settings": {"date": "bottom"}}
+ ]
+}

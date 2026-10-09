@@ -1,0 +1,124 @@
+{
+ "note": "Steps 4, 7 and 8. Expected rule ids per fixture. tests/test_harness.py checks the Python linter against this file and the site audit checks the browser linter against it, so the two cannot drift.",
+ "cases": [
+  {
+   "file": "fixtures/bad-system-qwen.md",
+   "kind": "system",
+   "family": "qwen",
+   "rules": [
+    "sys-date",
+    "sys-emphasis",
+    "sys-identity",
+    "sys-qwen-switch",
+    "sys-reasons",
+    "sys-text-tool-format",
+    "sys-untrusted",
+    "unfilled-placeholder"
+   ]
+  },
+  {
+   "file": "fixtures/bad-system-gpt.md",
+   "kind": "system",
+   "family": "gpt",
+   "rules": [
+    "sys-date",
+    "sys-mixed-markup",
+    "sys-reasons",
+    "sys-think-step",
+    "sys-untrusted"
+   ]
+  },
+  {
+   "file": "fixtures/bad-skill/SKILL.md",
+   "kind": "skill",
+   "family": "generic",
+   "rules": [
+    "skill-brackets",
+    "skill-desc-short",
+    "skill-name",
+    "skill-negative",
+    "skill-trigger"
+   ]
+  },
+  {
+   "file": "fixtures/bad-tools.json",
+   "kind": "tools",
+   "family": "generic",
+   "rules": [
+    "tools-description",
+    "tools-name",
+    "tools-schema"
+   ]
+  },
+  {
+   "file": "fixtures/bad-agents.md",
+   "kind": "agents",
+   "family": "generic",
+   "rules": [
+    "agents-commands",
+    "agents-done"
+   ]
+  },
+  {
+   "file": "fixtures/bad-subagent.md",
+   "kind": "subagent",
+   "family": "generic",
+   "rules": [
+    "subagent-consent",
+    "subagent-frontmatter",
+    "subagent-output"
+   ]
+  },
+  {
+   "file": "fixtures/bad-memory.md",
+   "kind": "memory",
+   "family": "generic",
+   "rules": [
+    "memory-orders",
+    "secret"
+   ]
+  },
+  {
+   "file": "../template/skills/expense-policy/SKILL.md",
+   "kind": "skill",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/skills/flag-for-review/SKILL.md",
+   "kind": "skill",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/tools/tools.json",
+   "kind": "tools",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/AGENTS.md",
+   "kind": "agents",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/agents/verifier.md",
+   "kind": "subagent",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/agents/explorer.md",
+   "kind": "subagent",
+   "family": "generic",
+   "rules": []
+  },
+  {
+   "file": "../template/memory/MEMORY.md",
+   "kind": "memory",
+   "family": "generic",
+   "rules": []
+  }
+ ]
+}

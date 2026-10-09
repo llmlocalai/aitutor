@@ -1,0 +1,281 @@
+{
+ "checked_at": "2026-10-09",
+ "python": "3.13.16",
+ "files": {
+  "harness/.gitignore": {
+   "sha256": "ab5eeb3752490470237d31575a3ddc60dad35fed23d57229acfe00abe31ae944",
+   "check": "read only"
+  },
+  "harness/README.md": {
+   "sha256": "a4f2f8503ce695e86d5ba3dfb50627c2df7d44fdd2b3524c722272a7f55f807d",
+   "check": "read only"
+  },
+  "harness/contract.yml": {
+   "sha256": "465a930e749f1d7b2e5844d9e924dc07f0a1387adb498f0ffb331f763fcfa00c",
+   "check": "yaml parses"
+  },
+  "harness/corpus/measure.py": {
+   "sha256": "42a618622e2b3830f39fd08d797db938030dfd92e228d92639cac9b6ef6e13a4",
+   "check": "compiles"
+  },
+  "harness/evals/baselines.py": {
+   "sha256": "2d709def7607a2c24b46d462e4178d7c86496862ecc925710f05d493f4ba58e2",
+   "check": "compiles"
+  },
+  "harness/evals/cases.json": {
+   "sha256": "5549cf5b183fabd17c7b0ad981014b892a53332a9fa87654ed7979d258f35094",
+   "check": "json parses"
+  },
+  "harness/evals/findings.md": {
+   "sha256": "714cb382c44c685fd831d62f1d18862db723d985bbfb8611db4da0db450ecdc6",
+   "check": "read only"
+  },
+  "harness/evals/fixtures/answers.json": {
+   "sha256": "b2a751fa56938aad6c2a4f263961224c1dc4238662f53465a037c4f1ec39ea73",
+   "check": "json parses"
+  },
+  "harness/evals/fixtures/world.json": {
+   "sha256": "304530a5d0545ab84ca45e9e3484b26122a69bda7a59385a0fc8a1a7c93a4a53",
+   "check": "json parses"
+  },
+  "harness/evals/graders.py": {
+   "sha256": "980713fef5f0de6b7f92970f4d8c95e9242e45473cdfaa4052d81f368254c4fc",
+   "check": "compiles"
+  },
+  "harness/evals/report.py": {
+   "sha256": "38df31bc7b132f1ecb2cc9014d25108d32f9406d207ee06b47a8879d57b9e398",
+   "check": "compiles"
+  },
+  "harness/evals/run_eval.py": {
+   "sha256": "78f4516dab6a7afe6aef178bc307ad24cf0dafc66b258b031a2a2da96d18f0e9",
+   "check": "compiles"
+  },
+  "harness/evals/variants.json": {
+   "sha256": "5193d32434e1e4cca53b47b044cd5d757502b939cdc969b981f5e9d36b1dd349",
+   "check": "json parses"
+  },
+  "harness/evals/world.py": {
+   "sha256": "c51f7211be940785336a0aac095642f7ac30a0b8104c5e53282c26453898f371",
+   "check": "compiles"
+  },
+  "harness/lint/fixtures/bad-agents.md": {
+   "sha256": "845ffd9bc2722a5686d45cffa56bd4c09b85e7f7435ab13259619e0a1b9f0277",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-memory.md": {
+   "sha256": "5fa13e89b35b1b9a6ece82dd40ac117842cfcacf12a61d499d3137f428651edd",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-skill/SKILL.md": {
+   "sha256": "c0f801f3932ea8558220eaac56dc063fd4b360e35faa67445250ede3f0dcb99d",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-subagent.md": {
+   "sha256": "858433afbc899682b6ae6c69dbd1475b15c48b6bde2f00fb5f0aa64df1ad9165",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-system-gpt.md": {
+   "sha256": "eee19d5a22330cbd56db2b2069e2729387103db5f7c5cf7f4e03a28e7ad9ba37",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-system-qwen.md": {
+   "sha256": "b1525ca45aefa49144fb3a7030992fd4e134da169576d9837c660b0f7f34657b",
+   "check": "read only"
+  },
+  "harness/lint/fixtures/bad-tools.json": {
+   "sha256": "0ecbb10e48410b1e17f8d9b8ba1a5686c7406476a7752baac7d51faadd736787",
+   "check": "json parses"
+  },
+  "harness/lint/fixtures/expected.json": {
+   "sha256": "26a28904628cdbbd351c35fb9fadde84fe2baf450d8983c6798d92d7eb680c16",
+   "check": "json parses"
+  },
+  "harness/lint/harness_lint.py": {
+   "sha256": "11a7207adb9e3831acdefe4f89f64c7ddc83f49dad6a96d4c84c894f98d0b07d",
+   "check": "compiles"
+  },
+  "harness/lint/rules.json": {
+   "sha256": "8db022bd63af0c537cee7e030d328571cf88567fdb1eb9ae55bb24927695c7fb",
+   "check": "json parses"
+  },
+  "harness/ops/failure_taxonomy.json": {
+   "sha256": "1bcda16a4af16bc01b6f629c0b7729537191778fea2398863198ebfb8c0237df",
+   "check": "json parses"
+  },
+  "harness/ops/release_gate.py": {
+   "sha256": "8066e08a00c94215bb1f87ea22d20cc6aef26c89e816f73ac16fcc8924f9bc3d",
+   "check": "compiles"
+  },
+  "harness/probe/probe.py": {
+   "sha256": "475ebc5e7f2796c6897d73aa77db284d136dd14cd0b0b8563b460d2399c5a13b",
+   "check": "compiles"
+  },
+  "harness/runtime/adapters.py": {
+   "sha256": "675969bd3554d8d14dc8d7ac31b342ff330d6e21ca15d3af8bd566bdec24e14f",
+   "check": "compiles"
+  },
+  "harness/runtime/assemble.py": {
+   "sha256": "32d333ef11470c4e3ef16816744bc50d9eff660f589447cd3597232da3722b9c",
+   "check": "compiles"
+  },
+  "harness/runtime/gate.py": {
+   "sha256": "c72b0fa4de6c3e65f11e78f79ca780731be7e56ecb5aa54f7e840290dff72fd1",
+   "check": "compiles"
+  },
+  "harness/runtime/loop.py": {
+   "sha256": "c21e5bb95d3a821ee75be019c5753ee70630cca5b92ebd01b8381ea4c2a85d15",
+   "check": "compiles"
+  },
+  "harness/runtime/skills.py": {
+   "sha256": "1cc3dd43225e1fccdc4815f988263661a85bbe3f56e465a6b34e87e9516783dc",
+   "check": "compiles"
+  },
+  "harness/runtime/stopcheck.py": {
+   "sha256": "c9acf65458071b3603631400b7329e9401646d3fad27d42d451912a5a2002445",
+   "check": "compiles"
+  },
+  "harness/runtime/verify.py": {
+   "sha256": "61069f897b434d0baee8d8a69eb06dca273d0e20e7e35a0e48165d0f7db7ad18",
+   "check": "compiles"
+  },
+  "harness/template/AGENTS.md": {
+   "sha256": "b5e25096eb3550676b88d96b1dc4ef5b6e5a372b96b1ac083222c6c789ae9545",
+   "check": "read only"
+  },
+  "harness/template/agents/explorer.md": {
+   "sha256": "029c41e3834c4108e26bfb6e7b0134f224c862763676b18db71532b1d1b974f1",
+   "check": "read only"
+  },
+  "harness/template/agents/verifier.md": {
+   "sha256": "da1f0c950db9b2dd57fe443a42da798aea183e69f29a2148cf6cd4e4a8799ad5",
+   "check": "read only"
+  },
+  "harness/template/memory/MEMORY.md": {
+   "sha256": "9eacc2dc4d8fdfa834c37d1032e14546e577b89bfe683d1738177f9f9abdaaeb",
+   "check": "read only"
+  },
+  "harness/template/memory/README.md": {
+   "sha256": "b070807c3b40782bb41ca054f60649d982e9626d50b93cc30661a74e90a5855b",
+   "check": "read only"
+  },
+  "harness/template/memory/handoff.md": {
+   "sha256": "c0576f8f5e6b2c22a0962eada46e184d02954eeb94b325f21b36c198e1c31976",
+   "check": "read only"
+  },
+  "harness/template/prompts/core.md": {
+   "sha256": "5585b005414dbe7cb093f1707673ab7996b1b7574243d2d53a708eabb0aca885",
+   "check": "read only"
+  },
+  "harness/template/prompts/families.yml": {
+   "sha256": "f8bb5fd04d2b575cad28734efacd2eab13fcda63c2b321f0e22e991bcce8431a",
+   "check": "yaml parses"
+  },
+  "harness/template/skills/expense-policy/SKILL.md": {
+   "sha256": "9458c8f2abbb95bd8279dde8ec585abc3b045693159c32a05c0ea9dcef1854e7",
+   "check": "read only"
+  },
+  "harness/template/skills/expense-policy/evals/triggers.json": {
+   "sha256": "8652011ab9647ad3863f9519e00d02b9c94e85c5ae92165cb0c7c162ce545ec8",
+   "check": "json parses"
+  },
+  "harness/template/skills/flag-for-review/SKILL.md": {
+   "sha256": "76aa43f4efcd6605fee907d3d0152f9a105cbd2cfaca803b130c203d20f9c13a",
+   "check": "read only"
+  },
+  "harness/template/tools/tools.json": {
+   "sha256": "10b5b5d4f7e7aad84fb54b9060d9a2bdc22ca45b324131791754eda760ad76f7",
+   "check": "json parses"
+  },
+  "harness/tests/test_harness.py": {
+   "sha256": "e0a22437fab73d87280464c4578195ed119ecb31beeeb8eb85c3f0b26d273213",
+   "check": "compiles"
+  }
+ },
+ "tests": {
+  "run": 42,
+  "failed": 0,
+  "names": [
+   "test_anthropic_translation (test_harness.Adapters.test_anthropic_translation)",
+   "test_responses_translation (test_harness.Adapters.test_responses_translation)",
+   "test_every_family_fits_its_budget (test_harness.Assemble.test_every_family_fits_its_budget)",
+   "test_every_rule_has_reason_and_caps (test_harness.Assemble.test_every_rule_has_reason_and_caps)",
+   "test_families_match_linter_budgets (test_harness.Assemble.test_families_match_linter_budgets)",
+   "test_render_variants (test_harness.Assemble.test_render_variants)",
+   "test_tools_wire_and_honeypot (test_harness.Assemble.test_tools_wire_and_honeypot)",
+   "test_promise_gets_one_nudge (test_harness.Checks.test_promise_gets_one_nudge)",
+   "test_stopcheck_classifies_endings (test_harness.Checks.test_stopcheck_classifies_endings)",
+   "test_verify_flags_invented_figures_and_allows_totals (test_harness.Checks.test_verify_flags_invented_figures_and_allows_totals)",
+   "test_verify_nudges_once (test_harness.Checks.test_verify_nudges_once)",
+   "test_approval_is_used_once_and_writes_never_repeat (test_harness.Contract.test_approval_is_used_once_and_writes_never_repeat)",
+   "test_every_declared_tool_has_a_tier (test_harness.Contract.test_every_declared_tool_has_a_tier)",
+   "test_metrics_read (test_harness.Contract.test_metrics_read)",
+   "test_tiers_and_gate (test_harness.Contract.test_tiers_and_gate)",
+   "test_cases_are_well_formed (test_harness.Graders.test_cases_are_well_formed)",
+   "test_grounded_check_catches_invented_amount (test_harness.Graders.test_grounded_check_catches_invented_amount)",
+   "test_hand_labelled_answers (test_harness.Graders.test_hand_labelled_answers)",
+   "test_negation_and_quotes (test_harness.Graders.test_negation_and_quotes)",
+   "test_null_fails_almost_everything (test_harness.Graders.test_null_fails_almost_everything)",
+   "test_number_parsing (test_harness.Graders.test_number_parsing)",
+   "test_oracle_passes_every_case_in_every_variant (test_harness.Graders.test_oracle_passes_every_case_in_every_variant)",
+   "test_fixtures_match_expected (test_harness.Lint.test_fixtures_match_expected)",
+   "test_rules_are_bilingual_and_typed (test_harness.Lint.test_rules_are_bilingual_and_typed)",
+   "test_template_is_clean_for_every_family (test_harness.Lint.test_template_is_clean_for_every_family)",
+   "test_budget_stops (test_harness.Loop.test_budget_stops)",
+   "test_gate_blocks_unapproved_write_and_deny (test_harness.Loop.test_gate_blocks_unapproved_write_and_deny)",
+   "test_malformed_arguments_are_counted_and_answered (test_harness.Loop.test_malformed_arguments_are_counted_and_answered)",
+   "test_missing_call_id_is_filled (test_harness.Loop.test_missing_call_id_is_filled)",
+   "test_repeated_call_detected (test_harness.Loop.test_repeated_call_detected)",
+   "test_replays_reasoning_fields_unchanged (test_harness.Loop.test_replays_reasoning_fields_unchanged)",
+   "test_tool_budget_ends_the_task (test_harness.Loop.test_tool_budget_ends_the_task)",
+   "test_prose_excludes_tools_and_code (test_harness.Measure.test_prose_excludes_tools_and_code)",
+   "test_advice_for_a_weak_endpoint (test_harness.Probe.test_advice_for_a_weak_endpoint)",
+   "test_paired_delta_and_noise (test_harness.Report.test_paired_delta_and_noise)",
+   "test_release_gate (test_harness.Report.test_release_gate)",
+   "test_safety_regression_beats_average (test_harness.Report.test_safety_regression_beats_average)",
+   "test_symptoms_exist_in_taxonomy (test_harness.Report.test_symptoms_exist_in_taxonomy)",
+   "test_contract_checks (test_harness.Skills.test_contract_checks)",
+   "test_discover_index_load (test_harness.Skills.test_discover_index_load)",
+   "test_trigger_sets_have_near_misses (test_harness.Skills.test_trigger_sets_have_near_misses)",
+   "test_untrusted_fields_are_wrapped (test_harness.World.test_untrusted_fields_are_wrapped)"
+  ]
+ },
+ "failures": 0,
+ "baselines": {
+  "oracle": {
+   "runs": 160,
+   "passed": 160
+  },
+  "null": {
+   "runs": 160,
+   "passed": 10
+  }
+ },
+ "lint_findings": {
+  "generic": 0,
+  "claude": 0,
+  "gpt": 0,
+  "gemini": 0,
+  "grok": 0,
+  "qwen": 0,
+  "deepseek": 0,
+  "kimi": 0,
+  "glm": 0,
+  "mistral": 0,
+  "llama": 0
+ },
+ "prompt_tokens": {
+  "generic": 1579,
+  "claude": 1567,
+  "gpt": 1579,
+  "gemini": 1565,
+  "grok": 1579,
+  "qwen": 1579,
+  "deepseek": 1579,
+  "kimi": 1579,
+  "glm": 1579,
+  "mistral": 1579,
+  "llama": 1579
+ },
+ "cases": 16,
+ "variants": 10
+}

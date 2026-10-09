@@ -1,0 +1,165 @@
+{
+ "note": "Steps 4, 7, 8 and the page's checker. One rule set, two interpreters: lint/harness_lint.py and the page's in-browser checker (lib/harness-lint.ts). Patterns use syntax both Python re and JavaScript RegExp accept; flags are given separately. The audit runs the browser interpreter over lint/fixtures and fails the build if it disagrees with lint/fixtures/expected.json, which the Python tests also check.",
+ "kinds": ["system", "skill", "agents", "tools", "subagent", "memory"],
+ "budgets": {"generic": 6000, "claude": 12000, "gpt": 12000, "gemini": 10000, "grok": 10000, "qwen": 4000, "deepseek": 4000, "kimi": 8000, "glm": 6000, "mistral": 6000, "llama": 3000},
+ "rules": [
+  {"id": "secret", "kinds": ["system", "skill", "agents", "subagent", "memory", "tools"], "severity": "error", "type": "regex_absent",
+   "pattern": "(sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,}|(api[_-]?key|secret|password)\\s*[:=]\\s*['\"]?[A-Za-z0-9/+_-]{16,})", "flags": "i",
+   "message": {"en": "Looks like a credential in the file.", "zh": "文件里看起来有凭证。"},
+   "why": {"en": "Anything in a prompt or skill can be printed by the model, logged in a trace, or committed to git.", "zh": "提示词或技能里的任何内容都可能被模型打印出来、记录进追踪日志，或被提交到 git。"},
+   "fix": {"en": "Remove it, rotate the key, and read secrets from the environment in code the model never sees.", "zh": "删除它，轮换这个密钥，并在模型看不到的代码中从环境变量读取机密。"}},
+
+  {"id": "sys-budget", "kinds": ["system"], "severity": "warn", "type": "max_tokens_family",
+   "message": {"en": "The prompt is over the token budget for this model family.", "zh": "提示词超出了该模型系列的 token 预算。"},
+   "why": {"en": "Every always-loaded token is paid on every turn, and on local servers with a small context window the start of the prompt (your rules) is what gets cut. The corpus shows harnesses moving procedures out of the core into skills and tool descriptions as they mature.", "zh": "每个常驻 token 每一轮都要付费；在上下文窗口较小的本地服务器上，被截掉的正是提示词开头（你的规则）。语料显示，成熟的智能体框架会把流程性内容从核心提示词移到技能和工具说明中。"},
+   "fix": {"en": "Move long procedures into skills loaded on demand, delete rules your evals show the model follows without being told, and check the context length the server actually uses (probe/probe.py).", "zh": "把冗长的流程移到按需加载的技能里，删掉评估表明模型不用提醒也会遵守的规则，并检查服务器实际使用的上下文长度（probe/probe.py）。"}},
+
+  {"id": "sys-emphasis", "kinds": ["system", "skill"], "severity": "warn", "type": "density_max", "pattern": "\\b(MUST|NEVER|ALWAYS|CRITICAL|IMPORTANT|MANDATORY)\\b|DO NOT", "flags": "", "per_words": 1000, "max": 4,
+   "message": {"en": "Many capitalized commands (MUST, NEVER, ALWAYS) per thousand words.", "zh": "每千词中大写命令（MUST、NEVER、ALWAYS）过多。"},
+   "why": {"en": "Newer models follow instructions closely, and shouted rules make them over-apply the rule to cases it was not meant for. In the corpus, vendors cut capitalized rules sharply between generations and kept NEVER for a few bright lines.", "zh": "较新的模型会严格遵循指令，大写强调的规则会让它们把规则套用到本不该适用的情况。在语料中，各厂商在代际之间大幅削减了大写规则，只为少数红线保留 NEVER。"},
+   "fix": {"en": "Rewrite each rule as a plain sentence with its reason. Keep capitals for the two or three rules where a mistake cannot be undone.", "zh": "把每条规则改写成带理由的普通句子。只在两三条一旦出错就无法挽回的规则上保留大写。"}},
+
+  {"id": "sys-reasons", "kinds": ["system"], "severity": "warn", "type": "ratio_min",
+   "numerator": "\\b(because|since|so that|otherwise|which means)\\b", "denominator": "^\\s*(-|\\*|\\d+\\.)\\s", "flags": "im", "min": 0.3, "min_denominator": 5,
+   "message": {"en": "Few rules carry a reason.", "zh": "很少有规则附带理由。"},
+   "why": {"en": "A rule with its reason lets the model handle the case the rule did not name. The vendors' own prompts raised their density of reasons about fivefold across versions while dropping capitals.", "zh": "带理由的规则能让模型处理规则没有点名的情况。厂商自己的提示词在各版本间把理由的密度提高了约五倍，同时减少了大写。"},
+   "fix": {"en": "Add the reason after each rule in one clause: what goes wrong without it.", "zh": "在每条规则后用一个分句补上理由：没有它会出什么问题。"}},
+
+  {"id": "sys-identity", "kinds": ["system"], "severity": "warn", "type": "regex_present_head", "pattern": "\\byou are\\b|\\byour role\\b|\\bthe assistant is\\b", "flags": "i", "head_chars": 600,
+   "message": {"en": "No identity or role in the first lines.", "zh": "开头几行没有身份或角色说明。"},
+   "why": {"en": "Every vendor prompt in the corpus opens with one or two sentences of who the model is and where it runs; the rest of the rules are read in that frame.", "zh": "语料中每个厂商的提示词开头都用一两句话说明模型是谁、在哪里运行；其余规则都在这个框架下被理解。"},
+   "fix": {"en": "Open with one sentence of role and one of context: who reads the answers, what the agent may change.", "zh": "开头用一句话说明角色，再用一句话交代背景：谁会读这些回答，智能体可以改动什么。"}},
+
+  {"id": "sys-date", "kinds": ["system"], "severity": "warn", "type": "regex_present", "pattern": "\\b(today is|current date|the date is|\\d{4}-\\d{2}-\\d{2})", "flags": "i",
+   "message": {"en": "No current date in the prompt.", "zh": "提示词中没有当前日期。"},
+   "why": {"en": "Models assume their training year. Every open-weight vendor prompt in the corpus that has any text at all injects the date, and several tell the model to trust tools over memory for anything recent.", "zh": "模型会默认自己处于训练数据的年份。语料中凡是有正文的开放权重厂商提示词都会注入日期，有几家还要求模型对近期信息相信工具而非记忆。"},
+   "fix": {"en": "Inject today's date at assembly time, and say that day counts are computed from it.", "zh": "在拼装时注入今天的日期，并说明天数从这个日期算起。"}},
+
+  {"id": "sys-untrusted", "kinds": ["system"], "severity": "warn", "type": "regex_present", "pattern": "untrusted|data, never instructions|not instructions|never follow instructions|treat .{0,40} as data", "flags": "i",
+   "message": {"en": "Nothing says tool results and documents are data, not instructions.", "zh": "没有说明工具结果和文档是数据而不是指令。"},
+   "why": {"en": "Anything a tool returns can contain a planted command. Every corpus product that reads outside content has a local rule for this, and the eval set includes an injection case.", "zh": "工具返回的任何内容都可能藏有植入的命令。语料中每个读取外部内容的产品都为此设有专门规则，评估集也包含一个注入用例。"},
+   "fix": {"en": "Add one rule naming the untrusted sources, and wrap those fields in code (see evals/world.py). Enforce writes in the gate, not only in text.", "zh": "加一条规则点名哪些来源不可信，并在代码中给这些字段加上包装（见 evals/world.py）。写操作要在闸门里强制执行，而不只是写在文字里。"}},
+
+  {"id": "sys-think-step", "kinds": ["system"], "severity": "warn", "type": "regex_absent", "pattern": "think step by step|let'?s think|think it through step", "flags": "i",
+   "families": ["claude", "gpt", "gemini", "grok", "deepseek", "kimi", "glm"],
+   "message": {"en": "Asks a reasoning model to think step by step.", "zh": "要求推理模型逐步思考。"},
+   "why": {"en": "These families reason natively. OpenAI says the instruction is unnecessary and can hurt; Google says to replace chain-of-thought prompting with the thinking level; Anthropic prefers general instructions and effort settings.", "zh": "这些系列的模型自带推理能力。OpenAI 表示这条指令没有必要甚至可能有害；Google 建议用 thinking level 取代思维链提示；Anthropic 更推荐通用指令和 effort 设置。"},
+   "fix": {"en": "Delete it and set the reasoning effort or thinking level on the request instead.", "zh": "删掉它，改为在请求中设置推理 effort 或 thinking level。"}},
+
+  {"id": "sys-qwen-switch", "kinds": ["system"], "severity": "warn", "type": "regex_absent", "pattern": "/no_?think\\b|/think\\b", "flags": "i", "families": ["qwen"],
+   "message": {"en": "Uses the /think or /no_think soft switch.", "zh": "使用了 /think 或 /no_think 软开关。"},
+   "why": {"en": "The Qwen3.6 model card says the soft switches are not officially supported; thinking is controlled by the chat template flag enable_thinking.", "zh": "Qwen3.6 的模型卡说明软开关不再获得官方支持；思考模式由聊天模板参数 enable_thinking 控制。"},
+   "fix": {"en": "Remove the switch and pass chat_template_kwargs {enable_thinking: false} (or true) on the request.", "zh": "删除开关，在请求中传入 chat_template_kwargs {enable_thinking: false}（或 true）。"}},
+
+  {"id": "sys-mixed-markup", "kinds": ["system"], "severity": "warn", "type": "both_present", "a": "^<[a-z_]+>\\s*$", "b": "^#{1,3} \\S", "flags": "m", "min_each": 3,
+   "families": ["gemini", "claude", "gpt"],
+   "message": {"en": "Mixes XML section tags and Markdown headings.", "zh": "混用了 XML 节标签和 Markdown 标题。"},
+   "why": {"en": "Google's guide says to choose one format per prompt. Anthropic's own prompts pick one primary scheme per file. Mixed markup gives the model two ways to read the hierarchy.", "zh": "Google 的指南要求每个提示词只用一种格式。Anthropic 自己的提示词每个文件也只选一种主要结构。混用标记会让模型有两种方式理解层级。"},
+   "fix": {"en": "Render every section the same way (runtime/assemble.py does this from one source).", "zh": "所有节都用同一种方式渲染（runtime/assemble.py 从同一个源文件完成这件事）。"}},
+
+  {"id": "sys-text-tool-format", "kinds": ["system"], "severity": "warn", "type": "regex_absent", "pattern": "<tool_call>|^Action:|^Action Input:|```tool_code|<function_calls>", "flags": "im",
+   "message": {"en": "Describes a hand-written tool-call format in the prompt.", "zh": "在提示词里描述了手写的工具调用格式。"},
+   "why": {"en": "Native tool calling depends on the model's chat template. A second, prompt-level format competes with it and produces malformed calls; Qwen's docs warn that ReAct-style stopwords break with reasoning models.", "zh": "原生工具调用依赖模型的聊天模板。提示词层面的第二种格式会与之竞争，产生格式错误的调用；Qwen 的文档警告 ReAct 风格的停止词在推理模型上会失效。"},
+   "fix": {"en": "Pass tools through the API tools field and delete the format description. Run probe/probe.py to confirm native calls work.", "zh": "通过 API 的 tools 字段传入工具，并删除格式说明。运行 probe/probe.py 确认原生调用可用。"}},
+
+  {"id": "unfilled-placeholder", "kinds": ["system", "subagent"], "severity": "error", "type": "regex_absent", "pattern": "\\{\\{\\s*[a-z_]+\\s*\\}\\}", "flags": "i",
+   "message": {"en": "An unfilled {{placeholder}} is left in the prompt.", "zh": "提示词里留有未填充的 {{占位符}}。"},
+   "why": {"en": "The model reads the literal braces; the date or index it was meant to see is missing.", "zh": "模型读到的是字面上的花括号，本该看到的日期或索引缺失了。"},
+   "fix": {"en": "Render the prompt with runtime/assemble.py and lint the rendered text, not the template.", "zh": "用 runtime/assemble.py 渲染提示词，然后检查渲染后的文本，而不是模板。"}},
+
+  {"id": "skill-frontmatter", "kinds": ["skill"], "severity": "error", "type": "frontmatter_required", "fields": ["name", "description"],
+   "message": {"en": "SKILL.md needs frontmatter with name and description.", "zh": "SKILL.md 需要包含 name 和 description 的 frontmatter。"},
+   "why": {"en": "The description is the only part resident in the prompt; without it the skill cannot be chosen. Every vendor skill format in the corpus requires both fields.", "zh": "description 是唯一常驻在提示词里的部分；没有它，这个技能就无法被选中。语料中每家厂商的技能格式都要求这两个字段。"},
+   "fix": {"en": "Start the file with ---, name: kebab-case-name, description: what it does and when to use it, ---.", "zh": "文件开头写 ---、name: kebab-case 名称、description: 它做什么以及何时使用、---。"}},
+
+  {"id": "skill-name", "kinds": ["skill"], "severity": "error", "type": "frontmatter_pattern", "field": "name", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "flags": "", "max": 64,
+   "message": {"en": "Skill name must be kebab-case, at most 64 characters.", "zh": "技能名必须是 kebab-case，最多 64 个字符。"},
+   "why": {"en": "Loaders and validators reject other names (Anthropic's limit is 64 lowercase letters, digits and hyphens).", "zh": "加载器和校验器会拒绝其他形式的名称（Anthropic 的限制是 64 个小写字母、数字和连字符）。"},
+   "fix": {"en": "Rename the field and the folder to match, for example expense-policy.", "zh": "把字段和文件夹改成一致的名称，例如 expense-policy。"}},
+
+  {"id": "skill-desc-length", "kinds": ["skill"], "severity": "error", "type": "frontmatter_max_len", "field": "description", "max": 1024,
+   "message": {"en": "Description is over 1,024 characters.", "zh": "description 超过 1,024 个字符。"},
+   "why": {"en": "That is the hard limit in Anthropic's skill format and the corpus validators; longer text is rejected or cut.", "zh": "这是 Anthropic 技能格式和语料中校验器的硬性上限；更长的文本会被拒绝或截断。"},
+   "fix": {"en": "Keep what it does and when to use it; move details into the body.", "zh": "只保留它做什么和何时使用；把细节移到正文。"}},
+
+  {"id": "skill-desc-short", "kinds": ["skill"], "severity": "warn", "type": "frontmatter_min_len", "field": "description", "min": 60,
+   "message": {"en": "Description is too short to route on.", "zh": "description 太短，无法据此路由。"},
+   "why": {"en": "The model picks a skill from this line alone. A label such as \"PDF helper\" gives it nothing to match a request against.", "zh": "模型只凭这一行来选择技能。像 “PDF helper” 这样的标签无法让它与请求进行匹配。"},
+   "fix": {"en": "Say what the skill does, then \"Use when ...\" with the words users actually type.", "zh": "先说明技能做什么，再写 “Use when ...”，用上用户实际会输入的词。"}},
+
+  {"id": "skill-trigger", "kinds": ["skill"], "severity": "warn", "type": "frontmatter_regex_present", "field": "description", "pattern": "use when|use for|use it|use this|when the user|when a ", "flags": "i",
+   "message": {"en": "Description does not say when to use the skill.", "zh": "description 没有说明何时使用这个技能。"},
+   "why": {"en": "Under-triggering is the common skill failure: the guidance in the corpus is to make descriptions name the trigger, even a little pushily.", "zh": "触发不足是技能最常见的问题：语料中的建议是让 description 点明触发条件，哪怕写得稍微强势一些。"},
+   "fix": {"en": "Add \"Use when ...\" with two or three concrete request shapes.", "zh": "加上 “Use when ...”，并给出两三种具体的请求形式。"}},
+
+  {"id": "skill-negative", "kinds": ["skill"], "severity": "info", "type": "frontmatter_regex_present", "field": "description", "pattern": "do not use|don't use|not for|not when", "flags": "i",
+   "message": {"en": "Description has no near-miss boundary (\"Do not use for ...\").", "zh": "description 没有写近似但不适用的边界（“Do not use for ...”）。"},
+   "why": {"en": "With several skills, overlap causes the wrong one to load. Meta's and OpenAI's skill descriptions in the corpus often state negative triggers.", "zh": "技能一多，重叠就会导致加载错误的技能。语料中 Meta 和 OpenAI 的技能描述经常写明不该触发的情况。"},
+   "fix": {"en": "Name the closest neighbouring request that should not load this skill, and which skill it should load instead.", "zh": "写出最接近但不应加载此技能的请求，并说明应改用哪个技能。"}},
+
+  {"id": "skill-brackets", "kinds": ["skill"], "severity": "error", "type": "frontmatter_regex_absent", "field": "description", "pattern": "[<>]", "flags": "",
+   "message": {"en": "Description contains angle brackets.", "zh": "description 中包含尖括号。"},
+   "why": {"en": "Skill validators reject them because the description is inserted into a tagged prompt.", "zh": "技能校验器会拒绝尖括号，因为 description 会被插入到带标签的提示词中。"},
+   "fix": {"en": "Rewrite without < or >.", "zh": "改写成不含 < 或 > 的文字。"}},
+
+  {"id": "skill-length", "kinds": ["skill"], "severity": "warn", "type": "max_lines", "max": 500,
+   "message": {"en": "SKILL.md body is over 500 lines.", "zh": "SKILL.md 正文超过 500 行。"},
+   "why": {"en": "The whole body loads when the skill triggers. The corpus guidance is under 500 lines, with long variants split into references/ files the body points to.", "zh": "技能触发时会加载整个正文。语料中的建议是控制在 500 行以内，较长的变体拆分到 references/ 文件中，由正文指向它们。"},
+   "fix": {"en": "Move each variant or long table into references/<topic>.md and say in the body when to read it.", "zh": "把每个变体或长表格移到 references/<topic>.md，并在正文中说明何时阅读。"}},
+
+  {"id": "agents-commands", "kinds": ["agents"], "severity": "warn", "type": "regex_present", "pattern": "^#{1,3} .*command", "flags": "im",
+   "message": {"en": "No commands section.", "zh": "没有命令小节。"},
+   "why": {"en": "The commands to build, test and lint are the facts a coding agent cannot guess and gets wrong most often.", "zh": "构建、测试和 lint 的命令是编码智能体无法猜到、也最常出错的事实。"},
+   "fix": {"en": "Add a Commands section with exact copy-paste lines, including how to run a single test.", "zh": "加一个 Commands 小节，写上可直接复制粘贴的确切命令，包括如何运行单个测试。"}},
+
+  {"id": "agents-done", "kinds": ["agents"], "severity": "warn", "type": "regex_present", "pattern": "definition of done|is done when|done means|before a change is complete", "flags": "i",
+   "message": {"en": "No definition of done.", "zh": "没有完成标准。"},
+   "why": {"en": "Without one, the agent decides for itself when to stop, which is how half-finished work is reported as complete.", "zh": "没有完成标准，智能体就会自己决定何时停下，半成品就是这样被报告为已完成的。"},
+   "fix": {"en": "Name which commands must pass before a change counts as done.", "zh": "写明哪些命令必须通过，改动才算完成。"}},
+
+  {"id": "agents-size", "kinds": ["agents"], "severity": "warn", "type": "max_tokens", "max": 8000,
+   "message": {"en": "AGENTS.md is over about 32 KiB.", "zh": "AGENTS.md 超过约 32 KiB。"},
+   "why": {"en": "Codex stops loading project instructions at 32 KiB by default, and every byte is resident in every session.", "zh": "Codex 默认在 32 KiB 处停止加载项目指令，而且每个字节在每个会话中都会常驻。"},
+   "fix": {"en": "Cut anything a session can derive with a few tool calls; move task procedures into skills.", "zh": "删掉会话用几次工具调用就能推导出的内容；把任务流程移到技能里。"}},
+
+  {"id": "tools-description", "kinds": ["tools"], "severity": "warn", "type": "tools_min_description", "min": 120,
+   "message": {"en": "A tool description is too short.", "zh": "某个工具的说明太短。"},
+   "why": {"en": "Anthropic calls the description the most important factor in tool performance and asks for three to four sentences: what it does, when to use it and not, what it returns, its caveats.", "zh": "Anthropic 认为工具说明是影响工具表现的最重要因素，要求写三到四句话：它做什么、何时用和何时不用、返回什么、有哪些注意事项。"},
+   "fix": {"en": "Write what it does, when to use it instead of its neighbour, what an empty or error result means.", "zh": "写清楚它做什么、什么时候该用它而不是相近的工具、空结果或错误结果意味着什么。"}},
+
+  {"id": "tools-schema", "kinds": ["tools"], "severity": "error", "type": "tools_object_schema",
+   "message": {"en": "A tool's parameters are not a JSON Schema object.", "zh": "某个工具的参数不是 JSON Schema 对象。"},
+   "why": {"en": "OpenAI, xAI, Ollama and the others require an object at the root of the parameters schema; anything else is rejected or ignored.", "zh": "OpenAI、xAI、Ollama 等都要求参数 schema 的根是对象；其他形式会被拒绝或忽略。"},
+   "fix": {"en": "Use {\"type\": \"object\", \"properties\": {...}, \"required\": [...]}.", "zh": "使用 {\"type\": \"object\", \"properties\": {...}, \"required\": [...]}。"}},
+
+  {"id": "tools-count", "kinds": ["tools"], "severity": "warn", "type": "tools_max_count", "max": 20,
+   "message": {"en": "More than 20 tools are always loaded.", "zh": "常驻加载的工具超过 20 个。"},
+   "why": {"en": "OpenAI recommends fewer than 20 functions per turn; selection errors grow with the list. Large harnesses in the corpus load the rest on demand through a tool search.", "zh": "OpenAI 建议每轮少于 20 个函数；工具越多，选错的概率越大。语料中的大型框架会通过工具搜索按需加载其余工具。"},
+   "fix": {"en": "Keep the common tools resident and load the rest with a search or skill step.", "zh": "把常用工具保持常驻，其余的通过搜索或技能步骤按需加载。"}},
+
+  {"id": "tools-name", "kinds": ["tools"], "severity": "error", "type": "tools_name_pattern", "pattern": "^[a-zA-Z0-9_-]{1,64}$", "flags": "",
+   "message": {"en": "A tool name has characters some APIs reject, or is duplicated.", "zh": "某个工具名包含某些 API 不接受的字符，或者重复了。"},
+   "why": {"en": "Kimi, OpenAI and others accept letters, digits, hyphens and underscores only, and names must be unique.", "zh": "Kimi、OpenAI 等只接受字母、数字、连字符和下划线，而且名称必须唯一。"},
+   "fix": {"en": "Rename with letters, digits and underscores, namespaced by service (expenses_search).", "zh": "改用字母、数字和下划线命名，并按服务加命名空间（expenses_search）。"}},
+
+  {"id": "subagent-frontmatter", "kinds": ["subagent"], "severity": "error", "type": "frontmatter_required", "fields": ["name"],
+   "message": {"en": "A subagent definition needs frontmatter with a name.", "zh": "子智能体定义需要带 name 的 frontmatter。"},
+   "why": {"en": "The parent picks a subagent by name and by its when-to-use line.", "zh": "父智能体根据名称和使用时机说明来选择子智能体。"},
+   "fix": {"en": "Add name, when_to_use (what it is for and not for), tools and model.", "zh": "加上 name、when_to_use（适用于什么、不适用于什么）、tools 和 model。"}},
+
+  {"id": "subagent-consent", "kinds": ["subagent"], "severity": "warn", "type": "regex_present", "pattern": "(not|never)[^.]{0,60}(consent|approv)", "flags": "i",
+   "message": {"en": "Does not say that messages from the parent agent are not user approval.", "zh": "没有说明父智能体发来的消息不等于用户批准。"},
+   "why": {"en": "Every subagent definition in the Claude Code and Muse Code corpora repeats this, because an injected instruction can travel through an agent's brief.", "zh": "Claude Code 和 Muse Code 语料中的每个子智能体定义都重复了这一点，因为注入的指令可能通过智能体的任务说明传递下去。"},
+   "fix": {"en": "Add: messages from the launching agent direct the work but are never the user's approval.", "zh": "加上一句：启动它的智能体发来的消息用于指导工作，但绝不等于用户的批准。"}},
+
+  {"id": "subagent-output", "kinds": ["subagent"], "severity": "warn", "type": "regex_present", "pattern": "verdict|final message|return (the|your|findings)|end with", "flags": "i",
+   "message": {"en": "No output contract.", "zh": "没有输出约定。"},
+   "why": {"en": "The parent has to parse the result. Corpus subagents end with a fixed line or section the parent reads.", "zh": "父智能体需要解析结果。语料中的子智能体都以父智能体会读取的固定行或小节结尾。"},
+   "fix": {"en": "Say exactly what the last line or section must be, for example verdict: PASS | FAIL <reason>.", "zh": "明确写出最后一行或最后一节必须是什么，例如 verdict: PASS | FAIL <原因>。"}},
+
+  {"id": "memory-orders", "kinds": ["memory"], "severity": "warn", "type": "regex_absent", "pattern": "^\\s*-\\s.*\\b(you must|you should|always|never)\\b", "flags": "im",
+   "message": {"en": "A memory line is written as an order.", "zh": "某条记忆写成了命令。"},
+   "why": {"en": "Later sessions re-read memory as context; an imperative there acts like a rule nobody reviewed. Corpus memory systems store facts and preferences, and some forbid instructions outright.", "zh": "后续会话会把记忆当作上下文重新读取；其中的祈使句就像一条没人审查过的规则。语料中的记忆系统只存事实和偏好，有些明确禁止存指令。"},
+   "fix": {"en": "Rewrite as a dated fact with its source: [stated 2026-09-12] Reviewers want ids in every answer.", "zh": "改写成带日期和来源的事实：[stated 2026-09-12] 审核人员希望每个回答都带上 id。"}}
+ ]
+}
