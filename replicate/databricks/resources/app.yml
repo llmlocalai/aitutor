@@ -1,0 +1,39 @@
+# The agent as a Databricks App. Names starting with "agent-" appear in the workspace agents list.
+# Confirmed on the vendor's author-an-agent page: an experiment resource with CAN_EDIT and a serving
+# endpoint resource with CAN_QUERY. The others follow the same shape; compare with the template's
+# databricks.yml and the Apps resources page, and keep theirs where they differ.
+# Every endpoint the code calls needs its own resource, or that call fails with 403 at runtime:
+# the default chat model, the fast model (small-talk route), and the embedding model (search, memory).
+resources:
+  apps:
+    agent_powerhouse:
+      name: agent-powerhouse
+      description: Replica of the local agent, served from the OpenAI Agents SDK template
+      source_code_path: ../agent_app             # the cloned template folder, with src/ copied in
+      resources:
+        - name: experiment
+          experiment:
+            experiment_id: ${var.experiment_id}
+            permission: CAN_EDIT
+        - name: model
+          serving_endpoint:
+            name: ${var.chat_endpoint}
+            permission: CAN_QUERY
+        - name: model-fast
+          serving_endpoint:
+            name: ${var.chat_fast_endpoint}
+            permission: CAN_QUERY
+        - name: embedding
+          serving_endpoint:
+            name: ${var.embedding_endpoint}
+            permission: CAN_QUERY
+        - name: sql_warehouse                    # graph expansion and the diagnostic's collection list
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        # Lakebase (memory, and retrieval if AGENT_RETRIEVAL=lakebase): add the database resource in the
+        # Apps UI or here as the vendor's resources page shows (key "postgres", permission
+        # CAN_CONNECT_AND_CREATE). The platform then sets the PG* variables for the app.
+# In the template's app config (env section), map resources to the variables the code reads:
+#   - name: DATABRICKS_WAREHOUSE_ID
+#     valueFrom: sql_warehouse

@@ -1,0 +1,81 @@
+# Jobs. Local build (module 15): launchd/systemd timers and a duty-cycle scheduler.
+# Here each schedule is a Lakeflow job on serverless compute; the platform supplies the machine,
+# so there is no duty cycle to manage, only a cost to watch.
+resources:
+  jobs:
+    ingest:
+      name: agent-ingest
+      schedule:
+        quartz_cron_expression: "0 15 * * * ?"     # hourly at :15
+        timezone_id: UTC
+        pause_status: UNPAUSED
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - databricks-openai
+              - databricks-sdk
+              - databricks-ai-search
+              - psycopg[binary,pool]
+      tasks:
+        - task_key: ingest
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/knowledge/ingest.py
+            parameters: ["--catalog", "${var.catalog}", "--backend", "${var.retrieval}"]
+        - task_key: edges
+          depends_on:
+            - task_key: ingest
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/graph/edges.py
+            parameters: ["--catalog", "${var.catalog}"]
+        - task_key: refresh_search                 # TRIGGERED syncs never run by themselves
+          depends_on:
+            - task_key: ingest
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/retrieval/refresh.py
+            parameters: ["--backend", "${var.retrieval}"]
+
+    nightly_eval:
+      name: agent-nightly-eval
+      schedule:
+        quartz_cron_expression: "0 30 2 * * ?"     # 02:30 every night
+        timezone_id: UTC
+        pause_status: UNPAUSED
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - mlflow[databricks]
+              - databricks-sdk
+              - requests
+      tasks:
+        - task_key: frozen_questions
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/evals/run_eval.py
+            parameters: ["run", "--repeats", "3", "--app-url", "${var.app_url}", "--experiment-id", "${var.eval_experiment_id}"]
+
+    learner:
+      name: agent-learner-report
+      schedule:
+        quartz_cron_expression: "0 0 4 * * ?"      # 04:00, after the eval
+        timezone_id: UTC
+        pause_status: PAUSED                        # unpause after you have read a week of manual runs
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - mlflow[databricks]
+              - unitycatalog-ai[databricks]
+      tasks:
+        - task_key: observe
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/learner/nightly.py
+            parameters: ["--experiment-id", "${var.experiment_id}", "--catalog", "${var.catalog}"]

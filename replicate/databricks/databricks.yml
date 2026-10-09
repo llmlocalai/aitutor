@@ -1,0 +1,37 @@
+# Step 18. One bundle for everything that runs on a schedule, plus the agent app.
+# databricks bundle validate -t dev && databricks bundle deploy -t dev
+# The agent app's own databricks.yml in the vendor template is authoritative for the app block;
+# copy its `resources.apps` entry here (or keep it there) rather than trusting this one blindly.
+bundle:
+  name: agent-replica
+
+variables:
+  catalog:
+    default: agentlab
+  experiment_id:
+    description: MLflow experiment that holds the agent's traces
+  chat_endpoint:
+    default: databricks-qwen35-122b-a10b
+  chat_fast_endpoint:
+    default: databricks-qwen3-next-80b-a3b-instruct
+  embedding_endpoint:
+    default: databricks-qwen3-embedding-0-6b
+  retrieval:
+    description: lakebase or ai_search (step 9)
+    default: lakebase
+  eval_experiment_id:
+    description: MLflow experiment for evaluation runs (keep it separate from the app's traces)
+  app_url:
+    description: URL of the deployed agent app (shown by `databricks apps get agent-powerhouse`)
+  warehouse_id:
+    description: SQL warehouse the app uses for graph expansion
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development          # resources get a [dev <user>] prefix and schedules are paused
+    default: true
+  prod:
+    mode: production

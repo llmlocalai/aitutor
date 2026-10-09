@@ -1,0 +1,167 @@
+{
+ "checked_at": "2026-10-08",
+ "python": "3.13.16",
+ "files": {
+  "replicate/databricks/README.md": {
+   "sha256": "4d9027e0696849f37570dde829230f18aa52516fd3c8dd30bcadb6807793eca5",
+   "check": "read only"
+  },
+  "replicate/databricks/databricks.yml": {
+   "sha256": "d1be5dc5f38f53cf5d4cfa09ce01ec70fc4997ad279698bcb0d1f518a7d76776",
+   "check": "yaml parses"
+  },
+  "replicate/databricks/resources/app.yml": {
+   "sha256": "ead53a4973cce94680f1275f21b09f4ba50a6eda2a7eaef5f2f624d73a2d5d7f",
+   "check": "yaml parses"
+  },
+  "replicate/databricks/resources/jobs.yml": {
+   "sha256": "087613478d4387c5addd5d20d16aed4423a6263dfb85719d46d9170ba9a746aa",
+   "check": "yaml parses"
+  },
+  "replicate/databricks/setup/00_workspace.sh": {
+   "sha256": "092485af8139f3ad1ef9f0251d6d334d09cc14326afcd70fb6b58266dbe37cd0",
+   "check": "bash -n passes"
+  },
+  "replicate/databricks/setup/01_catalog.sql": {
+   "sha256": "fa7c56c8cfce142c1430bc04bbbc03d06f1d086673d53c9bf40b60d49cc41928",
+   "check": "read only"
+  },
+  "replicate/databricks/setup/02_secrets.sh": {
+   "sha256": "da0ec56b0eb7fc4d7ca0c059812510d73dd001bc62cf490c67ef3300b8574b89",
+   "check": "bash -n passes"
+  },
+  "replicate/databricks/setup/03_upload_knowledge.sh": {
+   "sha256": "a9f373550325f84eaaf438df2c5f657746b8b28a59a54a8b8d0c26c57b530174",
+   "check": "bash -n passes"
+  },
+  "replicate/databricks/src/agent/agent.py": {
+   "sha256": "c5dc102b5d5a6a602d1328f64e3e6c1499fc9f569bf3ef141dd5da1f871666ae",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/agent/harness.py": {
+   "sha256": "66762001651718503962ef1833d80f2694f68da95864508fade5dcad9d314bd3",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/common/config.py": {
+   "sha256": "24e2a3bfc9f5d7dc9bb5c523d539547bfa0e51e8b09ca16c64c3c1f5bbbc374f",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/common/pg.py": {
+   "sha256": "bb13f0c57753230e058e414e067fffc95d2b8122f9cc378d4fb4338929d02b76",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/evals/run_eval.py": {
+   "sha256": "83341bff642f1ca7ffb7a1855b0cd42817ee58101dbe060e813f7130a4c493da",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/evals/scorers.py": {
+   "sha256": "f59970ea457a9df758b83d2fb4435e09c6bfd44e8add79e31cdc4bef0ffc26cd",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/graph/edges.py": {
+   "sha256": "b5229f96447c0b6fdda5fd4b46cae067fae2dc4b13fbc27f61f543b041ed056e",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/guard/answer_guard.py": {
+   "sha256": "c7bc96e169790b6652582c437dcb8efcfb30a14b246c68aac4d89cdd5dd60fa7",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/knowledge/chunking.py": {
+   "sha256": "1c7576f6ff9a41c9f4d6748d67bb607e09c9105e51a962c763fb70bb76111fea",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/knowledge/ingest.py": {
+   "sha256": "4f57a1721f383119eb7ecdb2cd8d5f460264edc126c2f06b0975dcaccd2f48f5",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/learner/nightly.py": {
+   "sha256": "f881fa291fc709e1b62abc45b438ab974de4d4d083a7b81438c7dadd5d9aba27",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/memory/store.py": {
+   "sha256": "eb901e72c08948ee408840c0df8eec91a18cc6263327f44a1b6f9e05de7efe2a",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/models/bench.py": {
+   "sha256": "e49a6d9afdfb3c1d0fafeaf057edb1bf2633e4a21bb4ebae8e24bfb96ed539b6",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/models/router.py": {
+   "sha256": "02eb1f66cca20fd3d865bdd45c429825bd86fbc8fb4b49a96d276aa61241f53d",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/ops/monitor.sql": {
+   "sha256": "8a53e4290198ae1355933f41286e223dbda8fd8458cf42c86fc900715099a9eb",
+   "check": "read only"
+  },
+  "replicate/databricks/src/retrieval/ai_search_index.py": {
+   "sha256": "a743bfa64cac5002c476619d6445517989cde5795ffa040fd2665765858a079d",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/retrieval/lakebase_search.sql": {
+   "sha256": "90790faf2fffbadb829faaeed1150091258bccafb39f8aab6e65b6e54f9402d8",
+   "check": "read only"
+  },
+  "replicate/databricks/src/retrieval/lakebase_sync.py": {
+   "sha256": "3fbd1653f90694d0ea7924216493d494b6f501ca688aa8be893049293273273b",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/retrieval/ranking.py": {
+   "sha256": "13999aa7090d671b815f797b82f85516feedcae7109fb97735dc16ff43ffa2ae",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/retrieval/refresh.py": {
+   "sha256": "58d3b0f69a7c272fde7b1cf4d69658904de7e40eb2f3ab32fc65081c3fa902bd",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/retrieval/search_tool.py": {
+   "sha256": "093e35befbed0f2460f0c5ffd617ce15685fa5de63d4b7773c6bc453f1c6abc3",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/skills/register_prompts.py": {
+   "sha256": "2cffd2de18e726801bfe9ec2f429350393a7088e5dfcd71c3b5226cf37ac30c6",
+   "check": "compiles"
+  },
+  "replicate/databricks/src/tools/query_expenses.sql": {
+   "sha256": "4fa26f9a2ba1e90f5d1eb0d50cde88df332a8ee4014f7e57a5abf56d91268a1c",
+   "check": "read only"
+  },
+  "replicate/databricks/src/tools/uc_tools.py": {
+   "sha256": "abf0e15c198ba5ba74bcc5abae07c321d915b82d6f1463670245cb34e7ccd0b1",
+   "check": "compiles"
+  },
+  "replicate/databricks/tests/test_portable.py": {
+   "sha256": "68cd8cd7b2eb2338f758dbca6d7cc2e97a86bb903a6ef1545c401ef72fec8010",
+   "check": "compiles"
+  }
+ },
+ "tests": {
+  "run": 22,
+  "failed": 0,
+  "names": [
+   "test_scorers (test_portable.Evals.test_scorers)",
+   "test_seal_digest_detects_one_changed_row (test_portable.Evals.test_seal_digest_detects_one_changed_row)",
+   "test_assistant_words_are_not_evidence (test_portable.Guard.test_assistant_words_are_not_evidence)",
+   "test_grounded_sum (test_portable.Guard.test_grounded_sum)",
+   "test_invented_figure (test_portable.Guard.test_invented_figure)",
+   "test_compose_order (test_portable.Harness.test_compose_order)",
+   "test_guard_loop (test_portable.Harness.test_guard_loop)",
+   "test_lineup_no_repeats (test_portable.Harness.test_lineup_no_repeats)",
+   "test_skill_floor (test_portable.Harness.test_skill_floor)",
+   "test_triage (test_portable.Harness.test_triage)",
+   "test_chunks_keep_heading_path (test_portable.Knowledge.test_chunks_keep_heading_path)",
+   "test_defines_edge (test_portable.Knowledge.test_defines_edge)",
+   "test_tier_first_match (test_portable.Knowledge.test_tier_first_match)",
+   "test_validate (test_portable.Knowledge.test_validate)",
+   "test_authority_breaks_near_tie_only (test_portable.Ranking.test_authority_breaks_near_tie_only)",
+   "test_dedup_shows_most_authoritative_copy (test_portable.Ranking.test_dedup_shows_most_authoritative_copy)",
+   "test_empty_has_diagnostic (test_portable.Ranking.test_empty_has_diagnostic)",
+   "test_flags_off (test_portable.Ranking.test_flags_off)",
+   "test_rrf_uses_positions_only (test_portable.Ranking.test_rrf_uses_positions_only)",
+   "test_contract (test_portable.Tools.test_contract)",
+   "test_learner_proves_by_rerun (test_portable.Tools.test_learner_proves_by_rerun)",
+   "test_prompt_braces (test_portable.Tools.test_prompt_braces)"
+  ]
+ },
+ "failures": 0
+}

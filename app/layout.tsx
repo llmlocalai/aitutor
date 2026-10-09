@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/"><T v={ui.navMap} /></Link>
               <Link href="/playbook"><T v={ui.navPlaybook} /></Link>
               <Link href="/platforms"><T v={ui.navPlatforms} /></Link>
+              <Link href="/databricks"><T v={ui.navDbx} /></Link>
               <Link href="/live"><T v={ui.navLive} /></Link>
               <Link href="/tutor"><T v={ui.navTutor} /></Link>
             </nav>

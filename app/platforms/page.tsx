@@ -16,6 +16,12 @@ export default function Platforms() {
       </header>
       <div className="note" style={{ marginBottom: 18 }}><T v={ui.plWarn} /></div>
 
+      <Link href="/databricks" className="card mod" style={{ display: "block", marginBottom: 18, borderColor: "var(--accent)" }}>
+        <div className="eyebrow"><T v={ui.dbxEyebrow} /> · Databricks</div>
+        <h3><T v={ui.dbxPlaybook} /></h3>
+        <p className="muted small"><T v={ui.dbxCard} /></p>
+      </Link>
+
       <h2 style={{ marginTop: 0 }}><T v={ui.guide} /></h2>
       <div className="mods">
         {guides.map((g) => (

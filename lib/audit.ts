@@ -4,6 +4,8 @@ import { guides } from "./platforms";
 import { machine, machineKeys } from "./machine";
 import type { LS } from "./types";
 import { ui } from "./ui";
+import * as dbx from "@/content/databricks";
+import { readScript, replicateCheck, staleScripts } from "./replicate";
 
 /**
  * Self-audit. Runs at build time (the /audit page calls it), so a broken link,
@@ -181,6 +183,59 @@ export function audit(): AuditReport {
     });
   }
 
+  // Databricks replication page
+  {
+    const w = "databricks";
+    ls(dbx.intro.title, `${w}.title`); ls(dbx.intro.lede, `${w}.lede`); ls(dbx.intro.honesty, `${w}.honesty`); ls(dbx.intro.scriptsHow, `${w}.scriptsHow`);
+    for (const id of new Set(dbx.unknownRefs)) errors.push(`${w}: text refers to unknown step [[${id}]]`);
+    for (const p of dbx.orderProblems()) errors.push(`${w}: ${p}`);
+    const ids = new Set<string>();
+    for (const p of dbx.phases) {
+      ls(p.title, `${w}.${p.id}.title`); ls(p.goal, `${w}.${p.id}.goal`);
+      for (const s of p.steps) {
+        const sw = `${w}.${s.id}`;
+        if (ids.has(s.id)) errors.push(`${sw}: duplicate step id`);
+        ids.add(s.id);
+        ls(s.title, `${sw}.title`); ls(s.local, `${sw}.local`); ls(s.why, `${sw}.why`); ls(s.what, `${sw}.what`); ls(s.done, `${sw}.done`);
+        if (s.unconfirmed) ls(s.unconfirmed, `${sw}.unconfirmed`);
+        if (s.how.length < 2) errors.push(`${sw}: fewer than 2 actions`);
+        if (s.interpret.length < 2) errors.push(`${sw}: fewer than 2 notes on reading the result`);
+        if (s.trouble.length < 1) errors.push(`${sw}: no troubleshooting`);
+        else if (s.trouble.length < 2) warnings.push(`${sw}: only one troubleshooting entry`);
+        if (!s.files?.length && !s.code?.length) warnings.push(`${sw}: no script`);
+        s.how.forEach((x, i) => ls(x, `${sw}.how[${i}]`));
+        s.interpret.forEach((x, i) => ls(x, `${sw}.interpret[${i}]`));
+        s.trouble.forEach((x, i) => { ls(x.s, `${sw}.trouble[${i}].s`); ls(x.c, `${sw}.trouble[${i}].c`); ls(x.f, `${sw}.trouble[${i}].f`); });
+        if (s.links.length === 0) errors.push(`${sw}: linked to no lesson step`);
+        for (const k of s.links) if (!stepByKey[k]) errors.push(`${sw}: links unknown lesson step ${k}`);
+        for (const f of s.files ?? []) {
+          try {
+            const sc = readScript(f);
+            if (!sc.check) errors.push(`${sw}: ${f} has no recorded check. Run: python3 replicate/databricks/check.py --write`);
+            else if (sc.stale) errors.push(`${sw}: ${f} changed after its check. Run: python3 replicate/databricks/check.py --write`);
+            else if (sc.check.check.startsWith("FAILED")) errors.push(`${sw}: ${f} ${sc.check.check}`);
+            const head = sc.text.split("\n").slice(0, 3).join(" ").match(/\bSteps? ((?:\d+(?:, | and | or )?)+)/);
+            if (head) {
+              const nums = head[1].match(/\d+/g)!.map(Number);
+              if (!nums.includes(dbx.numberOf[s.id])) errors.push(`${sw}: ${f} says "Step ${head[1].trim()}" but is shown on step ${dbx.numberOf[s.id]}`);
+            }
+          } catch (e) { errors.push(`${sw}: ${(e as Error).message}`); }
+        }
+      }
+    }
+    for (const r of dbx.componentMap) {
+      ls(r.local, `${w}.map.local`); ls(r.dbx, `${w}.map.dbx`); ls(r.change, `${w}.map.change`);
+      if (!dbx.rstepById[r.step]) errors.push(`${w}.map: unknown step ${r.step}`);
+    }
+    dbx.runbooks.forEach((r, i) => { ls(r.title, `${w}.runbook[${i}]`); ls(r.when, `${w}.runbook[${i}].when`); r.items.forEach((x, j) => ls(x, `${w}.runbook[${i}][${j}]`)); });
+    dbx.incidents.forEach((x, i) => { ls(x.s, `${w}.incident[${i}].s`); ls(x.check, `${w}.incident[${i}].check`); ls(x.f, `${w}.incident[${i}].f`); });
+    dbx.costLevers.forEach((x, i) => ls(x, `${w}.cost[${i}]`));
+    dbx.gaps.forEach((x, i) => ls(x, `${w}.gap[${i}]`));
+    if (dbx.sources.length === 0) errors.push(`${w}: no vendor sources`);
+    for (const f of staleScripts()) errors.push(`${w}: ${f} changed after its check (or was never checked). Run: python3 replicate/databricks/check.py --write`);
+    if (replicateCheck.failures) errors.push(`${w}: replicate/databricks/check.py recorded ${replicateCheck.failures} failures`);
+  }
+
   const links = steps.reduce((n, s) => n + (s.step.needs?.length ?? 0), 0);
   return {
     errors, warnings, forward,
@@ -198,6 +253,9 @@ export function audit(): AuditReport {
       "lab python": labPython,
       "unexecuted steps a machine check covers": mk.checks.length,
       "unexecuted steps checked by hand": mk.manual.length,
+      "Databricks replication steps": dbx.rsteps.length,
+      "Databricks scripts checked": Object.keys(replicateCheck.files).length,
+      "Databricks portable tests passed": `${replicateCheck.tests.run - replicateCheck.tests.failed}/${replicateCheck.tests.run}`,
       "machine checks passed on the reference machine": Object.values(machine.results).filter((r) => r.status === "pass").length,
     },
   };

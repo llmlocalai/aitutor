@@ -29,6 +29,9 @@ export default async function Guide({ params }: { params: Promise<{ id: string }
         <p className="lede"><T v={g.summary} /></p>
       </header>
       {g.id !== "other" && <div className="note" style={{ marginBottom: 18 }}><T v={ui.plWarn} /></div>}
+      {g.id === "databricks" && (
+        <p style={{ marginBottom: 18 }}><Link className="btn" href="/databricks"><T v={ui.dbxPlaybook} /></Link></p>
+      )}
       <div className="two">
         <div className="card"><h3><T v={ui.youOwn} /></h3><p><T v={g.owns.you} /></p></div>
         <div className="card"><h3><T v={ui.platformOwns} /></h3><p><T v={g.owns.platform} /></p></div>
