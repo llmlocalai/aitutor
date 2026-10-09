@@ -1,2 +1,2 @@
-/** Runs before first paint so the page never flashes the wrong language. Key must match components/lang.ts. */
-export const LANG_BOOT = `try{var l=localStorage.getItem("aitutor.lang");if(!l){l=(navigator.language||"").toLowerCase().indexOf("zh")===0?"zh":"en"}document.documentElement.dataset.lang=l;document.documentElement.lang=l==="zh"?"zh-Hans":"en"}catch(e){document.documentElement.dataset.lang="en"}`;
+/** Runs before first paint so the page never flashes the wrong language. English unless the visitor chose 中文 (stored on click). Key must match components/lang.ts. */
+export const LANG_BOOT = `try{var l=localStorage.getItem("aitutor.lang");if(l!=="zh"){l="en"}document.documentElement.dataset.lang=l;document.documentElement.lang=l==="zh"?"zh-Hans":"en"}catch(e){document.documentElement.dataset.lang="en"}`;

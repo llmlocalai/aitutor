@@ -5,7 +5,9 @@ import { machine, machineKeys } from "./machine";
 import type { LS } from "./types";
 import { ui } from "./ui";
 import * as dbx from "@/content/databricks";
-import { readScript, replicateCheck, staleScripts } from "./replicate";
+import * as nat from "@/content/databricks-native";
+import type { Phase, RStep } from "@/content/databricks/types";
+import { KITS, readScript, staleScripts, type Kit } from "./replicate";
 
 /**
  * Self-audit. Runs at build time (the /audit page calls it), so a broken link,
@@ -183,14 +185,14 @@ export function audit(): AuditReport {
     });
   }
 
-  // Databricks replication page
-  {
-    const w = "databricks";
-    ls(dbx.intro.title, `${w}.title`); ls(dbx.intro.lede, `${w}.lede`); ls(dbx.intro.honesty, `${w}.honesty`); ls(dbx.intro.scriptsHow, `${w}.scriptsHow`);
-    for (const id of new Set(dbx.unknownRefs)) errors.push(`${w}: text refers to unknown step [[${id}]]`);
-    for (const p of dbx.orderProblems()) errors.push(`${w}: ${p}`);
+  // Databricks pages: the replication guide and the native build
+  const kitPage = (w: string, mod: { phases: Phase[]; numberOf: Record<string, number>; rstepById: Record<string, RStep>;
+                                      unknownRefs: string[]; orderProblems: () => string[]; sources: unknown[] },
+                   kit: Kit, strict: boolean) => {
+    for (const id of new Set(mod.unknownRefs)) errors.push(`${w}: text refers to unknown step [[${id}]]`);
+    for (const p of mod.orderProblems()) errors.push(`${w}: ${p}`);
     const ids = new Set<string>();
-    for (const p of dbx.phases) {
+    for (const p of mod.phases) {
       ls(p.title, `${w}.${p.id}.title`); ls(p.goal, `${w}.${p.id}.goal`);
       for (const s of p.steps) {
         const sw = `${w}.${s.id}`;
@@ -202,27 +204,41 @@ export function audit(): AuditReport {
         if (s.interpret.length < 2) errors.push(`${sw}: fewer than 2 notes on reading the result`);
         if (s.trouble.length < 1) errors.push(`${sw}: no troubleshooting`);
         else if (s.trouble.length < 2) warnings.push(`${sw}: only one troubleshooting entry`);
-        if (!s.files?.length && !s.code?.length) warnings.push(`${sw}: no script`);
+        if (!s.files?.length && !s.code?.length) (strict ? errors : warnings).push(`${sw}: no script`);
+        if (strict && !s.scale?.length) errors.push(`${sw}: no scaling guidance`);
+        if (strict && !s.challenge?.length) errors.push(`${sw}: no architecture review question`);
         s.how.forEach((x, i) => ls(x, `${sw}.how[${i}]`));
         s.interpret.forEach((x, i) => ls(x, `${sw}.interpret[${i}]`));
         s.trouble.forEach((x, i) => { ls(x.s, `${sw}.trouble[${i}].s`); ls(x.c, `${sw}.trouble[${i}].c`); ls(x.f, `${sw}.trouble[${i}].f`); });
+        (s.scale ?? []).forEach((x, i) => ls(x, `${sw}.scale[${i}]`));
+        (s.challenge ?? []).forEach((c, i) => { ls(c.q, `${sw}.challenge[${i}].q`); ls(c.a, `${sw}.challenge[${i}].a`); });
         if (s.links.length === 0) errors.push(`${sw}: linked to no lesson step`);
         for (const k of s.links) if (!stepByKey[k]) errors.push(`${sw}: links unknown lesson step ${k}`);
         for (const f of s.files ?? []) {
+          if (!f.startsWith(kit.root + "/")) errors.push(`${sw}: ${f} is outside the kit ${kit.root}`);
           try {
             const sc = readScript(f);
-            if (!sc.check) errors.push(`${sw}: ${f} has no recorded check. Run: python3 replicate/databricks/check.py --write`);
-            else if (sc.stale) errors.push(`${sw}: ${f} changed after its check. Run: python3 replicate/databricks/check.py --write`);
+            if (!sc.check) errors.push(`${sw}: ${f} has no recorded check. Run: ${kit.checker}`);
+            else if (sc.stale) errors.push(`${sw}: ${f} changed after its check. Run: ${kit.checker}`);
             else if (sc.check.check.startsWith("FAILED")) errors.push(`${sw}: ${f} ${sc.check.check}`);
             const head = sc.text.split("\n").slice(0, 3).join(" ").match(/\bSteps? ((?:\d+(?:, | and | or )?)+)/);
             if (head) {
               const nums = head[1].match(/\d+/g)!.map(Number);
-              if (!nums.includes(dbx.numberOf[s.id])) errors.push(`${sw}: ${f} says "Step ${head[1].trim()}" but is shown on step ${dbx.numberOf[s.id]}`);
+              if (!nums.includes(mod.numberOf[s.id])) errors.push(`${sw}: ${f} says "Step ${head[1].trim()}" but is shown on step ${mod.numberOf[s.id]}`);
             }
           } catch (e) { errors.push(`${sw}: ${(e as Error).message}`); }
         }
       }
     }
+    if (mod.sources.length === 0) errors.push(`${w}: no vendor sources`);
+    for (const f of staleScripts(kit)) errors.push(`${w}: ${f} changed after its check (or was never checked). Run: ${kit.checker}`);
+    if (kit.report.failures) errors.push(`${w}: ${kit.checker} recorded ${kit.report.failures} failures`);
+  };
+
+  {
+    const w = "databricks";
+    ls(dbx.intro.title, `${w}.title`); ls(dbx.intro.lede, `${w}.lede`); ls(dbx.intro.honesty, `${w}.honesty`); ls(dbx.intro.scriptsHow, `${w}.scriptsHow`);
+    kitPage(w, dbx, KITS.replicate, false);
     for (const r of dbx.componentMap) {
       ls(r.local, `${w}.map.local`); ls(r.dbx, `${w}.map.dbx`); ls(r.change, `${w}.map.change`);
       if (!dbx.rstepById[r.step]) errors.push(`${w}.map: unknown step ${r.step}`);
@@ -231,9 +247,22 @@ export function audit(): AuditReport {
     dbx.incidents.forEach((x, i) => { ls(x.s, `${w}.incident[${i}].s`); ls(x.check, `${w}.incident[${i}].check`); ls(x.f, `${w}.incident[${i}].f`); });
     dbx.costLevers.forEach((x, i) => ls(x, `${w}.cost[${i}]`));
     dbx.gaps.forEach((x, i) => ls(x, `${w}.gap[${i}]`));
-    if (dbx.sources.length === 0) errors.push(`${w}: no vendor sources`);
-    for (const f of staleScripts()) errors.push(`${w}: ${f} changed after its check (or was never checked). Run: python3 replicate/databricks/check.py --write`);
-    if (replicateCheck.failures) errors.push(`${w}: replicate/databricks/check.py recorded ${replicateCheck.failures} failures`);
+  }
+  {
+    const w = "databricks-native";
+    for (const [k, v] of Object.entries(nat.intro)) ls(v, `${w}.intro.${k}`);
+    kitPage(w, nat, KITS.native, true);
+    nat.architecture.forEach((l) => { ls(l.label, `${w}.arch.${l.id}`); l.nodes.forEach((n) => { ls(n.label, `${w}.arch.${n.id}`); ls(n.detail, `${w}.arch.${n.id}.detail`); }); });
+    nat.delivery.forEach((d) => { ls(d.label, `${w}.delivery.${d.id}`); ls(d.detail, `${w}.delivery.${d.id}.detail`); if (d.gate) ls(d.gate, `${w}.delivery.${d.id}.gate`); });
+    nat.autonomy.forEach((a) => { ls(a.name, `${w}.autonomy.${a.level}`); ls(a.means, `${w}.autonomy.${a.level}.means`); ls(a.needs, `${w}.autonomy.${a.level}.needs`); });
+    nat.gates.forEach((g, i) => { ls(g.area, `${w}.gates[${i}]`); g.items.forEach((x, j) => ls(x, `${w}.gates[${i}][${j}]`)); });
+    // Every file in the kit is shown on some step, so nothing ships that the page does not explain.
+    const shown = new Set(nat.rsteps.flatMap((s) => s.files ?? []));
+    for (const f of Object.keys(KITS.native.report.files)) {
+      if (!shown.has(f) && !/\/(tests|agent)\/|README\.md$|requirements\.txt$|\/pg\.py$|contract\.py$/.test(f)) {
+        warnings.push(`${w}: ${f} is in the kit but shown on no step`);
+      }
+    }
   }
 
   const links = steps.reduce((n, s) => n + (s.step.needs?.length ?? 0), 0);
@@ -254,8 +283,12 @@ export function audit(): AuditReport {
       "unexecuted steps a machine check covers": mk.checks.length,
       "unexecuted steps checked by hand": mk.manual.length,
       "Databricks replication steps": dbx.rsteps.length,
-      "Databricks scripts checked": Object.keys(replicateCheck.files).length,
-      "Databricks portable tests passed": `${replicateCheck.tests.run - replicateCheck.tests.failed}/${replicateCheck.tests.run}`,
+      "Databricks replication scripts checked": Object.keys(KITS.replicate.report.files).length,
+      "Databricks replication portable tests passed": `${KITS.replicate.report.tests.run - KITS.replicate.report.tests.failed}/${KITS.replicate.report.tests.run}`,
+      "Databricks native build steps": nat.rsteps.length,
+      "Databricks native files checked": Object.keys(KITS.native.report.files).length,
+      "Databricks native tests passed": `${KITS.native.report.tests.run - KITS.native.report.tests.failed}/${KITS.native.report.tests.run}`,
+      "architecture review questions": nat.rsteps.reduce((n, s) => n + (s.challenge?.length ?? 0), 0),
       "machine checks passed on the reference machine": Object.values(machine.results).filter((r) => r.status === "pass").length,
     },
   };

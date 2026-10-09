@@ -1,0 +1,103 @@
+# Step 2 and 18. The bundle: every Databricks resource of this workflow, declared in git.
+# Declarative Automation Bundles (formerly Databricks Asset Bundles). CI deploys it; people do not
+# click resources into existence in staging or production.
+bundle:
+  name: spend-exceptions
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for this environment (contract.yml data.catalog_per_env)
+  warehouse_id:
+    description: Serverless SQL warehouse used by apps, tools and jobs
+  agent_model:
+    default: databricks-claude-sonnet-5-5
+  experiment_path:
+    default: /Shared/spend-exceptions/traces
+  genie_space_id:
+    description: Genie space over gold (step 11); created in the UI, then referenced here
+  agent_url:
+    description: URL of the deployed agent app in this target (set after the first deploy)
+    default: ""
+  pg_endpoint:
+    description: Lakebase endpoint name (Lakebase console, Connect)
+  pg_host:
+    description: Lakebase host for this environment
+  jobs_client_id:
+    description: >
+      Application id of the principal jobs run as (also its Postgres role name). In stg and prd this is a
+      runtime principal of its own (spend-jobs-stg, spend-jobs-prd), NOT the CI deployer: the deployer can
+      change code, the runtime principal can read data and call the agent, and no one identity does both.
+  agent_client_id:
+    description: >
+      Application id of the agent app's own service principal (Apps creates it on the first deploy; read it
+      with `databricks apps get agent-spend-exceptions`). Batch sends only the units this principal can read.
+    default: ""
+
+presets:
+  tags:
+    workload: spend-exceptions          # billing attribution: system.billing.usage custom_tags
+    owner: finance-operations
+
+targets:
+  dev:                                  # deployed by each engineer from their own login, never by CI
+    mode: development                   # names get a [dev <user>] prefix, schedules start paused
+    default: true
+    workspace:
+      host: https://<dev-workspace-host>
+    variables:
+      catalog: fin_dev
+      warehouse_id: <dev-warehouse-id>
+      genie_space_id: <dev-genie-space-id>
+      pg_endpoint: <dev-lakebase-endpoint>
+      pg_host: <dev-lakebase-host>
+      jobs_client_id: <your-own-user-name>   # dev jobs run as you; there is no run_as in dev
+      # Apps keep their default permissions in dev: you deployed them, so you can use them.
+
+  stg:
+    mode: production
+    workspace:
+      host: https://<stg-workspace-host>
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/stg
+    run_as:                             # the runtime principal; the CI deployer needs the Service Principal User role on it
+      service_principal_name: <jobs-stg-application-id>
+    variables:
+      catalog: fin_stg
+      warehouse_id: <stg-warehouse-id>
+      genie_space_id: <stg-genie-space-id>
+      pg_endpoint: <stg-lakebase-endpoint>
+      pg_host: <stg-lakebase-host>
+      jobs_client_id: <jobs-stg-application-id>
+      agent_client_id: <stg-agent-app-client-id>
+      agent_url: <stg-agent-app-url>
+    resources:
+      apps:
+        agent:
+          permissions:                  # only the jobs runtime principal may call the agent (batch, eval)
+            - level: CAN_USE
+              service_principal_name: ${var.jobs_client_id}
+
+  prd:
+    mode: production
+    workspace:
+      host: https://<prd-workspace-host>
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/prd
+    run_as:                             # the runtime principal; the CI deployer needs the Service Principal User role on it
+      service_principal_name: <jobs-prd-application-id>
+    variables:
+      catalog: fin_prd
+      warehouse_id: <prd-warehouse-id>
+      genie_space_id: <prd-genie-space-id>
+      pg_endpoint: <prd-lakebase-endpoint>
+      pg_host: <prd-lakebase-host>
+      jobs_client_id: <jobs-prd-application-id>
+      agent_client_id: <prd-agent-app-client-id>
+      agent_url: <prd-agent-app-url>
+    resources:
+      apps:
+        agent:
+          permissions:                  # only the jobs runtime principal may call the agent (batch, eval)
+            - level: CAN_USE
+              service_principal_name: ${var.jobs_client_id}

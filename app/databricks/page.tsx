@@ -1,13 +1,14 @@
 import Link from "next/link";
-import CodeBlock from "@/components/CodeBlock";
+import DbxTabs from "@/components/DbxTabs";
 import OpenAll from "@/components/OpenAll";
+import PhaseSteps from "@/components/PhaseSteps";
 import ReplicateMap, { type MapPhase } from "@/components/ReplicateMap";
 import T from "@/components/T";
 import {
   componentMap, costLevers, gaps, incidents, intro, numberOf, phases, rstepById, runbooks, sources,
 } from "@/content/databricks";
-import { byId, stepByKey } from "@/lib/curriculum";
-import { checkCounts, readScript, replicateCheck } from "@/lib/replicate";
+import { byId } from "@/lib/curriculum";
+import { checkCounts, replicateCheck } from "@/lib/replicate";
 import { ui } from "@/lib/ui";
 
 export const metadata = {
@@ -29,6 +30,7 @@ export default function Databricks() {
       <header className="lesson-head">
         <div className="eyebrow"><Link href="/platforms"><T v={ui.navPlatforms} /></Link> / <T v={ui.dbxEyebrow} /></div>
         <h1><T v={intro.title} /></h1>
+        <DbxTabs active="replicate" />
         <p className="lede"><T v={intro.lede} /></p>
       </header>
 
@@ -77,88 +79,7 @@ export default function Databricks() {
       <ReplicateMap phases={mapPhases} />
 
       <OpenAll />
-      {phases.map((p, pi) => (
-        <section key={p.id} id={`ph-${p.id}`} className="dbx-phase">
-          <h2><span className="ph-n">{pi + 1}</span> <T v={p.title} /></h2>
-          <p className="lede small-lede"><T v={p.goal} /></p>
-          {p.steps.map((s) => (
-            <details key={s.id} id={`r-${s.id}`} className="step dbx-step">
-              <summary>
-                <span className="n">{pad(numberOf[s.id])}</span>
-                <span className="t"><T v={s.title} /></span>
-                <span className="chev" />
-              </summary>
-              <div className="body">
-                <div className="dbx-meta">
-                  <div><b className="lab"><T v={ui.dbxReplaces} /></b><T v={s.local} /></div>
-                  <div>
-                    <b className="lab needs-l"><T v={ui.dbxAfter} /></b>
-                    {s.after.length + (s.afterAny?.length ?? 0) === 0 ? <span className="muted"><T v={ui.nothingFirst} /></span> : (
-                      <span className="chips">
-                        {s.after.map((a) => (<a key={a} className="chip" href={`#r-${a}`}>{pad(numberOf[a])} <T v={rstepById[a].title} /></a>))}
-                        {s.afterAny && (
-                          <span className="chip any"><T v={ui.dbxOneOf} />: {s.afterAny.map((a) => pad(numberOf[a])).join(" / ")}</span>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <b className="lab"><T v={ui.dbxLessons} /></b>
-                    <span className="chips">
-                      {s.links.map((k) => {
-                        const st = stepByKey[k];
-                        return (
-                          <Link key={k} className="chip" href={`/modules/${st.module.id}#step-${st.step.id}`}>
-                            {st.module.n}.{st.module.steps.findIndex((x) => x.id === st.step.id) + 1} <T v={st.step.title} />
-                          </Link>
-                        );
-                      })}
-                    </span>
-                  </div>
-                </div>
-
-                <h4><T v={ui.dbxWhy} /></h4>
-                <div className="whyhere"><T v={s.why} /></div>
-
-                <h4><T v={ui.dbxWhat} /></h4>
-                <p><T v={s.what} /></p>
-
-                <h4><T v={ui.dbxHow} /></h4>
-                <ol className="do">{s.how.map((h) => (<li key={h.en}><T v={h} /></li>))}</ol>
-
-                {(s.files?.length || s.code?.length) ? <h4><T v={ui.dbxScripts} /></h4> : null}
-                {s.files?.map((f) => {
-                  const sc = readScript(f);
-                  return <CodeBlock key={f} text={sc.text} label={`${f.replace("replicate/databricks/", "")} · ${sc.check?.check ?? ""}`} />;
-                })}
-                {s.code?.map((c) => (<CodeBlock key={c.text.slice(0, 40)} text={c.text} label={c.file ?? c.lang} />))}
-
-                <h4><T v={ui.dbxInterpret} /></h4>
-                <ul className="bullets">{s.interpret.map((x) => (<li key={x.en}><T v={x} /></li>))}</ul>
-
-                <h4><T v={ui.dbxTrouble} /></h4>
-                <div className="table-scroll">
-                  <table className="dbx-trouble">
-                    <thead><tr><th><T v={ui.dbxSymptom} /></th><th><T v={ui.dbxCause} /></th><th><T v={ui.dbxFix} /></th></tr></thead>
-                    <tbody>
-                      {s.trouble.map((x) => (
-                        <tr key={x.s.en}><td><b><T v={x.s} /></b></td><td><T v={x.c} /></td><td><T v={x.f} /></td></tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="verify"><b><T v={ui.dbxDone} /></b><T v={s.done} /></div>
-                {s.unconfirmed && (
-                  <div className="note" style={{ marginTop: 10 }}>
-                    <b className="lab warn-l"><T v={ui.dbxUnconfirmed} /></b><T v={s.unconfirmed} />
-                  </div>
-                )}
-              </div>
-            </details>
-          ))}
-        </section>
-      ))}
+      <PhaseSteps phases={phases} numberOf={numberOf} byId={rstepById} localLabel={ui.dbxReplaces} kitRoot="replicate/databricks" />
 
       <h2 id="playbook"><T v={ui.dbxPlaybook} /></h2>
       <div className="two">

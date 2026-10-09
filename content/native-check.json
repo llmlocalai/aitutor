@@ -1,0 +1,242 @@
+{
+ "checked_at": "2026-10-08",
+ "python": "3.13.16",
+ "files": {
+  "native/databricks/.gitignore": {
+   "sha256": "56c3ff06ab855a605cb23673f0aec5edfdddd02c19a54312fc40fded66232327",
+   "check": "read only"
+  },
+  "native/databricks/.gitlab-ci.yml": {
+   "sha256": "2c335080801edc44fc959ffcab574671c77539a60976858b86410460fddf1cfb",
+   "check": "yaml parses"
+  },
+  "native/databricks/agent/README.md": {
+   "sha256": "45402aa218df520c7cdaad5f7ca9a6d18c57c0c7eebc4a22daa2c647141b5734",
+   "check": "read only"
+  },
+  "native/databricks/app/app.py": {
+   "sha256": "48a94381e72621ed7cf31abb330dfa87ff6a1ae51b6a0866b97e8af088d3a68c",
+   "check": "compiles"
+  },
+  "native/databricks/app/app.yaml": {
+   "sha256": "5dac271add29c3c3baf551ae3f176a6e823efeb458e9783c6c7c069c629da037",
+   "check": "yaml parses"
+  },
+  "native/databricks/app/pg.py": {
+   "sha256": "aebd1983a7e43021f76368ff7b24b96083ec5ebc26796455adb4c7132a670805",
+   "check": "compiles"
+  },
+  "native/databricks/app/requirements.txt": {
+   "sha256": "e2ee7f9444fc5a9d536d16162877990bd278d2ea8754a0260820d85a5384c715",
+   "check": "read only"
+  },
+  "native/databricks/app/review_logic.py": {
+   "sha256": "990bf2ba84054c9e688ffe25f32f05d0116690f79f35da1d3006b22f64fcc821",
+   "check": "compiles"
+  },
+  "native/databricks/contract.yml": {
+   "sha256": "238a7916b9f8ebd87438275e880d686e168d47088d49fc4db956c537ca0432f5",
+   "check": "yaml parses"
+  },
+  "native/databricks/databricks.yml": {
+   "sha256": "0b5218e79aade3087d23ee3b9035c7449ab2353f7d49c1f746aceaabb4f050e8",
+   "check": "yaml parses"
+  },
+  "native/databricks/pipelines/bronze.py": {
+   "sha256": "49a96eecc832802e5c6aa1d89c7781db66789a9b310e661a1156eab6ae74c09c",
+   "check": "compiles"
+  },
+  "native/databricks/pipelines/enrich.sql": {
+   "sha256": "b8faeb99b5dec6317dcdb338bf85d193200a7eb0c5fc3f944e6d3065679bf78e",
+   "check": "sqlglot databricks: 5/5 statements parsed"
+  },
+  "native/databricks/pipelines/silver_gold.sql": {
+   "sha256": "0e4179a1061c281de61a55e2f9fb15076d5b8b01861013053abe99c57ca2cafd",
+   "check": "sqlglot databricks: 5/5 statements parsed (6 ON VIOLATION clauses skipped)"
+  },
+  "native/databricks/requirements-ci.txt": {
+   "sha256": "8a064e74a3861dcb2d728bc48e8a43ffb02deb56a50fbd867b1c2e908c5734ce",
+   "check": "read only"
+  },
+  "native/databricks/resources/apps.yml": {
+   "sha256": "b9d63d35ae97e93442698a720593b774baef5b40119ae73057825f4a6039c271",
+   "check": "yaml parses"
+  },
+  "native/databricks/resources/jobs.yml": {
+   "sha256": "5453c9fe392225ba487c4fcfbe9ead010778ffcf1a51e0d8e56cda33f22cb1c1",
+   "check": "yaml parses"
+  },
+  "native/databricks/resources/pipeline.yml": {
+   "sha256": "f5e168d4cf7dfd855dff598aa9a0f006848155607f5a938cf98be8a840cdfb23",
+   "check": "yaml parses"
+  },
+  "native/databricks/semantics/metric_view.sql": {
+   "sha256": "b88dea2700faef8f10e848b2bb00f871950eea1620518843e0a3fc3ee70661d8",
+   "check": "sqlglot databricks: 3/4 statements parsed"
+  },
+  "native/databricks/setup/01_envs_federation.sh": {
+   "sha256": "2765e6490dbdfb56a802a2f091fb69cebce33def50a41943761761fb15aed5fe",
+   "check": "bash -n passes"
+  },
+  "native/databricks/setup/02_governance.sql": {
+   "sha256": "6783610bde6f311fa95f61301bfc5fb46f7ac6a6d04520d23a0d84ce7193f9fb",
+   "check": "sqlglot databricks: 24/38 statements parsed"
+  },
+  "native/databricks/setup/03_vendor_agent_template.sh": {
+   "sha256": "45c98d4421e75c47275527a56e0b134f8365bd82afd7e05b302d588fee694c9e",
+   "check": "bash -n passes"
+  },
+  "native/databricks/setup/04_dev_deploy.sh": {
+   "sha256": "bd8d5a5025e86fa720715871b2c852c56354dd0ab214c75c6dd3e865369baf38",
+   "check": "bash -n passes"
+  },
+  "native/databricks/src/agent/batch_triage.py": {
+   "sha256": "6a6e525093677b65e3a6fcb38c6b8a45c46db310005b1b7b4db0727b087478bf",
+   "check": "compiles"
+  },
+  "native/databricks/src/agent/policy.py": {
+   "sha256": "3c4ec59768f000f918be3d564058d467dd1492678dbb903066d121c7807c4675",
+   "check": "compiles"
+  },
+  "native/databricks/src/agent/spend_agent.py": {
+   "sha256": "7f09308742a05a8ec971e3788b09c5248b156624c8dc035a92c0c879e66dbb2b",
+   "check": "compiles"
+  },
+  "native/databricks/src/common/apply_sql.py": {
+   "sha256": "274ddcdd4af4d683c1196d265f1145059b5d257ad6eb7c41c6cb9ab83ac7a872",
+   "check": "compiles"
+  },
+  "native/databricks/src/common/contract.py": {
+   "sha256": "3427d27e50305efa355ac85d9b0c5604287904afbf964691c536dc29b035ae1a",
+   "check": "compiles"
+  },
+  "native/databricks/src/common/pg.py": {
+   "sha256": "0cc31dd9655258a0b9602bddddf081f2c195552d6fe321d23156b88b624d967c",
+   "check": "compiles"
+  },
+  "native/databricks/src/common/render_env.py": {
+   "sha256": "cbca83264154faee55764555913d5ab6bd424518674c3a4496990394d114526b",
+   "check": "compiles"
+  },
+  "native/databricks/src/evals/classifier_check.py": {
+   "sha256": "c6a4e81d7a09930904e3ec89c038cd803c393df337f9b05c7cb7427c3e5d5433",
+   "check": "compiles"
+  },
+  "native/databricks/src/evals/gate.py": {
+   "sha256": "59aba93f96dfc80b34d2b7ac4e4cb68d07b7fb12d3e03510dac1c359e1fdb9aa",
+   "check": "compiles"
+  },
+  "native/databricks/src/evals/run_eval.py": {
+   "sha256": "e9d3a67d44ab9dc7134d5855e3d88eea4067568b095d9da980fa8129d3c4bbd6",
+   "check": "compiles"
+  },
+  "native/databricks/src/evals/scorers.py": {
+   "sha256": "a9bd293d55ef0574a3f658880f805daa1763666a9b380af3f85dc8bfbb7ec245",
+   "check": "compiles"
+  },
+  "native/databricks/src/evals/verify_gate.py": {
+   "sha256": "4b9a30848d578df52799d14db5761b77a85fb2fc79c66876e8731928cc483c69",
+   "check": "compiles"
+  },
+  "native/databricks/src/genie/benchmark.py": {
+   "sha256": "5b9da19676ab496c8bf575fc7cf84161e0adabd32a96077e8bae3f3e0daecc9b",
+   "check": "compiles"
+  },
+  "native/databricks/src/genie/genie_benchmarks.json": {
+   "sha256": "4d457ca1b9decb361f33d62251e4129eac61595534cefbe483c26cf2571020ff",
+   "check": "json parses"
+  },
+  "native/databricks/src/knowledge/policy_index.py": {
+   "sha256": "758bb0710bbff7bf9ae7fc79377e635a367a4857ba8dff5f3d060b3b16608d49",
+   "check": "compiles"
+  },
+  "native/databricks/src/monitoring/register_monitors.py": {
+   "sha256": "bacab2fd8f8fe5b3badac7a89a70491d039ef3d467d6e5895c1177f102c38853",
+   "check": "compiles"
+  },
+  "native/databricks/src/ops/observability.sql": {
+   "sha256": "58d4ac5b99ca27868128e01849fc8954710638716aa84cb5764f18b3bc3c7241",
+   "check": "sqlglot databricks: 6/6 statements parsed"
+  },
+  "native/databricks/src/review/export_decisions.py": {
+   "sha256": "7a3a66a7ae2ad95683471610130ea00abb5b6a809595c8ab55a07cefaa935b6b",
+   "check": "compiles"
+  },
+  "native/databricks/src/review/review_queue.sql": {
+   "sha256": "799cc6807f6d4c7778f7c115c57b9f127b537362fa883acd326fbf9fe90ba100",
+   "check": "sqlglot postgres: 13/16 statements parsed"
+  },
+  "native/databricks/src/scale/load_test.py": {
+   "sha256": "2a659500156d118993beaddf5adb69e4e5ea9d085e21d523f237487127b5ed21",
+   "check": "compiles"
+  },
+  "native/databricks/src/tools/functions.sql": {
+   "sha256": "ae03cccb2f3e15cbfc2bc28123ba4e290afa9729af05b197a49e6f96c834ad0a",
+   "check": "sqlglot databricks: 6/6 statements parsed"
+  },
+  "native/databricks/tests/test_native.py": {
+   "sha256": "6b1f850393bdca9a456185c64141b17a1ae76facb0481dd42fdf795d437592c0",
+   "check": "compiles"
+  },
+  "native/databricks/tests/test_review_queue_pg.py": {
+   "sha256": "e620375f3b26e16f3812c8108255dd9096170b9155b98443f809845cf1d018e5",
+   "check": "compiles"
+  }
+ },
+ "tests": {
+  "run": 49,
+  "failed": 0,
+  "names": [
+   "test_catches_contradictions (test_native.Contract.test_catches_contradictions)",
+   "test_level_three_needs_limit (test_native.Contract.test_level_three_needs_limit)",
+   "test_shipped_contract_is_valid (test_native.Contract.test_shipped_contract_is_valid)",
+   "test_catalog_substitution (test_native.Deploy.test_catalog_substitution)",
+   "test_render_env (test_native.Deploy.test_render_env)",
+   "test_split_statements (test_native.Deploy.test_split_statements)",
+   "test_baseline_list_is_reduced (test_native.Evals.test_baseline_list_is_reduced)",
+   "test_classifier_per_class_gate (test_native.Evals.test_classifier_per_class_gate)",
+   "test_gate_blocks (test_native.Evals.test_gate_blocks)",
+   "test_gate_passes (test_native.Evals.test_gate_passes)",
+   "test_regression_beyond_spread_only (test_native.Evals.test_regression_beyond_spread_only)",
+   "test_release_verifies_the_exact_commit (test_native.Evals.test_release_verifies_the_exact_commit)",
+   "test_spread (test_native.Evals.test_spread)",
+   "test_summary_and_safe_direction (test_native.Evals.test_summary_and_safe_direction)",
+   "test_chunks_carry_heading_path (test_native.Knowledge.test_chunks_carry_heading_path)",
+   "test_genie_result_compare (test_native.Knowledge.test_genie_result_compare)",
+   "test_action_not_allowed_for_type (test_native.Policy.test_action_not_allowed_for_type)",
+   "test_every_type_can_escalate (test_native.Policy.test_every_type_can_escalate)",
+   "test_good_proposal (test_native.Policy.test_good_proposal)",
+   "test_invented_figure_and_missing_citation (test_native.Policy.test_invented_figure_and_missing_citation)",
+   "test_low_confidence_must_escalate (test_native.Policy.test_low_confidence_must_escalate)",
+   "test_no_po_type_is_conservative (test_native.Policy.test_no_po_type_is_conservative)",
+   "The contract, the reviewer app's source of truth, and the database trigger use one number.",
+   "test_two_person_rule_is_strictly_above (test_native.Policy.test_two_person_rule_is_strictly_above)",
+   "test_closed_proposal (test_native.ReviewApp.test_closed_proposal)",
+   "test_exactly_the_threshold_needs_one_approver (test_native.ReviewApp.test_exactly_the_threshold_needs_one_approver)",
+   "test_label_only_when_final (test_native.ReviewApp.test_label_only_when_final)",
+   "test_model_text_is_escaped (test_native.ReviewApp.test_model_text_is_escaped)",
+   "test_origin_check_behind_proxy (test_native.ReviewApp.test_origin_check_behind_proxy)",
+   "test_rejection_needs_the_right_answer (test_native.ReviewApp.test_rejection_needs_the_right_answer)",
+   "test_scope_enforced (test_native.ReviewApp.test_scope_enforced)",
+   "test_small_amount_single_approval (test_native.ReviewApp.test_small_amount_single_approval)",
+   "test_two_person_flow (test_native.ReviewApp.test_two_person_flow)",
+   "test_backoff_grows_and_caps (test_native.Scale.test_backoff_grows_and_caps)",
+   "test_batch_selection_and_limit (test_native.Scale.test_batch_selection_and_limit)",
+   "test_changed_invoice_is_triaged_again_only_while_pending (test_native.Scale.test_changed_invoice_is_triaged_again_only_while_pending)",
+   "test_load_stats_and_knee (test_native.Scale.test_load_stats_and_knee)",
+   "test_vendored_pg_matches (test_native.Scale.test_vendored_pg_matches)",
+   "CI sets REQUIRE_PG=1, so a missing Postgres fails the pipeline instead of skipping the control tests.",
+   "test_agent_can_supersede_its_own_pending_proposal (test_review_queue_pg.ReviewQueueOnPostgres.test_agent_can_supersede_its_own_pending_proposal)",
+   "test_agent_cannot_approve_without_a_decision (test_review_queue_pg.ReviewQueueOnPostgres.test_agent_cannot_approve_without_a_decision)",
+   "test_agent_cannot_insert_a_decided_proposal (test_review_queue_pg.ReviewQueueOnPostgres.test_agent_cannot_insert_a_decided_proposal)",
+   "test_closed_proposal_cannot_change (test_review_queue_pg.ReviewQueueOnPostgres.test_closed_proposal_cannot_change)",
+   "test_decisions_are_append_only (test_review_queue_pg.ReviewQueueOnPostgres.test_decisions_are_append_only)",
+   "test_large_amount_needs_two_different_approvers (test_review_queue_pg.ReviewQueueOnPostgres.test_large_amount_needs_two_different_approvers)",
+   "test_nobody_can_rewrite_the_amount (test_review_queue_pg.ReviewQueueOnPostgres.test_nobody_can_rewrite_the_amount)",
+   "test_one_live_proposal_per_exception (test_review_queue_pg.ReviewQueueOnPostgres.test_one_live_proposal_per_exception)",
+   "test_small_amount_one_approver (test_review_queue_pg.ReviewQueueOnPostgres.test_small_amount_one_approver)",
+   "The attack: shadow decisions with a temporary table holding two fake approvals, then approve."
+  ]
+ },
+ "failures": 0
+}

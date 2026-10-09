@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-multipart
+databricks-sdk
+databricks-sql-connector
+psycopg[binary,pool]
+pyyaml

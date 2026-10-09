@@ -1,0 +1,122 @@
+# Step 18. GitLab CI/CD.
+#   merge request  -> tests only. No Databricks credentials at all: an MR pipeline cannot reach any workspace.
+#                     Engineers deploy their own dev copies from their own login (bundle target dev).
+#   main           -> deploy staging, apply SQL, evaluate, gate. The staging principal trusts ref main only.
+#   release        -> verify the gate passed for this exact commit on main, then a manual, approved deploy
+#                     to production. The production principal trusts ref release only (a protected branch
+#                     that only maintainers can merge to), so the stg/prd boundary is enforced by Databricks.
+# Authentication: GitLab OIDC -> Databricks workload identity federation (step 3). No stored secret.
+# CI variables per GitLab environment (staging, production), none secret:
+#   DATABRICKS_HOST  DATABRICKS_CLIENT_ID  DATABRICKS_ACCOUNT_ID  CATALOG  WAREHOUSE_ID
+#   GENIE_SPACE_ID   LAKEBASE_ENDPOINT     LAKEBASE_HOST
+
+stages: [test, deploy, evaluate, release]
+
+default:
+  image: python:3.12-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq curl git >/dev/null
+    - pip install -q -r requirements-ci.txt
+
+variables:
+  DATABRICKS_AUTH_TYPE: env-oidc
+  SETUP_CLI_REF: "<pinned tag of databricks/setup-cli>"     # pin the CLI; never install from a moving branch
+
+.databricks:
+  id_tokens:
+    DATABRICKS_OIDC_TOKEN:
+      aud: $DATABRICKS_ACCOUNT_ID
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq curl git unzip >/dev/null
+    - curl -fsSL "https://raw.githubusercontent.com/databricks/setup-cli/${SETUP_CLI_REF}/install.sh" | sh
+    - pip install -q -r requirements-ci.txt databricks-sdk
+
+.render: &render                                       # per-environment values into both apps
+  - rm -rf agent/src && cp -r src agent/src && cp contract.yml agent/ && cp contract.yml app/
+  - python3 src/common/render_env.py app/app.yaml AGENT_CATALOG=$CATALOG ENDPOINT_NAME=$LAKEBASE_ENDPOINT PGHOST=$LAKEBASE_HOST DATABRICKS_WAREHOUSE_ID=@sql_warehouse
+  - python3 src/common/render_env.py agent/app.yaml AGENT_CATALOG=$CATALOG GENIE_SPACE_ID=$GENIE_SPACE_ID ENDPOINT_NAME=$LAKEBASE_ENDPOINT PGHOST=$LAKEBASE_HOST DATABRICKS_WAREHOUSE_ID=@sql_warehouse
+
+unit_tests:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - apt-get install -y -qq postgresql util-linux >/dev/null      # the review-queue tests run on a real Postgres
+    - python3 src/common/contract.py
+    - REQUIRE_PG=1 python3 -m pytest -q tests                       # a missing Postgres fails the job, never skips
+    - tail -n +2 app/pg.py | cmp - src/common/pg.py                  # vendored module has not drifted
+
+deploy_stg:
+  stage: deploy
+  extends: .databricks
+  environment: {name: staging}
+  resource_group: staging                                           # one deploy at a time
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - *render
+    - databricks bundle validate -t stg
+    - databricks bundle deploy -t stg
+    - databricks bundle run spend_pipeline -t stg                   # tables must exist before functions and views on them
+    - python3 src/common/apply_sql.py --file src/tools/functions.sql   --catalog $CATALOG --warehouse-id $WAREHOUSE_ID
+    - python3 src/common/apply_sql.py --file semantics/metric_view.sql --catalog $CATALOG --warehouse-id $WAREHOUSE_ID
+    - databricks bundle run agent -t stg                            # deploy uploads code; run restarts the app on it
+    - databricks bundle run reviewer -t stg
+
+eval_gate:
+  stage: evaluate
+  extends: .databricks
+  environment: {name: staging, action: verify}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - databricks bundle run quality -t stg                           # eval set x3 against the staging agent + Genie benchmark
+    - databricks fs cp "dbfs:/Volumes/${CATALOG}/ops/artifacts/eval_current.json" current.json
+    - >
+      curl -fsS --header "JOB-TOKEN: $CI_JOB_TOKEN" -o baseline.json
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/release/raw/baseline.json?job=deploy_prd"
+      || echo "no production baseline yet"
+    - python3 src/evals/gate.py --current current.json --baseline baseline.json --contract contract.yml --result gate_result.json
+  artifacts:
+    when: always
+    paths: [current.json, gate_result.json]
+    expire_in: 1 year                                               # release evidence for the auditors
+
+verify_gate:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "release"
+  script:
+    - >
+      curl -fsS --header "JOB-TOKEN: $CI_JOB_TOKEN" -o gate_result.json
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_DEFAULT_BRANCH/raw/gate_result.json?job=eval_gate"
+    - >
+      curl -fsS --header "JOB-TOKEN: $CI_JOB_TOKEN" -o current.json
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_DEFAULT_BRANCH/raw/current.json?job=eval_gate"
+    - python3 src/evals/verify_gate.py gate_result.json "$CI_COMMIT_SHA"   # this exact commit passed on main
+  artifacts:
+    paths: [gate_result.json, current.json]
+
+deploy_prd:
+  stage: release
+  extends: .databricks
+  environment: {name: production}                                   # protected environment: approval required
+  resource_group: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "release"
+      when: manual
+  needs: [verify_gate]
+  script:
+    - *render
+    - databricks bundle validate -t prd
+    - databricks bundle deploy -t prd
+    - databricks bundle run spend_pipeline -t prd                   # tables must exist before functions and views on them
+    - python3 src/common/apply_sql.py --file src/tools/functions.sql   --catalog $CATALOG --warehouse-id $WAREHOUSE_ID
+    - python3 src/common/apply_sql.py --file semantics/metric_view.sql --catalog $CATALOG --warehouse-id $WAREHOUSE_ID
+    - databricks bundle run agent -t prd
+    - databricks bundle run reviewer -t prd
+    - cp current.json baseline.json                                  # this release is the next baseline
+  artifacts:
+    paths: [baseline.json, gate_result.json]
+    expire_in: never

@@ -41,6 +41,12 @@ export interface RStep {
   done: LS;
   /** What on this step could not be confirmed on a vendor page. Absent means every call was seen on one. */
   unconfirmed?: LS;
+  /** How this step changes when the workload grows: the first limit you hit, and the lever. */
+  scale?: LS[];
+  /** Questions an architecture review would ask about this step, with the answer this design gives. */
+  challenge?: { q: LS; a: LS }[];
+  /** Architecture components (ids in the page's architecture map) this step builds. */
+  components?: string[];
 }
 
 export interface Phase {

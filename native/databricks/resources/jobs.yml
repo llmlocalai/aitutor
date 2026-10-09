@@ -1,0 +1,84 @@
+# Steps 10, 11, 16, 19. Jobs. File arrival starts the main flow; the rest run on a schedule.
+resources:
+  jobs:
+    spend_orchestrator:
+      name: spend-exceptions-orchestrator
+      max_concurrent_runs: 1              # two overlapping runs would triage the same exceptions twice
+      trigger:
+        file_arrival:
+          url: /Volumes/${var.catalog}/landing/erp/
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies: [databricks-sdk, aiohttp, "psycopg[binary,pool]"]
+      tasks:
+        - task_key: refresh_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.spend_pipeline.id}
+        - task_key: batch_triage
+          depends_on: [{task_key: refresh_pipeline}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/agent/batch_triage.py
+            parameters: ["--catalog", "${var.catalog}", "--agent-url", "${var.agent_url}", "--limit", "500",
+                         "--agent-principal", "${var.agent_client_id}",
+                         "--warehouse-id", "${var.warehouse_id}", "--pg-endpoint", "${var.pg_endpoint}",
+                         "--pg-host", "${var.pg_host}", "--pg-user", "${var.jobs_client_id}"]
+        - task_key: export_decisions
+          depends_on: [{task_key: batch_triage}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/review/export_decisions.py
+            parameters: ["--catalog", "${var.catalog}", "--pg-endpoint", "${var.pg_endpoint}",
+                         "--pg-host", "${var.pg_host}", "--pg-user", "${var.jobs_client_id}"]
+      email_notifications:
+        on_failure: [finance-ops-oncall@example.com]
+
+    policy_refresh:
+      name: spend-exceptions-policy-refresh
+      schedule:
+        quartz_cron_expression: "0 0 5 ? * MON"   # Mondays 05:00; policy changes are rare and reviewed
+        timezone_id: UTC
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies: [databricks-ai-search]
+      tasks:
+        - task_key: build
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/knowledge/policy_index.py
+            parameters: ["build", "--catalog", "${var.catalog}"]
+        - task_key: sync
+          depends_on: [{task_key: build}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/knowledge/policy_index.py
+            parameters: ["sync", "--catalog", "${var.catalog}"]
+
+    quality:
+      name: spend-exceptions-quality
+      schedule:
+        quartz_cron_expression: "0 30 2 * * ?"    # nightly: the eval set against the deployed agent, then Genie
+        timezone_id: UTC
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies: ["mlflow[databricks]", databricks-sdk, requests, pyyaml]
+      tasks:
+        - task_key: eval
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/evals/run_eval.py
+            parameters: ["run", "--catalog", "${var.catalog}", "--agent-url", "${var.agent_url}", "--repeats", "3",
+                         "--warehouse-id", "${var.warehouse_id}",
+                         "--out", "/Volumes/${var.catalog}/ops/artifacts/eval_current.json"]
+        - task_key: genie_benchmark
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/genie/benchmark.py
+            parameters: ["--space-id", "${var.genie_space_id}", "--warehouse-id", "${var.warehouse_id}",
+                         "--file", "genie_benchmarks.json", "--catalog", "${var.catalog}"]   # file resolved next to benchmark.py

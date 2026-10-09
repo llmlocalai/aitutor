@@ -1,0 +1,15 @@
+# Step 15. Runtime configuration for the reviewer app. DATABRICKS_APP_PORT is substituted by the platform.
+# Values that differ per environment (AGENT_CATALOG, ENDPOINT_NAME, PGHOST) are written in by CI with
+# src/common/render_env.py before each deploy; the committed values are for dev.
+command: ['uvicorn', 'app:app', '--host', '0.0.0.0', '--port', '$DATABRICKS_APP_PORT']
+env:
+  - name: AGENT_CATALOG
+    value: fin_dev
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql_warehouse            # the sql_warehouse resource declared in resources/apps.yml
+  # Lakebase: ENDPOINT_NAME and PGHOST from the console's Connect dialog. PGUSER defaults to the app's own
+  # client id (the Postgres role name of its service principal); a Lakebase app resource can set PG* instead.
+  - name: ENDPOINT_NAME
+    value: projects/spend-exceptions/branches/dev/endpoints/primary
+  - name: PGHOST
+    value: <dev-lakebase-host>

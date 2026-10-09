@@ -1,0 +1,51 @@
+# Steps 14, 15, 18. Two Databricks Apps, each with its own service principal and only the resources it uses.
+#   agent     the spend-exceptions agent, from the vendor's OpenAI Agents SDK app template (agent/ folder),
+#             with src/ copied in by CI. Name starts with "agent-" so it is listed among workspace agents.
+#   reviewer  the human-in-the-loop UI (app/ folder). User authorization (scope: sql) is enabled on it in
+#             the Apps UI or with `databricks apps update` and user_api_scopes; see step 15.
+# Confirmed resource shapes: experiment (CAN_EDIT) and serving_endpoint (CAN_QUERY). Check sql_warehouse,
+# genie_space and the Lakebase database blocks against the Apps resources page before the first deploy.
+resources:
+  apps:
+    agent:
+      name: agent-spend-exceptions
+      description: Proposes resolutions for invoice match exceptions. Never pays or holds anything itself.
+      source_code_path: ../agent
+      resources:
+        - name: experiment
+          experiment:
+            experiment_id: ${resources.experiments.traces.id}
+            permission: CAN_EDIT
+        - name: model
+          serving_endpoint:
+            name: ${var.agent_model}
+            permission: CAN_QUERY
+        - name: sql_warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: genie
+          genie_space:
+            space_id: ${var.genie_space_id}
+            permission: CAN_RUN
+      # permissions: set per target in databricks.yml (stg, prd), because in dev the caller is you, a user.
+
+    reviewer:
+      name: spend-exceptions-review
+      description: Reviewers approve or reject the agent's proposals for their business units.
+      source_code_path: ../app
+      resources:
+        - name: sql_warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        # Lakebase database: add as the vendor's resources page shows (key "postgres",
+        # permission CAN_CONNECT_AND_CREATE); the platform then sets PG* variables for the app.
+        # Until then, CI writes ENDPOINT_NAME and PGHOST into app.yaml and PGUSER defaults to the app's client id.
+      permissions:
+        - level: CAN_USE
+          group_name: fin-reviewers
+
+  experiments:
+    traces:
+      name: ${var.experiment_path}

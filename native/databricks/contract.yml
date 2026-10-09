@@ -1,0 +1,35 @@
+# Step 1. The workflow contract. Written before any code, reviewed like code, checked in CI
+# (src/common/contract.py validates it; tests/test_native.py runs that check).
+# Every later step points back to a line in this file: if a step cannot, it is scope creep.
+workflow: spend-exceptions
+owner: finance-operations            # the business owner who signs off each autonomy change
+decision: >
+  For each invoice that fails the three-way match (invoice vs purchase order vs receipt),
+  propose one resolution with its evidence, for a person to approve.
+actions:                             # the only things the agent may propose
+  - approve_payment
+  - hold_payment
+  - request_credit_memo
+  - escalate
+autonomy_level: 2                    # 0 report, 1 recommend, 2 act with approval, 3 act within limits, 4 autonomous
+writes:
+  allowed: [review_queue]            # the agent writes proposals, nothing else
+  forbidden: [erp, payments, vendors]
+human_in_the_loop:
+  every_proposal: true
+  second_approver_above: 25000       # two-person rule, in the invoice currency
+success_metrics:                     # measured on the sealed eval set before every release
+  action_accuracy_min: 0.85
+  grounded_figures_min: 1.0          # every figure in a rationale must be in the evidence
+  policy_cited_min: 0.95
+  p95_latency_s_max: 30
+  cost_per_exception_usd_max: 0.25
+service_levels:
+  backlog_max_days: 5                # an exception waits at most this long for a decision (alert in step 20)
+data:
+  catalog_per_env: {dev: fin_dev, stg: fin_stg, prd: fin_prd}
+  sensitive_columns: [vendors.bank_account, vendors.tax_id]
+  row_scope: business_unit           # a reviewer sees only their business units
+retention_days:
+  traces: 365
+  proposals: 2555                    # seven years, the record-retention rule for payment decisions

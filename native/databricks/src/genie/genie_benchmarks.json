@@ -1,0 +1,10 @@
+[
+  {"question": "How many open exceptions are there by business unit?",
+   "sql": "SELECT business_unit, count(*) FROM fin_dev.gold.open_exceptions GROUP BY business_unit"},
+  {"question": "What is the total invoice value held by duplicate suspects?",
+   "sql": "SELECT sum(invoice_amount) FROM fin_dev.gold.open_exceptions WHERE exception_type = 'duplicate_suspect'"},
+  {"question": "Which five vendors have the most open exceptions?",
+   "sql": "SELECT vendor_id, count(*) AS n FROM fin_dev.gold.open_exceptions GROUP BY vendor_id ORDER BY n DESC LIMIT 5"},
+  {"question": "What is the net price variance for each business unit?",
+   "sql": "SELECT business_unit, sum(variance) FROM fin_dev.gold.open_exceptions WHERE exception_type = 'price_variance' GROUP BY business_unit"}
+]

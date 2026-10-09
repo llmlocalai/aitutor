@@ -1,0 +1,20 @@
+# Steps 5, 6, 8, 9. One serverless Lakeflow pipeline: bronze -> silver -> gold, plus the AI enrichment.
+resources:
+  pipelines:
+    spend_pipeline:
+      name: spend-exceptions-pipeline
+      catalog: ${var.catalog}
+      schema: bronze                      # default schema; the source files publish to bronze, silver, gold, ai
+      serverless: true
+      continuous: false                   # triggered by the orchestrator job when files arrive
+      libraries:
+        - file:
+            path: ../pipelines/bronze.py
+        - file:
+            path: ../pipelines/silver_gold.sql
+        - file:
+            path: ../pipelines/enrich.sql
+      configuration:
+        landing_root: /Volumes/${var.catalog}/landing
+        tolerance_pct: "2"                # a price variance above 2% of the PO, or
+        tolerance_abs: "50"               # above 50 in invoice currency, whichever is larger

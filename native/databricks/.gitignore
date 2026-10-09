@@ -1,0 +1,6 @@
+# Build output: copied in by CI and setup/04_dev_deploy.sh before each deploy
+agent/src/
+agent/contract.yml
+app/contract.yml
+*.orig
+.databricks/
