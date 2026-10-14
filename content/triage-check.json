@@ -1,0 +1,414 @@
+{
+ "checked_at": "2026-10-13 22:08",
+ "python": "3.13.16",
+ "files": {
+  "native/contract-triage/README.md": {
+   "sha256": "5798594fbe771a5d5ae150471dcc3ffc9d1d6daaecb342fc6206df94f7cff816",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/deploy/databricks/app.template.yaml": {
+   "sha256": "80b37ec3878ad930d259106c99d31ebe2cc151768d343549804e6c7516925c5f",
+   "check": "yaml parses"
+  },
+  "native/contract-triage/overlay/deploy/databricks/env.template": {
+   "sha256": "e8bce95877427953568c339b3c19b72671b3b2c24cb69463b5646d29f011190d",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/decisions.md": {
+   "sha256": "723791efcbe3b1f569132ed11af02f93eecd36874d1199b155831ebc5a784481",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/design-rules.md": {
+   "sha256": "f1e60d560ef96a5dce5c320f61f13546eb5faffe037029e794824ff32df46a60",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/eval-changes.md": {
+   "sha256": "00f6ec96158742fdfa7ffb6c69c0d176664d9cdfa45f6439969b44cffd540d5d",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/evaluation.md": {
+   "sha256": "4b9fc6708e12637aa5d8abf6c03c4fbdc0cbc2501ef6d623283cc1ba7a0072f6",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/scope.md": {
+   "sha256": "3ac307cb774c2654218bde5b014677c913d9bede674718c6bbbadfba1b84fb0b",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/docs/security.md": {
+   "sha256": "594eeba821dcde9125de4dde73de88e62ffcab5d9c1143263d10e8eadfd2779b",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/env.example.addition": {
+   "sha256": "cdcec5a66267e9d17d19c8791baea4d6600ec2c8f081053b37797cdff273b1aa",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/eval/answer_key.sql": {
+   "sha256": "bb1deeda2d460b260b890a87cb7df911bcb45ed3e17141a2e8b68ca4c9588379",
+   "check": "sqlglot databricks: 4/4 statements parsed"
+  },
+  "native/contract-triage/overlay/eval/build_golden.py": {
+   "sha256": "95c49382207051c7aeeb72130e8e60af9ce158eb56448e7f42d5931ade2671e6",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/eval/databricks/triage_eval.py": {
+   "sha256": "c4b68ea70e21217496c41f123a69390305458d4ea4f0f6cd1689ed2cd0581e12",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/eval/local/run_tool_eval.py": {
+   "sha256": "7673980e75cc296fd6116c5f3c68c355a11a00fffa6bde664119eb87259ae203",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/eval/scorers.py": {
+   "sha256": "4fd2db22cf2dc5a066a67b9f3d7ef368eea9e31ebd903ba2ec5303695b636d44",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/00_setup.py": {
+   "sha256": "e10a32fd316b1d8813050b946973ba19cf087baecc54c9c4f1a465c95ea9117a",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/01_bronze_usaspending.py": {
+   "sha256": "876d15e26a67df328778321dd42c8d6639d39178867a12d443fa46eb67581a27",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/02_bronze_sam.py": {
+   "sha256": "a9c687e7e2814fd515de12bc17f1253709f81d8e55a0c31f2194adb3cbecd81e",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/03_silver_gold.py": {
+   "sha256": "d73c93ea1931ec4e35dc97553580f5de5bbb0518661913882df7738679a56deb",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/05_dq.py": {
+   "sha256": "a3e14bd23f75aedc1e30e22407d21501e1fe44cde4ebfc2ee026d663fd1a8191",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/06_export_snapshot.py": {
+   "sha256": "49d36e2bd9dcfc96e37df9699125dc0f42f69b8b985124e3a40e7ab2339cf960",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/common.py": {
+   "sha256": "c408e67a32ab0cc3ac140b2f8978c765fbc81e4a4d9676ae79fadb879d996cf3",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/pipelines/job.template.json": {
+   "sha256": "2b934a15177763f5968af9fe38ad8232fe4609c7ade706c9d6e75fd774ef9dfc",
+   "check": "json parses"
+  },
+  "native/contract-triage/overlay/scripts/apply_server.sh": {
+   "sha256": "67781991fa2ac89cf6eb769f85204f1f9c491689ed9912ed4e56ae8d2c08f758",
+   "check": "bash -n passes"
+  },
+  "native/contract-triage/overlay/scripts/call_tool.py": {
+   "sha256": "15928496c08c9d8632e1816d4a480ec843e001cd9ea97624882cdfd49c66d8fe",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/datagov_sources.py": {
+   "sha256": "b84fc16bae988af94fd524a174a05abd2f57a5fa8ea580608ff7f7d61f9aa8f5",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/fetch_usaspending.py": {
+   "sha256": "f03bd45b9efd547c5363baa5a50c01cb702674ef5a0ccec065630c75250b10d0",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/hand_check.py": {
+   "sha256": "b1ac59e4e7ffe65c5afadded535f8d6d2c5f78e26603a1d58e0db99767b30d6f",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/hooks/pre-commit": {
+   "sha256": "e9e9e17be7694e1a6eb676c0bb98a422a7d63875808aeaa7f62c5601b04433c5",
+   "check": "bash -n passes"
+  },
+  "native/contract-triage/overlay/scripts/latency.py": {
+   "sha256": "fd38e298692af0407ad167247c9a30df51afcec8e38c6aeb11229002d81022d4",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/local_pipeline.py": {
+   "sha256": "6b562765968b88a5d9def8c4696ca99b7abbcedc949696695a249e7d09564d64",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/parity.py": {
+   "sha256": "2bf30ef3ad59416458249acb1089c9dfc2cba03ae07761b1961f7bcc879694e4",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/presubmit.sh": {
+   "sha256": "b6de2e3b7e90fa4c6920dfa48da0f8458853b72c9b5f30e8aa54a4ff3fc741d6",
+   "check": "bash -n passes"
+  },
+  "native/contract-triage/overlay/scripts/probe_apis.py": {
+   "sha256": "d8ba531ee5bbab7873d4273260ccbf07f2d96f681b6d5a77a3b29777ec2c8f53",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/rename_package.sh": {
+   "sha256": "cbfa796c25025453119fb088f19160d827b212cc495a2456cfce31aca42dfabc",
+   "check": "bash -n passes"
+  },
+  "native/contract-triage/overlay/scripts/render.py": {
+   "sha256": "595f25900219b355d0564cb0e756d2a06f2eea814187a5cce71b594ff50c0cf6",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/scripts/session.env.template": {
+   "sha256": "04c1483a1653dd3c072a735ca5d9ca84cef53818d76c29fbdbb3701e64dbefdc",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/scripts/verify_env.sh": {
+   "sha256": "e88c9bee313265df157f3da6b4c676f4247541ac1d5341dcb0a1cfd1c45d91a7",
+   "check": "bash -n passes"
+  },
+  "native/contract-triage/overlay/sql/ddl.sql": {
+   "sha256": "94cecc453985a1172bbd3186a4c09e1bb12293ead6df6712ea5180130a3bc203",
+   "check": "sqlglot databricks: 7/8 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/gold_closeout_candidates.sql": {
+   "sha256": "36df51b520b2e5afe3a30b9a7678ddef9ddc2ef7d413a9c209e859d04e0f1153",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/gold_contracts_ending.sql": {
+   "sha256": "6af26b85d93e056b027ac8335d45a8d04096682a044fa343f32e4b2776539a96",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/gold_offices.sql": {
+   "sha256": "3c06db80577aed24146b396e6208aa3b21cc2426fb9785b9daea7730b7fa00c5",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/gold_vendor_share.sql": {
+   "sha256": "3a7e6d612cb569919bb81d5fa849769098f820ac72db3a36c38e407166dc4caa",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/grants.template.sql": {
+   "sha256": "4f6f5482c740c1343ada63141ad9d88d8873fe56b18b6cdae13036ffbeacdd21",
+   "check": "sqlglot databricks: 3/4 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/silver_awards.sql": {
+   "sha256": "4f7db2c625a84aa4ad332e730236224cd66e114f303b1ae1c180c425e4206ffa",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/sql/silver_contract_tx.sql": {
+   "sha256": "e547827675f5677d178ec449ab808173bab7f477ebcfdeeaf3416090191055c7",
+   "check": "sqlglot databricks: 1/1 statements parsed"
+  },
+  "native/contract-triage/overlay/src/contract_triage/app.py": {
+   "sha256": "21952fc50952d4e4c8ea227a75a4fb8a007041de46bb41e94f1cdcf2f48e0f09",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/backends/__init__.py": {
+   "sha256": "ad8598864473a382478bd165da407105d9a5a089bb0fcd939b4c27c97c45efc2",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/backends/base.py": {
+   "sha256": "340465389d88608aae62819ddabcbca6b35335844b892b21b73fc896e9802a51",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/backends/databricks_sql.py": {
+   "sha256": "b05bca3b4c8c72d80862266f9d81b25b9657c364ca95c9c224fe3904adc73e4b",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/backends/snapshot.py": {
+   "sha256": "250befb798b8a01ed3dc2dfadd83faca189b3a02cfbfc9535098f744acd4cb1e",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/config.py": {
+   "sha256": "059a0a9b4a3b900b6b3ad4babd7b021b1f1aef03a869ad4de8edd19a1a8c1c70",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/data/sources.json": {
+   "sha256": "4c559ebc0fca1b6b69a4dd69261811c74b7e9355e2953a0b071f690ec5a1b757",
+   "check": "json parses"
+  },
+  "native/contract-triage/overlay/src/contract_triage/models.py": {
+   "sha256": "953c77bda02dc5e33f464879da581743cda156441f4963087ddf060034bcaa0e",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/prompts/__init__.py": {
+   "sha256": "fec7175372a1952c6195908aca014abc5174f3ec8741c191af9e3e5ff0f9b186",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/prompts/triage.py": {
+   "sha256": "17a5a39565ddba59573bd919fb3fc38e89d7a26661d67b6715f37c8bfd019e24",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/resources/__init__.py": {
+   "sha256": "e6bba2d6894f3064662e042af0f45875c0a340e6b0d01fd0794e3497d25fba73",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/resources/contracts.py": {
+   "sha256": "33696d2e3ed19df77fa91644e677ac2196ab6a50d6969b2a5a908b2f74ac8534",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/routes.py": {
+   "sha256": "212ad1a3c1e261f13215e74f7ecbc97e9b8c845447bf16c6282c33b46c21ec9a",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/__init__.py": {
+   "sha256": "4f508728103f42e7c8a5b4b93be235f1d10c914d35607660ea911f0780b55763",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/_common.py": {
+   "sha256": "abe38f05f3712d0b6830dc6b8317775f701611e3b1f8657b56100895c94f7012",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/award_brief.py": {
+   "sha256": "fb32187c37d86561252fad7c7eea1cae51c79416002eb2f1a7ade1c5a58d403c",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/closeout.py": {
+   "sha256": "105c0a9f0ce1fe529011840fe593fb1cbce7106d4a6dc5018323dd1b3cc9f602",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/ending_soon.py": {
+   "sha256": "aedd5ff40255f3af2c167740d8e032f97d587ad349a084832f6b6215bc3bf971",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/find_office.py": {
+   "sha256": "b42556559e562fe82779f9fb80311d9398a1f2f4ec16fb5e9567185621e1c4f1",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/tools/vendor_dependence.py": {
+   "sha256": "dfb792e2f12c1576ac6709f5d83481fa5a424d64e782a5d0727cd224fffc3fdd",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/untrusted.py": {
+   "sha256": "ac4568fe4fb0e530416379e7a33afc165d94aea2d81a6540f3db55a8a8e654c4",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/src/contract_triage/upstream.py": {
+   "sha256": "0597e61e43fc87e9a40911f554f07c4381dfbc333fbeee9223cb4241f12d7f89",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/conftest.py": {
+   "sha256": "0f1c27d07f6a45f9014abff7810e481fe33dd5d1183c34aec2b034d6669b827d",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/fixtures/sam_closed.json": {
+   "sha256": "5bfaef17c8af0360f4e5849ef744eb562c6fb25d2f0d2a66844eefbba0ef3c03",
+   "check": "json parses"
+  },
+  "native/contract-triage/overlay/tests/fixtures/usas_tx.csv": {
+   "sha256": "f9f2fcc983770ee31c7ab9ae607150a6b7ee0ce39cd9a58fb4b7e7f0c830c82a",
+   "check": "read only"
+  },
+  "native/contract-triage/overlay/tests/test_award_brief.py": {
+   "sha256": "8566ca819ed3df7b138146b2c92e6871011f8956033018f03a0413d8f89e661a",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_hand_checked.py": {
+   "sha256": "905135a2fbba17ac0cd6d6ed0612e9f9c6126607900de8571cf6aaf10a66874e",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_pipeline.py": {
+   "sha256": "14ab7c53be903134f38701fdc25b6c5a45bc85f72f0eb5cc8dbfad8576eba73f",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_scorers.py": {
+   "sha256": "800a15ce174dd2f3ee930e5e61480920fd12445927eb3b88f59df0599d831efa",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_server.py": {
+   "sha256": "4bb069240e128db244fcb9521870ead4c018002ed3e10cd86ef3276d029db50b",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_tools.py": {
+   "sha256": "15cbf0612a87b5ce810bd9af1ecb3c7ce8d764c2d0b78d7fb7b228cf9937c038",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_untrusted.py": {
+   "sha256": "b4759fbae64c735bf4b0c3dd9ce3a456b9e0ef0d0d55428d2583d31938c5b698",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/tests/test_workflow.py": {
+   "sha256": "98054b3801bd21aa405123487b3e1d98551d12ca7abb7732043f4eeeea330861",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/workflow/07_weekly_triage.py": {
+   "sha256": "af41fc1940ee32a751370cd6181152fcecca6d5ee6e6423000419558db9cabc3",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/workflow/08_decisions.py": {
+   "sha256": "152124012224fb679b38063f63ed22316787457bed113d96b6dd0417294cca84",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/workflow/triage.py": {
+   "sha256": "fde7020ad94c8e76590459a73514b132580a1cb6dc713e40db195fab4dd71477",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/workflow/verifier.py": {
+   "sha256": "a87247ace07877619abe0b20d904c40273314e8ae115f1c9c7d8c04801255804",
+   "check": "compiles"
+  },
+  "native/contract-triage/overlay/workflow/weekly.template.json": {
+   "sha256": "b65d2b17a9e2b7b6877faf675af5706550d45125e92f41aabcb1261d5c5ce508",
+   "check": "json parses"
+  },
+  "native/contract-triage/replay.py": {
+   "sha256": "ec9a89d97f2c756fdc95a4a064283e39f08e01135145305d9c5b450c57a853cf",
+   "check": "compiles"
+  }
+ },
+ "tests": {
+  "run": 60,
+  "failed": 0,
+  "names": [
+   "test_award_brief.py::test_brief_without_sam_key_still_answers",
+   "test_award_brief.py::test_brief_with_sam_key_cites_both_sources_and_hides_key",
+   "test_award_brief.py::test_cache_protects_quota",
+   "test_award_brief.py::test_upstream_failure_is_sanitized",
+   "test_hand_checked.py::test_hand_checked[NOTSET]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[http://169.254.169.254/latest/meta-data]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[https://localhost/admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[//127.0.0.1/admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[/absolute/path]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[../admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[datasets/../../admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[%2e%2e/admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[%252e%252e/admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[%2f%2f127.0.0.1/admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[datasets?target=http://127.0.0.1]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[datasets#fragment]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[\\\\\\\\127.0.0.1\\\\admin]",
+   "test_http_security.py::test_validate_relative_path_rejects_destination_override[]",
+   "test_http_security.py::test_validate_relative_path_accepts_expected_api_path",
+   "test_http_security.py::test_fetch_json_uses_fixed_origin_and_safe_client_policy",
+   "test_http_security.py::test_fetch_json_does_not_send_rejected_path",
+   "test_http_security.py::test_upstream_error_does_not_expose_sensitive_response",
+   "test_http_security.py::test_invalid_json_is_sanitized",
+   "test_pipeline.py::test_one_row_per_award",
+   "test_pipeline.py::test_silver_takes_latest_end_date_and_sums_obligations",
+   "test_pipeline.py::test_sam_join_uses_parent_idv",
+   "test_pipeline.py::test_dq_checks_pass_and_agreement_is_reported",
+   "test_pipeline.py::test_duplicate_check_fails_on_broken_input",
+   "test_pipeline.py::test_archive_names_pick_newest_full_file",
+   "test_pipeline.py::test_sam_parser_normalizes_dates",
+   "test_pipeline.py::test_statement_splitter_ignores_comments",
+   "test_scorers.py::test_right_answer_passes",
+   "test_scorers.py::test_wrong_count_fails",
+   "test_scorers.py::test_decoy_listed_fails_and_excluded_decoy_passes",
+   "test_scorers.py::test_missing_refusal_fails",
+   "test_scorers.py::test_no_action_needs_nothing_wording",
+   "test_server.py::test_server_name",
+   "test_server.py::test_default_transport_is_stdio",
+   "test_server.py::test_submodules_register",
+   "test_server.py::test_five_tools_three_resources_two_prompts",
+   "test_server.py::test_every_tool_is_read_only_and_documented",
+   "test_tools.py::test_find_office_by_words_and_code",
+   "test_tools.py::test_ending_soon_180_days",
+   "test_tools.py::test_ending_soon_sorted_by_option_value_and_paged",
+   "test_tools.py::test_no_action_needed",
+   "test_tools.py::test_closeout_both_signals_excludes_decoy",
+   "test_tools.py::test_closeout_basis_k_only_includes_sam_closed",
+   "test_tools.py::test_sam_record_under_another_idv_does_not_close_an_order",
+   "test_tools.py::test_vendor_dependence_hhi_matches_hand_calculation",
+   "test_tools.py::test_unknown_office_returns_hint",
+   "test_tools.py::test_negative_days_is_a_readable_error",
+   "test_tools.py::test_bad_office_code_pattern_rejected",
+   "test_tools.py::test_injection_text_comes_back_wrapped",
+   "test_tools.py::test_resources_read",
+   "test_untrusted.py::test_truncates_to_300_and_strips_controls",
+   "test_untrusted.py::test_wrap_drops_empty_fields",
+   "test_untrusted.py::test_log_allowlist",
+   "test_workflow.py::test_template_explanations_all_verify",
+   "test_workflow.py::test_planted_wrong_number_is_rejected",
+   "test_workflow.py::test_decided_items_are_skipped_until_they_change",
+   "test_workflow.py::test_verifier_accepts_formatted_numbers_and_flags_inventions"
+  ]
+ },
+ "failures": 0
+}

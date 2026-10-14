@@ -1,0 +1,29 @@
+{
+  "name": "contract-triage-refresh",
+  "description": "Blueprint 1.7: monthly refresh of the public contract tables. Rendered by scripts/render.py.",
+  "tags": {"project": "contract-triage"},
+  "max_concurrent_runs": 1,
+  "schedule": {
+    "quartz_cron_expression": "0 0 7 10 * ?",
+    "timezone_id": "America/New_York",
+    "pause_status": "PAUSED"
+  },
+  "parameters": [
+    {"name": "catalog", "default": "${CATALOG}"},
+    {"name": "agency", "default": "047"}
+  ],
+  "tasks": [
+    {"task_key": "setup",
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/pipelines/00_setup", "source": "WORKSPACE"}},
+    {"task_key": "bronze_usaspending", "depends_on": [{"task_key": "setup"}],
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/pipelines/01_bronze_usaspending", "source": "WORKSPACE",
+                       "base_parameters": {"fy_from": "2022", "fy_to": "2026", "mode": "${USAS_MODE}"}}},
+    {"task_key": "bronze_sam", "depends_on": [{"task_key": "setup"}],
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/pipelines/02_bronze_sam", "source": "WORKSPACE",
+                       "base_parameters": {"mode": "page", "max_calls": "300"}}},
+    {"task_key": "silver_gold", "depends_on": [{"task_key": "bronze_usaspending"}, {"task_key": "bronze_sam"}],
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/pipelines/03_silver_gold", "source": "WORKSPACE"}},
+    {"task_key": "data_quality", "depends_on": [{"task_key": "silver_gold"}],
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/pipelines/05_dq", "source": "WORKSPACE"}}
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "_note": "Seed list. scripts/datagov_sources.py fills datagov_identifier and last_harvested_date from the Data.gov Catalog API v4 (Blueprint 1.10).",
+  "sources": [
+    {"id": "usaspending-award-archive", "title": "USAspending Award Data Archive (contracts, full files by agency and fiscal year)",
+     "publisher": "U.S. Department of the Treasury, Bureau of the Fiscal Service",
+     "link": "https://www.usaspending.gov/download_center/award_data_archive",
+     "datagov_query": "USAspending award data archive", "datagov_identifier": "", "last_harvested_date": ""},
+    {"id": "usaspending-api", "title": "USAspending API v2 (award and transaction endpoints)",
+     "publisher": "U.S. Department of the Treasury, Bureau of the Fiscal Service",
+     "link": "https://api.usaspending.gov/docs/endpoints",
+     "datagov_query": "USAspending API", "datagov_identifier": "", "last_harvested_date": ""},
+    {"id": "sam-contract-awards", "title": "SAM.gov Contract Awards API",
+     "publisher": "General Services Administration",
+     "link": "https://open.gsa.gov/api/contract-awards/",
+     "datagov_query": "SAM.gov contract awards", "datagov_identifier": "", "last_harvested_date": ""},
+    {"id": "datagov-catalog", "title": "Data.gov Catalog API v4",
+     "publisher": "General Services Administration",
+     "link": "https://resources.data.gov/catalog-api/",
+     "datagov_query": "", "datagov_identifier": "", "last_harvested_date": ""}
+  ]
+}

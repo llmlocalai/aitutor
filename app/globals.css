@@ -515,3 +515,49 @@ html[data-family]:not([data-family="all"]) .model-card { display: none; }
 .diag-grid > * { min-width: 0; }
 .mono-list li { overflow-wrap: anywhere; }
 .diag-files code, .diag-body code, .hlint-out code { overflow-wrap: anywhere; word-break: break-all; }
+
+/* Contract triage follow-along */
+.ct-where { display: inline-block; font-style: normal; font-family: var(--mono); font-size: 0.66rem; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.ct-code .bar .ct-where { background: #2c313a; color: #d7dbe2; margin-right: 2px; }
+.w-mac, .w-repo, .w-aitutor { background: var(--accent-soft); color: var(--accent); }
+.w-dbx-ui, .w-dbx-nb, .w-dbx-sql, .w-playground { background: var(--needs-soft); color: var(--needs); }
+.w-github, .w-browser, .w-email, .w-meeting, .w-claude { background: var(--unlocks-soft); color: var(--unlocks); }
+.ct-code .bar .w-mac, .ct-code .bar .w-repo, .ct-code .bar .w-aitutor { background: #4a2a1c; color: #f5b393; }
+.ct-code .bar .w-dbx-ui, .ct-code .bar .w-dbx-nb, .ct-code .bar .w-dbx-sql, .ct-code .bar .w-playground { background: #173634; color: #8fe0d6; }
+.ct-code .bar .w-github, .ct-code .bar .w-browser, .ct-code .bar .w-email, .ct-code .bar .w-meeting, .ct-code .bar .w-claude { background: #2f2540; color: #cdb8f0; }
+.ct-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px 16px; margin: 6px 0 4px; }
+.ct-dates { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); margin: 4px 0 0; }
+.ct-bp { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); margin-right: 4px; }
+.ct-step > summary { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.ct-ran { font-family: var(--mono); font-size: 0.66rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.ct-ran.replayed { background: var(--needs-soft); color: var(--ok); border: 1px solid var(--ok); }
+.ct-ran.you { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
+.ct-how > li { margin-bottom: 4px; }
+.ct-how .code { margin: 8px 0 10px; }
+.ct-test { margin-bottom: 10px; }
+.ct-test .verify { margin-top: 6px; }
+.ct-test-where { margin: 4px 0; }
+.ct-files, .ct-rec { margin: 10px 0; }
+.ct-files > summary, .ct-rec > summary { cursor: pointer; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); }
+.ct-check { display: flex; gap: 8px; align-items: center; margin-top: 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.9rem; cursor: pointer; }
+.ct-check.on { border-color: var(--ok); background: var(--needs-soft); }
+.ct-check input { width: 18px; height: 18px; accent-color: var(--ok); }
+.ct-progress { margin: 8px 0 18px; }
+.ct-next { margin: 4px 0 12px; }
+.ct-dots { display: grid; gap: 6px; }
+.ct-dot-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ct-dot-row > .chip { min-width: 26px; text-align: center; }
+.ct-dot { font-family: var(--mono); font-size: 0.66rem; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink-2); text-decoration: none; background: var(--surface); }
+.ct-dot.on { background: var(--needs-soft); border-color: var(--ok); color: var(--ok); }
+.ct-dot.nx { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.ct-reset { margin-top: 12px; background: transparent; border: 1px solid var(--line); color: var(--ink-2); border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: 0.8rem; }
+.ct-corr { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.ct-corr h3 { font-size: 1rem; }
+.ct-gate { margin: 4px 0 26px; border-color: var(--needs); }
+.ct-gate-cmd { display: block; margin-top: 6px; font-size: 0.72rem; white-space: pre-wrap; word-break: break-all; }
+@media (max-width: 640px) { .step .body { padding: 0 14px 14px 14px; } .ct-legend { grid-template-columns: 1fr; } }
+.ct-how { max-width: none; grid-template-columns: minmax(0, 1fr); }
+.ct-how > li, .ct-test, .ct-files, .ct-rec { min-width: 0; }
+.ct-step .body { min-width: 0; }
+.ct-code { max-width: 100%; }
+.ct-code pre { overflow-x: auto; }

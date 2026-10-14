@@ -1,0 +1,17 @@
+{
+  "name": "contract-triage-weekly",
+  "description": "Blueprint 5.1: weekly triage per pilot office. Its own job because the refresh is monthly. Rendered by scripts/render.py.",
+  "tags": {"project": "contract-triage"},
+  "max_concurrent_runs": 1,
+  "schedule": {
+    "quartz_cron_expression": "0 0 7 ? * MON",
+    "timezone_id": "America/New_York",
+    "pause_status": "PAUSED"
+  },
+  "tasks": [
+    {"task_key": "weekly_triage",
+     "notebook_task": {"notebook_path": "${GIT_FOLDER}/workflow/07_weekly_triage", "source": "WORKSPACE",
+                       "base_parameters": {"catalog": "${CATALOG}", "warehouse_id": "${WAREHOUSE_ID}",
+                                           "offices": "${OFFICES}", "model": "${MODEL}"}}}
+  ]
+}

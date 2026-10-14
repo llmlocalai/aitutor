@@ -1,0 +1,25 @@
+# Blueprint 3.1. Render to deploy/databricks/app.yaml with scripts/render.py.
+# The deploy script copies this file to the repo root for the sync, as before.
+#
+# Two values come from app resources you add once (step 3.1), by resource key:
+#   sql_warehouse -> the SQL warehouse id   (resource type: SQL warehouse, permission Can use)
+#   sam_api_key   -> the SAM.gov key        (resource type: Secret, scope contract-triage,
+#                                            key sam_api_key, permission Can read)
+# The key never sits in source. The app's own service principal reads the gold views.
+command:
+  [
+    "/bin/sh",
+    "-c",
+    "export PYTHONPATH=/app/python/source_code/src:$PYTHONPATH && python -m contract_triage.app",
+  ]
+env:
+  - name: DATA_BACKEND
+    value: databricks
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql_warehouse
+  - name: DATABRICKS_CATALOG
+    value: "${CATALOG}"
+  - name: DATABRICKS_SCHEMA
+    value: contract_triage
+  - name: SAM_API_KEY
+    valueFrom: sam_api_key

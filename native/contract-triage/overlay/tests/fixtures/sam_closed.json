@@ -1,0 +1,18 @@
+{
+  "_note": "SYNTHETIC test records in the SAM.gov Contract Awards awardSummary shape. Not real contracts.",
+  "totalRecords": 3,
+  "awardSummary": [
+    {"contractId": {"piid": "TSTA0123C0004", "modificationNumber": "P00002", "referencedIDVPiid": null},
+     "coreData": {"contractingOffice": {"code": "TSTA01"}},
+     "awardDetails": {"dates": {"dateSigned": "2026-02-15", "currentCompletionDate": "2025-12-31"},
+                      "transactionData": {"closedStatus": "Yes", "closedDate": "02/15/2026"}}},
+    {"contractId": {"piid": "TSTA0123C0003", "modificationNumber": "P00003", "referencedIDVPiid": null},
+     "coreData": {"contractingOffice": {"code": "TSTA01"}},
+     "awardDetails": {"dates": {"dateSigned": "2026-03-05", "currentCompletionDate": "2025-09-30"},
+                      "transactionData": {"closedStatus": "Yes", "closedDate": "2026-03-05"}}},
+    {"contractId": {"piid": "TSTA0126F0009", "modificationNumber": "P00001", "referencedIDVPiid": "TSTA0120D0999"},
+     "coreData": {"contractingOffice": {"code": "TSTA01"}},
+     "awardDetails": {"dates": {"dateSigned": "2026-06-01", "currentCompletionDate": "2026-05-31"},
+                      "transactionData": {"closedStatus": "Yes", "closedDate": "2026-06-01"}}}
+  ]
+}

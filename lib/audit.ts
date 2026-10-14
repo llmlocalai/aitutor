@@ -11,6 +11,8 @@ import { KITS, readScript, staleScripts, type Kit } from "./replicate";
 import fs from "node:fs";
 import path from "node:path";
 import * as hx from "@/content/harness";
+import * as ct from "@/content/contract-triage";
+import triageReplay from "@/content/triage-replay.json";
 import harnessCorpus from "@/content/harness-corpus.json";
 import harnessResults from "@/content/harness-results.json";
 import harnessRules from "@/harness/lint/rules.json";
@@ -345,6 +347,55 @@ export function audit(): AuditReport {
     }
   }
 
+  {
+    // The contract triage follow-along: every blueprint card has a step, every string is
+    // bilingual, every file shown is checked and current, and every recorded output exists.
+    const w = "contract-triage";
+    for (const [k, v] of Object.entries(ct.intro)) ls(v as LS, `${w}.intro.${k}`);
+    for (const p of ct.stepProblems()) errors.push(`${w}: ${p}`);
+    for (const [k, v] of Object.entries(ct.WHERE)) { ls(v.label, `${w}.where.${k}`); ls(v.hint, `${w}.where.${k}.hint`); }
+    ct.flow.forEach((f) => { ls(f.label, `${w}.flow.${f.id}`); ls(f.detail, `${w}.flow.${f.id}.detail`); });
+    ct.corrections.forEach((c, i) => { ls(c.title, `${w}.corr[${i}]`); ls(c.detail, `${w}.corr[${i}].detail`); });
+    ct.risks.forEach((r, i) => { ls(r.risk, `${w}.risk[${i}]`); ls(r.fallback, `${w}.risk[${i}].fallback`); });
+    ls(ct.cutOrder, `${w}.cutOrder`);
+    const rep = triageReplay as unknown as { steps: { step: string }[]; failures: number };
+    const repKeys = new Set(rep.steps.map((x) => x.step));
+    if (rep.failures) errors.push(`${w}: the replay recorded ${rep.failures} unexpected exits. Run: ${KITS.triage.checker}`);
+    for (const st of ct.stages) {
+      ls(st.title, `${w}.${st.id}.title`); ls(st.dates, `${w}.${st.id}.dates`); ls(st.goal, `${w}.${st.id}.goal`);
+      if (st.gate) {
+        ls(st.gate.title, `${w}.${st.gate.id}`);
+        st.gate.rows.forEach((g, i) => { ls(g.check, `${w}.${st.gate!.id}[${i}]`); ls(g.pass, `${w}.${st.gate!.id}[${i}].pass`); ls(g.fail, `${w}.${st.gate!.id}[${i}].fail`); });
+      }
+      for (const s of st.steps) {
+        const sw = `${w}.${s.id}`;
+        ls(s.title, `${sw}.title`); ls(s.what, `${sw}.what`); ls(s.why, `${sw}.why`); ls(s.done, `${sw}.done`);
+        if (s.unconfirmed) ls(s.unconfirmed, `${sw}.unconfirmed`);
+        if (!s.how.length) errors.push(`${sw}: no actions`);
+        s.how.forEach((a, i) => ls(a.t, `${sw}.how[${i}]`));
+        if (!s.test.length) errors.push(`${sw}: no test`);
+        s.test.forEach((x, i) => ls(x.expect, `${sw}.test[${i}]`));
+        if (!s.trouble.length) errors.push(`${sw}: no troubleshooting`);
+        s.trouble.forEach((x, i) => { ls(x.s, `${sw}.trouble[${i}].s`); ls(x.c, `${sw}.trouble[${i}].c`); ls(x.f, `${sw}.trouble[${i}].f`); });
+        if (s.ran === "replayed" && !(s.replay ?? []).length) errors.push(`${sw}: marked replayed but shows no recorded output`);
+        for (const k of s.replay ?? []) if (!repKeys.has(k)) errors.push(`${sw}: replay key ${k} is not in content/triage-replay.json`);
+        for (const f of s.files ?? []) {
+          if (!f.startsWith(KITS.triage.root + "/")) errors.push(`${sw}: ${f} is outside the kit`);
+          try {
+            const sc = readScript(f);
+            if (!sc.check) errors.push(`${sw}: ${f} has no recorded check. Run: ${KITS.triage.checker}`);
+            else if (sc.stale) errors.push(`${sw}: ${f} changed after its check. Run: ${KITS.triage.checker}`);
+            else if (sc.check.check.startsWith("FAILED")) errors.push(`${sw}: ${f} ${sc.check.check}`);
+          } catch (e) { errors.push(`${sw}: ${(e as Error).message}`); }
+        }
+        // A block whose code still holds a ${...} would be a TypeScript interpolation slip.
+        for (const a of s.how) for (const c of a.c ?? []) if (/\$\{[A-Z_]+\}/.test(c.code) && !/render\.py|template/.test(c.code)) warnings.push(`${sw}: block contains \${...}`);
+      }
+    }
+    for (const f of staleScripts(KITS.triage)) errors.push(`${w}: ${f} changed after its check (or was never checked). Run: ${KITS.triage.checker}`);
+    if (KITS.triage.report.failures) errors.push(`${w}: ${KITS.triage.checker} recorded ${KITS.triage.report.failures} failures`);
+  }
+
   const links = steps.reduce((n, s) => n + (s.step.needs?.length ?? 0), 0);
   return {
     errors, warnings, forward,
@@ -369,6 +420,9 @@ export function audit(): AuditReport {
       "Databricks native files checked": Object.keys(KITS.native.report.files).length,
       "Databricks native tests passed": `${KITS.native.report.tests.run - KITS.native.report.tests.failed}/${KITS.native.report.tests.run}`,
       "architecture review questions": nat.rsteps.reduce((n, s) => n + (s.challenge?.length ?? 0), 0),
+      "contract triage steps": ct.fsteps.length,
+      "contract triage steps replayed": ct.fsteps.filter((x) => x.ran === "replayed").length,
+      "contract triage kit tests passed": `${KITS.triage.report.tests.run - KITS.triage.report.tests.failed}/${KITS.triage.report.tests.run}`,
       "harness steps": hx.rsteps.length,
       "harness kit files checked": Object.keys(KITS.harness.report.files).length,
       "harness tests passed": `${KITS.harness.report.tests.run - KITS.harness.report.tests.failed}/${KITS.harness.report.tests.run}`,
